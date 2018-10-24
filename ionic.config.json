@@ -1,0 +1,7 @@
+{
+  "name": "Quiz",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "ionic-angular"
+}
