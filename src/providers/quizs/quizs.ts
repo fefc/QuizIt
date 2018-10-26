@@ -1,5 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
+
+import { Quiz } from '../../models/quiz';
 
 /*
   Generated class for the QuizsProvider provider.
@@ -9,9 +11,48 @@ import { Injectable } from '@angular/core';
 */
 @Injectable()
 export class QuizsProvider {
+  public quizs: Array<Quiz>;
 
-  constructor(public http: HttpClient) {
-    console.log('Hello QuizsProvider Provider');
+  constructor(private storage: Storage) {
+    this.quizs = new Array<Quiz>();
+  }
+
+  loadFromStorage() {
+    return new Promise((resolve, reject) => {
+      this.storage.get('quizs').then(data => {
+        if (data) {
+          this.quizs = JSON.parse(data);
+          resolve();
+        }
+      }).catch(() => {
+        reject();
+      });
+    });
+  }
+
+  saveToStorage(quiz: Quiz) {
+    return new Promise((resolve, reject) => {
+      if (!quiz.id || quiz.id === -1) {
+        //We have a new quiz, so first we need to get a new id
+        let newQuiz: Quiz = {
+          id: this.quizs.length,
+          title: quiz.title,
+          creationDate: quiz.creationDate
+        }
+
+        this.quizs.push(newQuiz);
+        this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+          resolve();
+        }).catch(() => {
+          this.quizs.pop();
+          reject();
+        });
+      }
+      else {
+        //Saving an exsisting quiz, lets just make sure it's in the list
+        reject();
+      }
+    });
   }
 
 }

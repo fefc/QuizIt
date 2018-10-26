@@ -3,11 +3,14 @@ import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
+import { QuizsProvider } from '../providers/quizs/quizs';
+
 import { HomePage } from '../pages/home/home';
 /*import { PlayPage } from '../pages/play/play';*/
 
 @Component({
-  templateUrl: 'app.html'
+  templateUrl: 'app.html',
+  providers: [QuizsProvider]
 })
 export class MyApp {
   rootPage:any = HomePage;

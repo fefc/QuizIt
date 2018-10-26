@@ -12,5 +12,18 @@
 </ion-header>
 
 <ion-content>
-
+  <ion-list>
+    <ion-item>
+    <ion-label color="primary" fixed>Title</ion-label>
+      <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="newQuiz.title"></ion-input>
+    </ion-item>
+  </ion-list>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons end>
+      <button ion-button color="primary" (click)="create()" [disabled]="!enableCreateButton()">Create</button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

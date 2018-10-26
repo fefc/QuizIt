@@ -3,8 +3,7 @@ import { Participant } from './participant';
 
 
 export interface Quiz {
-  name: string,
-  creationDate: number,
-  categories: Array<Category>,
-  participants: Array<Participant>
+  readonly id: number,
+  title: string,
+  creationDate: number
 }
