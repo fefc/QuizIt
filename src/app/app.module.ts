@@ -6,19 +6,23 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { IonicStorageModule } from '@ionic/storage';
 
 import { MyApp } from './app.component';
+
+import { QuizsProvider } from '../providers/quizs/quizs';
+
 import { HomePage } from '../pages/home/home';
 import { QuizNewPage } from '../pages/quiz-new/quiz-new';
-
-
+import { QuizQuestionsPage } from '../pages/quiz-questions/quiz-questions';
+import { QuestionPage } from '../pages/question/question';
 
 import { PlayPage } from '../pages/play/play';
-import { QuizsProvider } from '../providers/quizs/quizs';
 
 @NgModule({
   declarations: [
     MyApp,
     HomePage,
     QuizNewPage,
+    QuizQuestionsPage,
+    QuestionPage,
     PlayPage
   ],
   imports: [
@@ -31,6 +35,8 @@ import { QuizsProvider } from '../providers/quizs/quizs';
     MyApp,
     HomePage,
     QuizNewPage,
+    QuizQuestionsPage,
+    QuestionPage,
     PlayPage
   ],
   providers: [

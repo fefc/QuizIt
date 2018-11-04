@@ -1,20 +1,20 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      QuizIt
+      {{quiz.title}}
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <button ion-item *ngFor="let quiz of quizsProv.quizs" (click)="openQuizQuestionsPage(quiz)">
+  <!--<ion-list>
+    <button ion-item *ngFor="let quiz of quizsProv.quizs">
       {{ quiz.title }}
     </button>
-  </ion-list>
+  </ion-list>-->
 
   <ion-fab right bottom>
-  <button ion-fab (click)="openQuizNewPage()">
+  <button ion-fab (click)="openNewQuestionPage()">
     <ion-icon name="add"></ion-icon>
   </button>
 </ion-fab>
