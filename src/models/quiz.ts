@@ -5,5 +5,6 @@ import { Participant } from './participant';
 export interface Quiz {
   readonly id: number,
   title: string,
-  creationDate: number
+  creationDate: number,
+  categorys: Array<Category>
 }

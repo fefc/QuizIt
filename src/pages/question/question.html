@@ -12,18 +12,38 @@
 </ion-header>
 
 <ion-content>
-  <!--<ion-list>
+  <ion-list>
     <ion-item>
-    <ion-label color="primary" fixed>Title</ion-label>
-      <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="newQuiz.title"></ion-input>
+      <ion-label color="primary" fixed>Question</ion-label>
+      <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="newQuestion.question"></ion-input>
     </ion-item>
-  </ion-list>-->
+    <ion-item>
+      <ion-label fixed>Type</ion-label>
+      <ion-select [(ngModel)]="newQuestion.type">
+        <ion-option value="0">Classic</ion-option>
+        <ion-option value="1">Time</ion-option>
+        <!--<ion-option value="2">Right picture</ion-option>
+        <ion-option value="3">Video</ion-option>
+        <ion-option value="4">Pictures</ion-option>-->
+      </ion-select>
+    </ion-item>
+    <ion-item *ngFor="let answer of newQuestion.answers; let i = index; trackBy:indexTracker">
+      <ion-label fixed>Answer {{i}}</ion-label>
+      <ion-input type="text" placeholder="I let the dog out" [(ngModel)]="newQuestion.answers[i]"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label fixed>Right answer</ion-label>
+      <ion-select [(ngModel)]="newQuestion.rightAnswer">
+        <ion-option *ngFor="let answer of newQuestion.answers; let i = index" [value]="i">{{answer}}</ion-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
 </ion-content>
 
 <ion-footer>
   <ion-toolbar>
     <ion-buttons end>
-      <button ion-button color="primary" (click)="dismiss()">Create</button>
+      <button ion-button color="primary" (click)="create()" [disabled]="!enableCreateButton()">Create</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

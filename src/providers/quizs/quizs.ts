@@ -37,7 +37,8 @@ export class QuizsProvider {
         let newQuiz: Quiz = {
           id: this.quizs.length,
           title: quiz.title,
-          creationDate: quiz.creationDate
+          creationDate: quiz.creationDate,
+          categorys: quiz.categorys
         }
 
         this.quizs.push(newQuiz);

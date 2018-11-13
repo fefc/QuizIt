@@ -7,11 +7,12 @@
 </ion-header>
 
 <ion-content>
-  <!--<ion-list>
-    <button ion-item *ngFor="let quiz of quizsProv.quizs">
-      {{ quiz.title }}
-    </button>
-  </ion-list>-->
+  <ion-list>
+    <ion-item-group *ngFor="let category of quiz.categorys">
+      <ion-item-divider color="light">{{ category.name }}</ion-item-divider>
+      <ion-item *ngFor="let question of category.questions">{{ question.question }}</ion-item>
+    </ion-item-group>
+  </ion-list>
 
   <ion-fab right bottom>
   <button ion-fab (click)="openNewQuestionPage()">

@@ -11,7 +11,13 @@ export class QuizNewPage {
   private newQuiz: Quiz = {
     id: -1,
     title: '',
-    creationDate: -1
+    creationDate: -1,
+    categorys: [
+      {
+        name: 'uncategorized',
+        questions: []
+      }
+    ]
   };
 
   constructor(public viewCtrl: ViewController) {
@@ -25,7 +31,6 @@ export class QuizNewPage {
         enable = true;
       }
     }
-
     return enable;
   }
 

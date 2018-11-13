@@ -26,21 +26,23 @@ export class QuizQuestionsPage {
   openNewQuestionPage() {
     let modal = this.modalCtrl.create(QuestionPage);
     modal.present();
-    /*modal.onDidDismiss(data => {
+    modal.onDidDismiss(data => {
       if (data) {
         let loading = this.loadingCtrl.create({
-          content: 'Creating Quiz...'
+          content: 'Creating Question...'
         });
 
-        loading.present();
+        //loading.present();
 
-        this.quizsProv.saveToStorage(data).then(() => {
+        this.quiz.categorys[0].questions.push(data);
+
+        /*this.quizsProv.saveToStorage(data).then(() => {
           loading.dismiss();
         }).catch(() => {
           loading.dismiss();
           alert('Unable to create Quiz.');
-        });
+        });*/
       }
-    });*/
+    });
   }
 }
