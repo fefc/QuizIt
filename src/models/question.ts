@@ -1,4 +1,4 @@
-export enum Type {
+export enum QuestionType {
   classic = 0,
   time = 1,
   rightPicture = 2,
@@ -8,7 +8,7 @@ export enum Type {
 
 export interface Question {
   question: string,
-  type: Type,
+  type: QuestionType,
   rightAnswer: number,
   answers: Array<string>,
   extras: Array<string>,

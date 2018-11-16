@@ -6,5 +6,6 @@ export interface Quiz {
   readonly id: number,
   title: string,
   creationDate: number,
-  categorys: Array<Category>
+  categorys: Array<Category>,
+  selected?: boolean
 }

@@ -51,7 +51,16 @@ export class QuizsProvider {
       }
       else {
         //Saving an exsisting quiz, lets just make sure it's in the list
-        reject();
+        if (this.quizs.findIndex(quiz => quiz.id === quiz.id) !== -1) {
+          this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+            resolve();
+          }).catch(() => {
+            reject();
+          });
+        }
+        else {
+          reject();
+        }
       }
     });
   }

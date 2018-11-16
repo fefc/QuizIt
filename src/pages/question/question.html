@@ -18,8 +18,15 @@
       <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="newQuestion.question"></ion-input>
     </ion-item>
     <ion-item>
+      <ion-label fixed>Category</ion-label>
+      <ion-select [(ngModel)]="selectedCategoryName" interface="popover" (ionChange)="categoryChange($event)">
+        <ion-option *ngFor="let category of categoryNames" [value]="category">{{category}}</ion-option>
+        <ion-option value="new">New category</ion-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
       <ion-label fixed>Type</ion-label>
-      <ion-select [(ngModel)]="newQuestion.type">
+      <ion-select [(ngModel)]="newQuestion.type" interface="popover">
         <ion-option value="0">Classic</ion-option>
         <ion-option value="1">Time</ion-option>
         <!--<ion-option value="2">Right picture</ion-option>
@@ -33,7 +40,7 @@
     </ion-item>
     <ion-item>
       <ion-label fixed>Right answer</ion-label>
-      <ion-select [(ngModel)]="newQuestion.rightAnswer">
+      <ion-select [(ngModel)]="newQuestion.rightAnswer" interface="popover">
         <ion-option *ngFor="let answer of newQuestion.answers; let i = index" [value]="i">{{answer}}</ion-option>
       </ion-select>
     </ion-item>

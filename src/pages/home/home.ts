@@ -13,6 +13,7 @@ import { QuizQuestionsPage } from '../quiz-questions/quiz-questions';
   templateUrl: 'home.html'
 })
 export class HomePage {
+  private selectedQuizs: number;
 
   constructor(
     public navCtrl: NavController,
@@ -20,6 +21,7 @@ export class HomePage {
     public loadingCtrl: LoadingController,
     private quizsProv: QuizsProvider) {
 
+      this.selectedQuizs = 0;
   }
 
   openQuizNewPage() {
@@ -45,5 +47,23 @@ export class HomePage {
 
   openQuizQuestionsPage(quiz: Quiz) {
     this.navCtrl.push(QuizQuestionsPage, {quiz: quiz});
+  }
+
+  selectQuiz(quiz: Quiz) {
+    if (!quiz.selected) {
+      quiz.selected = true;
+      this.selectedQuizs += 1;
+    }
+    else {
+      quiz.selected = false;
+      this.selectedQuizs -= 1;
+    }
+  }
+
+  deleteSelected() {
+    for (let quiz of this.quizsProv.quizs) {
+      quiz.selected = false;
+    }
+    this.selectedQuizs = 0;
   }
 }

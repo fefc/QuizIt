@@ -24,7 +24,13 @@ export class QuizQuestionsPage {
   }
 
   openNewQuestionPage() {
-    let modal = this.modalCtrl.create(QuestionPage);
+    let categoryNames = new Array<string>();
+
+    for (let category of this.quiz.categorys) {
+      categoryNames.push(category.name);
+    }
+
+    let modal = this.modalCtrl.create(QuestionPage, {categoryNames: categoryNames});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {
@@ -32,16 +38,31 @@ export class QuizQuestionsPage {
           content: 'Creating Question...'
         });
 
-        //loading.present();
+        loading.present();
 
-        this.quiz.categorys[0].questions.push(data);
+        console.log(String(data.categoryName));
+        console.log(this.quiz.categorys);
 
-        /*this.quizsProv.saveToStorage(data).then(() => {
+        let index = this.quiz.categorys.findIndex((category) => category.name === data.categoryName);
+
+        console.log(index);
+
+        if (index === -1) {
+          this.quiz.categorys.push({
+            name: data.categoryName,
+            questions: [data.question]
+          });
+        }
+        else {
+          this.quiz.categorys[index].questions.push(data.question);
+        }
+
+        this.quizsProv.saveToStorage(this.quiz).then(() => {
           loading.dismiss();
         }).catch(() => {
           loading.dismiss();
-          alert('Unable to create Quiz.');
-        });*/
+          alert('Unable to save Quiz.');
+        });
       }
     });
   }

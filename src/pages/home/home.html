@@ -1,16 +1,27 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar *ngIf="selectedQuizs === 0">
     <ion-title>
       QuizIt
     </ion-title>
+  </ion-navbar>
+  <ion-navbar *ngIf="selectedQuizs > 0">
+    <ion-title>
+      {{selectedQuizs}} Selected
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="deleteSelected()">
+        <ion-icon name="trash"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
   <ion-list>
-    <button ion-item *ngFor="let quiz of quizsProv.quizs" (click)="openQuizQuestionsPage(quiz)">
-      {{ quiz.title }}
-    </button>
+    <ion-item *ngFor="let quiz of quizsProv.quizs" (tap)="openQuizQuestionsPage(quiz)" (press)="selectQuiz(quiz)">
+        <ion-checkbox *ngIf="quiz.selected" checked="true"></ion-checkbox>
+        <ion-label>{{ quiz.title }}</ion-label>
+      </ion-item>
   </ion-list>
 
   <ion-fab right bottom>
