@@ -9,8 +9,11 @@
 <ion-content>
   <ion-list>
     <ion-item-group *ngFor="let category of quiz.categorys">
-      <ion-item-divider color="light">{{ category.name }}</ion-item-divider>
-      <ion-item *ngFor="let question of category.questions">{{ question.question }}</ion-item>
+      <ion-item-divider color="light">
+        <ion-label>{{ category.name }}</ion-label>
+        <button ion-button icon-only item-end (click)="renameCategory(category)"><ion-icon name="create"></ion-icon></button>
+      </ion-item-divider>
+      <ion-item *ngFor="let question of category.questions" (tap)="openQuestionPage(question)">{{ question.question }}</ion-item>
     </ion-item-group>
   </ion-list>
 

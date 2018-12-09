@@ -46,7 +46,9 @@ export class HomePage {
   }
 
   openQuizQuestionsPage(quiz: Quiz) {
-    this.navCtrl.push(QuizQuestionsPage, {quiz: quiz});
+    if (this.selectedQuizs === 0) {
+      this.navCtrl.push(QuizQuestionsPage, {quiz: quiz});
+    }
   }
 
   selectQuiz(quiz: Quiz) {
@@ -61,9 +63,14 @@ export class HomePage {
   }
 
   deleteSelected() {
-    for (let quiz of this.quizsProv.quizs) {
-      quiz.selected = false;
-    }
-    this.selectedQuizs = 0;
+    this.quizsProv.deleteSelectedFromStorage().then(() => {
+      this.selectedQuizs = 0;
+    }).catch(() => {
+      for (let selectedQuiz of this.quizsProv.quizs) {
+        selectedQuiz.selected = false;
+      }
+      this.selectedQuizs = 0;
+      alert('Unable to delete selected quizs.');
+    });
   }
 }

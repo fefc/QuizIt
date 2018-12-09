@@ -9,20 +9,22 @@ import { Question } from '../../models/question';
   templateUrl: 'question.html'
 })
 export class QuestionPage {
+  private title: string;
+  private saveButtonName: string;
   private categoryNames: Array<string>;
   private selectedCategoryName: string;
-  private newQuestion: Question = {
-    question: '',
-    type: QuestionType.classic,
-    rightAnswer: -1,
-    answers: ['','','',''],
-    extras: [],
-    authorId: -1
-  };
+  private question: Question;
 
   constructor(public viewCtrl: ViewController, private alertCtrl: AlertController, params: NavParams) {
+    this.title = "Edit Question";
+    this.saveButtonName = "Save";
     this.categoryNames = params.data.categoryNames;
-    this.selectedCategoryName = this.categoryNames[0];
+    this.selectedCategoryName = params.data.selecteCategoryName;
+    this.question = params.data.question;
+    if (!this.question.question) {
+      this.title = "New Question";
+      this.saveButtonName = "Create";
+    }
   }
 
   indexTracker(index: number, obj: any) {
@@ -43,6 +45,9 @@ export class QuestionPage {
           {
             text: 'Cancel',
             role: 'cancel',
+            handler: data => {
+              this.selectedCategoryName = this.categoryNames[0];
+            }
           },
           {
             text: 'Create',
@@ -76,10 +81,10 @@ export class QuestionPage {
 
   enableCreateButton() {
     let enable: boolean = true;
-    if (this.newQuestion.question) {
-      if (this.newQuestion.question.length > 0) {
-        if (this.newQuestion.rightAnswer !== -1) {
-          for (let answer of this.newQuestion.answers) {
+    if (this.question.question) {
+      if (this.question.question.length > 0) {
+        if (this.question.rightAnswer !== -1) {
+          for (let answer of this.question.answers) {
             if (answer.length === 0) {
               enable = false;
             }
@@ -101,7 +106,7 @@ export class QuestionPage {
 
   create() {
     if (this.enableCreateButton()) {
-      this.viewCtrl.dismiss({question: this.newQuestion, categoryName: this.selectedCategoryName});
+      this.viewCtrl.dismiss({question: this.question, categoryName: this.selectedCategoryName});
     }
   }
 
