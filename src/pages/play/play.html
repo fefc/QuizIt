@@ -1,24 +1,27 @@
-<!--<ion-header>
-  <ion-navbar>
-    <ion-title>
-      Ionic Blank
-    </ion-title>
-  </ion-navbar>
-</ion-header>-->
+<ion-content class="main" (click)="next()">
 
-<ion-content class="main">
-  <!--<div class="question">
-    This is my question?
+  <div *ngIf="screenState === ScreenStateType.displayTitle" class="title">
+    <div>{{quiz.title}}</div>
   </div>
 
-  <div class="answers">
-    <div class="one">Answer 1</div>
-    <div class="two">Answer 2</div>
-    <div class="three">Answer 3</div>
-    <div class="four">Answer 4Answer 4Answer 4</div>
-  </div>-->
+  <div *ngIf="screenState === ScreenStateType.displayCategoryTitle" class="title">
+    <div>{{quiz.categorys[currentCategory].name}}</div>
+  </div>
+  
+  <div *ngIf="screenState === ScreenStateType.displayQuestion">
+    <div class="question">
+      {{quiz.categorys[currentCategory].questions[currentQuestion].question}}
+    </div>
 
-  <div class="players">
+    <div class="answers">
+      <div class="one">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[0]}}</div>
+      <div class="two">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[1]}}</div>
+      <div class="three">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[2]}}</div>
+      <div class="four">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[3]}}</div>
+    </div>
+  </div>
+
+  <!--<div class="players">
     <div class="player">
       <div class="info">
         <div>
@@ -32,10 +35,10 @@
         <div class="avatar">
 
           <!--<img  src="assets/imgs/Dog.png">-->
-        </div>
+        <!--</div>
       </div>
 
-    </div>
+    </div>-->
     <!--<div class="player">
       <div class="info">
         <h2>Sintel</h2>
@@ -47,5 +50,5 @@
         </div>
       </div>
     </div>-->
-  </div>
+  <!--</div>-->
 </ion-content>

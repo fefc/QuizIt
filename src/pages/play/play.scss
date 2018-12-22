@@ -14,6 +14,23 @@ $dark: rgba(0, 0, 0, 0.7);
     overflow-y: hidden;
   }
 
+  .title {
+    width: 100vw;
+    height: 100vh;
+    display: table;
+
+    div {
+      display:  table-cell;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 20vh;
+      font-family: fantasy;
+      color: #ccc;
+      text-shadow: 2px 2px #ff0000;
+      word-break: normal;
+    }
+  }
+
   .question {
     width: 96vw;
     height: 12vh;
@@ -31,13 +48,13 @@ $dark: rgba(0, 0, 0, 0.7);
       inset 0.25vw -0.25vh 0.4vw 0.4vh rgba(125, 125, 125, 0.2);
     border-radius: 2vh;
 
-    animation: slidein 1.5s ease-in-out 3s;
+    /*animation: slidein 1.5s ease-in-out 3s;
     transform-origin: -4vw -12vh;
 
     @keyframes slidein {
       from { transform: rotate3d(1, 1, 1, -90deg); }
       to   { transform: rotate3d(0); }
-    }
+    }*/
   }
 
   .answers {
@@ -69,13 +86,13 @@ $dark: rgba(0, 0, 0, 0.7);
         inset 0.25vw -0.25vh 0.3vw 0.3vh rgba(255, 255, 255, 0.1);
       border-radius: 2vh;
 
-      animation: answerslidein 1.5s ease-in-out 3s;
+      /*animation: answerslidein 1.5s ease-in-out 3s;
       transform-origin: -15vw top;
 
       @keyframes answerslidein {
         from { transform: rotate3d(1, 1, 1, 90deg); }
         to   { transform: rotate3d(0); }
-      }
+      }*/
     }
 
     .one {

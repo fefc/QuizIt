@@ -9,6 +9,9 @@ import { Question } from '../../models/question';
 import { QuizsProvider } from '../../providers/quizs/quizs';
 
 import { QuestionPage } from '../question/question';
+import { PlayPage } from '../play/play';
+
+
 
 @Component({
   selector: 'page-quiz-questions',
@@ -143,5 +146,9 @@ export class QuizQuestionsPage {
         });
       }
     });
+  }
+
+  startQuiz() {
+    this.navCtrl.push(PlayPage, {quiz: this.quiz});
   }
 }
