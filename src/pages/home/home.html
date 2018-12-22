@@ -19,7 +19,7 @@
 <ion-content>
   <ion-list>
     <ion-item *ngFor="let quiz of quizsProv.quizs" (tap)="openQuizQuestionsPage(quiz)" (press)="selectQuiz(quiz)">
-        <ion-checkbox *ngIf="quiz.selected" checked="true"></ion-checkbox>
+        <ion-checkbox *ngIf="quiz.selected" checked="true" (click)="selectQuiz(quiz)"></ion-checkbox>
         <ion-label>{{ quiz.title }}</ion-label>
       </ion-item>
   </ion-list>
