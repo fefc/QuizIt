@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
+import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -14,6 +15,54 @@ enum ScreenStateType {
 
 @Component({
   selector: 'page-play',
+  animations: [
+    trigger(
+      'titleAnimation', [
+        transition(':enter', [
+          style({transform: 'translateX(100%)', opacity: 0}),
+          animate('500ms', style({transform: 'translateX(0)', opacity: 1}))
+        ]),
+        transition(':leave', [
+          style({transform: 'translateX(0)', opacity: 1}),
+          animate('500ms', style({transform: 'translateX(100%)', opacity: 0}))
+        ])
+      ]),
+      trigger(
+      'questionAnimation' , [
+        transition(':enter', [
+          style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}),
+          animate('600ms', style({transform: 'none', opacity: 1}))
+        ]),
+        transition(':leave', [
+          style({transform: 'none', opacity: 1}),
+          animate('600ms', style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}))
+        ]),
+      ]),
+      trigger(
+      'answerAnimation' , [
+        transition(':enter', [
+          style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}),
+          animate('600ms', style({transform: 'none', opacity: 1}))
+        ]),
+        transition(':leave', [
+          style({transform: 'none', opacity: 1}),
+          animate('600ms', style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}))
+        ]),
+      ]),
+      trigger(
+      'timeBarAnimation' , [
+        transition(':enter', [
+          style({opacity: 0}),
+          animate('20600ms',
+            keyframes([
+              style({opacity: 0, offset: 0.029}),
+              style({opacity: 1, offset: 0.03}),
+              style({width: 0, offset: 1}),
+            ])
+          )
+        ])
+      ]),
+  ],
   templateUrl: 'play.html'
 })
 

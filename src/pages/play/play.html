@@ -1,25 +1,23 @@
 <ion-content class="main" (click)="next()">
 
-  <div *ngIf="screenState === ScreenStateType.displayTitle" class="title">
-    <div>{{quiz.title}}</div>
+  <div *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle" [@titleAnimation] class="title">
+    <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{quiz.categorys[currentCategory].name}}</div>
   </div>
 
-  <div *ngIf="screenState === ScreenStateType.displayCategoryTitle" class="title">
-    <div>{{quiz.categorys[currentCategory].name}}</div>
-  </div>
-  
-  <div *ngIf="screenState === ScreenStateType.displayQuestion">
-    <div class="question">
-      {{quiz.categorys[currentCategory].questions[currentQuestion].question}}
-    </div>
+  <div *ngIf="screenState === ScreenStateType.displayQuestion" [@timeBarAnimation] class="time-bar"></div>
 
-    <div class="answers">
-      <div class="one">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[0]}}</div>
-      <div class="two">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[1]}}</div>
-      <div class="three">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[2]}}</div>
-      <div class="four">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[3]}}</div>
-    </div>
+  <div *ngIf="screenState === ScreenStateType.displayQuestion" [@questionAnimation] class="question">
+    {{quiz.categorys[currentCategory].questions[currentQuestion].question}}
   </div>
+
+  <div class="answers">
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="one">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[0]}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="two">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[1]}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="three">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[2]}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="four">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[3]}}</div>
+  </div>
+
 
   <!--<div class="players">
     <div class="player">
