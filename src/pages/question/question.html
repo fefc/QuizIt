@@ -29,8 +29,8 @@
       <ion-select [(ngModel)]="question.type" interface="popover">
         <ion-option value="0">Classic</ion-option>
         <ion-option value="1">Time</ion-option>
-        <!--<ion-option value="2">Right picture</ion-option>
-        <ion-option value="3">Video</ion-option>
+        <ion-option value="2">Right picture</ion-option>
+        <!--<ion-option value="3">Video</ion-option>
         <ion-option value="4">Pictures</ion-option>-->
       </ion-select>
     </ion-item>
@@ -50,6 +50,7 @@
 <ion-footer>
   <ion-toolbar>
     <ion-buttons end>
+      <button ion-button (click)="selectPicture()">Select</button>
       <button ion-button color="primary" (click)="create()" [disabled]="!enableCreateButton()">{{saveButtonName}}</button>
     </ion-buttons>
   </ion-toolbar>

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ViewController, AlertController, NavParams } from 'ionic-angular';
+import { ImagePicker } from '@ionic-native/image-picker';
 
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
@@ -15,7 +16,7 @@ export class QuestionPage {
   private selectedCategoryName: string;
   private question: Question;
 
-  constructor(public viewCtrl: ViewController, private alertCtrl: AlertController, params: NavParams) {
+  constructor(public viewCtrl: ViewController, private alertCtrl: AlertController, private imagePicker: ImagePicker, params: NavParams) {
     this.title = "Edit Question";
     this.saveButtonName = "Save";
     this.categoryNames = params.data.categoryNames;
@@ -77,6 +78,14 @@ export class QuestionPage {
       });
       alert.present();
     }
+  }
+
+  selectPicture() {
+    this.imagePicker.getPictures({maximumImagesCount: 6}).then((results) => {
+  for (var i = 0; i < results.length; i++) {
+      console.log('Image URI: ' + results[i]);
+  }
+}, (err) => { });
   }
 
   enableCreateButton() {
