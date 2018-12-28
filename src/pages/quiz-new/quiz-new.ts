@@ -9,7 +9,7 @@ import { Quiz } from '../../models/quiz';
 })
 export class QuizNewPage {
   private newQuiz: Quiz = {
-    id: -1,
+    uuid: '',
     title: '',
     creationDate: -1,
     categorys: [

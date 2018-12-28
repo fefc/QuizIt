@@ -32,12 +32,16 @@ export class QuizsProvider {
 
   saveToStorage(quiz: Quiz) {
     return new Promise((resolve, reject) => {
-      // strangly if id = 0 !quiz.id will be true even if 0 has been set!
-      //if (!quiz.id || quiz.id === -1) {
-      if (quiz.id === -1) {
-        //We have a new quiz, so first we need to get a new id
+      if (!quiz.uuid) {
+        //We have a new quiz, so first we need to get a new uuid
+        let uuid: string = this.uuidv4();
+
+        while (this.quizs.findIndex(q => q.uuid === uuid) !== -1) {
+          uuid = this.uuidv4();
+        }
+
         let newQuiz: Quiz = {
-          id: this.quizs.length,
+          uuid: uuid,
           title: quiz.title,
           creationDate: quiz.creationDate,
           categorys: quiz.categorys
@@ -54,7 +58,7 @@ export class QuizsProvider {
       }
       else {
         //Saving an exsisting quiz, lets just make sure it's in the list
-        if (this.quizs.findIndex(quiz => quiz.id === quiz.id) !== -1) {
+        if (this.quizs.findIndex(q => q.uuid === quiz.uuid) !== -1) {
           this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
             resolve();
           }).catch(() => {
@@ -73,7 +77,7 @@ export class QuizsProvider {
       let indexes: Array<number> = Array<number>();
 
       for (let selectedQuiz of this.quizs.filter((quiz) => quiz.selected === true)) {
-        let index = this.quizs.findIndex(quiz => quiz.id === selectedQuiz.id);
+        let index = this.quizs.findIndex(quiz => quiz.uuid === selectedQuiz.uuid);
         if (index !== -1) {
           indexes.push(index);
         }
@@ -95,7 +99,7 @@ export class QuizsProvider {
 
   deleteFromStorage(quiz: Quiz) {
     return new Promise((resolve, reject) => {
-      let index: number = this.quizs.findIndex(quiz => quiz.id === quiz.id);
+      let index: number = this.quizs.findIndex(q => q.uuid === quiz.uuid);
       if (index !== -1) {
         this.quizs.splice(index, 1);
         this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
@@ -107,6 +111,14 @@ export class QuizsProvider {
       else {
         reject();
       }
+    });
+  }
+
+  //From https://stackoverflow.com/a/2117523
+  uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
     });
   }
 }

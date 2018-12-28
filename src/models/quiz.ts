@@ -3,7 +3,7 @@ import { Participant } from './participant';
 
 
 export interface Quiz {
-  readonly id: number,
+  readonly uuid: string;
   title: string,
   creationDate: number,
   categorys: Array<Category>,
