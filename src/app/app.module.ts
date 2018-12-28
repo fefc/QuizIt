@@ -6,6 +6,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { IonicStorageModule } from '@ionic/storage';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ImagePicker } from '@ionic-native/image-picker';
+import { File } from '@ionic-native/file';
 
 import { MyApp } from './app.component';
 
@@ -46,6 +47,7 @@ import { PlayPage } from '../pages/play/play';
     StatusBar,
     SplashScreen,
     ImagePicker,
+    File,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     QuizsProvider
   ]

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ViewController, AlertController, NavParams } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
+import { File } from '@ionic-native/file';
 
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
@@ -16,7 +17,11 @@ export class QuestionPage {
   private selectedCategoryName: string;
   private question: Question;
 
-  constructor(public viewCtrl: ViewController, private alertCtrl: AlertController, private imagePicker: ImagePicker, params: NavParams) {
+  constructor(public viewCtrl: ViewController,
+              private alertCtrl: AlertController,
+              private imagePicker: ImagePicker,
+              private file: File,
+              params: NavParams) {
     this.title = "Edit Question";
     this.saveButtonName = "Save";
     this.categoryNames = params.data.categoryNames;
@@ -81,11 +86,35 @@ export class QuestionPage {
   }
 
   selectPicture() {
-    this.imagePicker.getPictures({maximumImagesCount: 6}).then((results) => {
-  for (var i = 0; i < results.length; i++) {
-      console.log('Image URI: ' + results[i]);
-  }
-}, (err) => { });
+    this.file.checkDir(this.file.dataDirectory, 'attachements').then(() => {
+      alert(this.file.dataDirectory);
+
+      this.imagePicker.getPictures({maximumImagesCount: 6}).then((results) => {
+    for (var i = 0; i < results.length; i++) {
+      alert('Image URI: ' + results[i]);
+      alert(results[i].replace(this.file.cacheDirectory, ''));
+
+      this.file.copyFile(this.file.cacheDirectory, results[i].replace(this.file.cacheDirectory, ''), this.file.dataDirectory + 'attachements', results[i].replace(this.file.cacheDirectory, '')).then(() => {
+        this.file.listDir(this.file.dataDirectory, 'attachements').then((results) => {
+          for(let file of results){
+            alert('copy URI: ' + file.name);
+          }
+        });
+      }).catch((err) => {
+        alert(err[0]);
+      });
+    }
+  }, (err) => { });
+
+    }).catch((err) => {
+      this.file.createDir(this.file.dataDirectory, 'attachements', false).then(() => {
+        alert('dreated dir');
+      }).catch((err) => {
+        alert('could not create dir');
+      })
+    });
+
+
   }
 
   enableCreateButton() {
