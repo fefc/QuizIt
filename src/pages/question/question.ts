@@ -113,36 +113,15 @@ export class QuestionPage {
     }
   }
 
+  //https://stackoverflow.com/a/52970316
   selectPicture() {
-    /*this.file.checkDir(this.file.dataDirectory, 'attachements').then(() => {
-      alert(this.file.dataDirectory);
-
-      this.imagePicker.getPictures({maximumImagesCount: 6}).then((results) => {
-    for (var i = 0; i < results.length; i++) {
-      alert('Image URI: ' + results[i]);
-      alert(results[i].replace(this.file.cacheDirectory, ''));
-
-      this.file.copyFile(this.file.cacheDirectory, results[i].replace(this.file.cacheDirectory, ''), this.file.dataDirectory + 'attachements', results[i].replace(this.file.cacheDirectory, '')).then(() => {
-        this.file.listDir(this.file.dataDirectory, 'attachements').then((results) => {
-          for(let file of results){
-            alert('copy URI: ' + file.name);
-          }
-        });
-      }).catch((err) => {
-        alert(err[0]);
-      });
-    }
-  }, (err) => { });
-
-    }).catch((err) => {
-      this.file.createDir(this.file.dataDirectory, 'attachements', false).then(() => {
-        alert('dreated dir');
-      }).catch((err) => {
-        alert('could not create dir');
-      })
+    this.imagePicker.getPictures({maximumImagesCount: 4}).then((results) => {
+      for (var i = 0; i < results.length; i++) {
+        this.question.answers[i] = results[i].replace(this.file.cacheDirectory, '');
+      }
+    }).catch(() => {
+      alert('Could not get images.');
     });
-
-*/
   }
 
   enableSaveButton() {
