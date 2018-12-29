@@ -49,6 +49,15 @@ export class QuizQuestionsPage {
           text: 'Save',
           handler: data => {
             if (data.categoryName.length > 3 && this.quiz.categorys.findIndex((category) => category.name === data.categoryName) === -1 ) {
+
+              // renaome questions reference first
+              let questionIndex: number = this.quiz.questions.findIndex((question) => question.category.name === category.name);
+
+              while (questionIndex !== -1) {
+                this.quiz.questions[questionIndex].category.name = data.categoryName;
+                questionIndex = this.quiz.questions.findIndex((question) => question.category.name === category.name);
+              }
+
               category.name = data.categoryName;
 
               let loading = this.loadingCtrl.create({
@@ -84,69 +93,66 @@ export class QuizQuestionsPage {
   }
 
   openQuestionPage(question: Question) {
-    let categoryNames = new Array<string>();
-
-    for (let category of this.quiz.categorys) {
-      categoryNames.push(category.name);
-    }
-
-    let modal = this.modalCtrl.create(QuestionPage, {categoryNames: categoryNames, selecteCategoryName: categoryNames[0], question});
-    modal.present();
-
-
-  }
-
-  openNewQuestionPage() {
-    let categoryNames = new Array<string>();
-    let newQuestion: Question = {
-        question: '',
-        type: QuestionType.classic,
-        rightAnswer: -1,
-        answers: ['','','',''],
-        extras: [],
-        authorId: -1
-      };
-
-    for (let category of this.quiz.categorys) {
-      categoryNames.push(category.name);
-    }
-
-    let modal = this.modalCtrl.create(QuestionPage, {categoryNames: categoryNames, selecteCategoryName: categoryNames[0], question: newQuestion});
+    let modal = this.modalCtrl.create(QuestionPage, {categorys: this.quiz.categorys, question: question});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {
-        let loading = this.loadingCtrl.create({
-          content: 'Creating Question...'
-        });
-
-        loading.present();
-
-        console.log(String(data.categoryName));
-        console.log(this.quiz.categorys);
-
-        let index = this.quiz.categorys.findIndex((category) => category.name === data.categoryName);
-
-        console.log(index);
-
-        if (index === -1) {
-          this.quiz.categorys.push({
-            name: data.categoryName,
-            questions: [data.question]
-          });
-        }
-        else {
-          this.quiz.categorys[index].questions.push(data.question);
-        }
-
-        this.quizsProv.saveToStorage(this.quiz).then(() => {
-          loading.dismiss();
-        }).catch(() => {
-          loading.dismiss();
-          alert('Unable to save Quiz.');
-        });
+        this.saveChanges(data.question);
       }
     });
   }
+
+  openNewQuestionPage() {
+    let modal = this.modalCtrl.create(QuestionPage, {categorys: this.quiz.categorys});
+    modal.present();
+    modal.onDidDismiss(data => {
+      if (data) {
+        this.saveChanges(data.question);
+      }
+    });
+  }
+
+  saveChanges(question: Question){
+    let loading = this.loadingCtrl.create({
+      content: 'Saving changes...'
+    });
+
+    loading.present();
+
+    //Make sure the category exists, if not add it
+    if (this.quiz.categorys.findIndex((category) => category.name === question.category.name) === -1) {
+      this.quiz.categorys.push({
+        name: question.category.name
+      });
+    }
+
+    //Make sure question exists, if not add it
+    let questionIndex: number = this.quiz.questions.findIndex((q) => q.uuid === question.uuid);
+    if ( questionIndex === -1) {
+      this.quiz.questions.push(question);
+    }
+    else {
+      this.quiz.questions[questionIndex].question = question.question;
+      this.quiz.questions[questionIndex].type = question.type;
+      this.quiz.questions[questionIndex].rightAnswer = question.rightAnswer;
+      this.quiz.questions[questionIndex].answers = question.answers;
+      this.quiz.questions[questionIndex].extras = question.extras;
+      this.quiz.questions[questionIndex].category = question.category;
+      this.quiz.questions[questionIndex].authorId = question.authorId;
+    }
+
+    this.quizsProv.saveToStorage(this.quiz).then(() => {
+      loading.dismiss();
+    }).catch(() => {
+      loading.dismiss();
+      alert('Unable to save Quiz.');
+    });
+  }
+
+  getQuestionsFromCategory(category: Category) {
+    return this.quiz.questions.filter((question) => question.category.name === category.name);
+  }
+
 
   startQuiz() {
     this.navCtrl.push(PlayPage, {quiz: this.quiz});

@@ -83,7 +83,7 @@ export class PlayPage {
   }
 
   next() {
-    if (this.screenState === ScreenStateType.displayTitle) {
+    /*if (this.screenState === ScreenStateType.displayTitle) {
       this.screenState = ScreenStateType.displayCategoryTitle;
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
@@ -103,7 +103,7 @@ export class PlayPage {
           this.navCtrl.pop();
         }
       }
-    }
+    }*/
 
   }
 

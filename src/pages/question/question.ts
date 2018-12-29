@@ -3,6 +3,7 @@ import { ViewController, AlertController, NavParams } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
 
+import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 
@@ -13,23 +14,50 @@ import { Question } from '../../models/question';
 export class QuestionPage {
   private title: string;
   private saveButtonName: string;
-  private categoryNames: Array<string>;
-  private selectedCategoryName: string;
+  private categorys: Array<Category>;
   private question: Question;
 
   constructor(public viewCtrl: ViewController,
               private alertCtrl: AlertController,
-              private imagePicker: ImagePicker,
               private file: File,
+              private imagePicker: ImagePicker,
               params: NavParams) {
-    this.title = "Edit Question";
-    this.saveButtonName = "Save";
-    this.categoryNames = params.data.categoryNames;
-    this.selectedCategoryName = params.data.selecteCategoryName;
-    this.question = params.data.question;
-    if (!this.question.question) {
+    //lets make deep copies, so that we don't modfiy anything before user confirmation
+    this.categorys = [];
+
+    for (let category of params.data.categorys) {
+      this.categorys.push({name: category.name});
+    }
+
+    if (!params.data.question) {
+      this.question = {
+        uuid: '',
+        question: '',
+        type: QuestionType.classic,
+        rightAnswer: -1,
+        answers: ['','','',''],
+        extras: [],
+        category: {name: this.categorys[0].name},
+        authorId: -1
+      };
+
       this.title = "New Question";
       this.saveButtonName = "Create";
+    }
+    else {
+      this.question = {
+        uuid: params.data.question.uuid,
+        question: params.data.question.question,
+        type: params.data.question.type,
+        rightAnswer: params.data.question.rightAnswer,
+        answers: params.data.question.answers,
+        extras: params.data.question.extras,
+        category: {name: this.categorys.find((category) => category.name === params.data.question.category.name).name},
+        authorId: params.data.question.authorId
+      };
+
+      this.title = "Edit Question";
+      this.saveButtonName = "Save";
     }
   }
 
@@ -52,18 +80,18 @@ export class QuestionPage {
             text: 'Cancel',
             role: 'cancel',
             handler: data => {
-              this.selectedCategoryName = this.categoryNames[0];
+              this.question.category.name = this.categorys[0].name;
             }
           },
           {
             text: 'Create',
             handler: data => {
-              if (data.categoryName.length > 3 && this.categoryNames.findIndex((category) => category === data.categoryName) === -1 ) {
-                this.categoryNames.push(data.categoryName);
-                this.selectedCategoryName = data.categoryName;
+              if (data.categoryName.length > 3 && this.categorys.findIndex((category) => category.name === data.categoryName) === -1 ) {
+                this.categorys.push({name: data.categoryName});
+                this.question.category.name = data.categoryName;
               }
               else {
-                this.selectedCategoryName = this.categoryNames[0];
+                this.question.category.name = this.categorys[0].name;
 
                 let error = this.alertCtrl.create({
                   title: 'Error creating category',
@@ -86,7 +114,7 @@ export class QuestionPage {
   }
 
   selectPicture() {
-    this.file.checkDir(this.file.dataDirectory, 'attachements').then(() => {
+    /*this.file.checkDir(this.file.dataDirectory, 'attachements').then(() => {
       alert(this.file.dataDirectory);
 
       this.imagePicker.getPictures({maximumImagesCount: 6}).then((results) => {
@@ -114,10 +142,10 @@ export class QuestionPage {
       })
     });
 
-
+*/
   }
 
-  enableCreateButton() {
+  enableSaveButton() {
     let enable: boolean = true;
     if (this.question.question) {
       if (this.question.question.length > 0) {
@@ -142,9 +170,9 @@ export class QuestionPage {
     return enable;
   }
 
-  create() {
-    if (this.enableCreateButton()) {
-      this.viewCtrl.dismiss({question: this.question, categoryName: this.selectedCategoryName});
+  save() {
+    if (this.enableSaveButton()) {
+      this.viewCtrl.dismiss({question: this.question});
     }
   }
 

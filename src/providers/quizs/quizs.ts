@@ -2,6 +2,7 @@ import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
 
 import { Quiz } from '../../models/quiz';
+import { Question } from '../../models/question';
 
 /*
   Generated class for the QuizsProvider provider.
@@ -36,7 +37,7 @@ export class QuizsProvider {
         //We have a new quiz, so first we need to get a new uuid
         let uuid: string = this.uuidv4();
 
-        while (this.quizs.findIndex(q => q.uuid === uuid) !== -1) {
+        while (this.quizs.findIndex((q) => q.uuid === uuid) !== -1) {
           uuid = this.uuidv4();
         }
 
@@ -44,7 +45,8 @@ export class QuizsProvider {
           uuid: uuid,
           title: quiz.title,
           creationDate: quiz.creationDate,
-          categorys: quiz.categorys
+          categorys: quiz.categorys,
+          questions: quiz.questions
         }
 
         this.quizs.push(newQuiz);
@@ -58,7 +60,34 @@ export class QuizsProvider {
       }
       else {
         //Saving an exsisting quiz, lets just make sure it's in the list
-        if (this.quizs.findIndex(q => q.uuid === quiz.uuid) !== -1) {
+        let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
+        if (quizIndex !== -1) {
+          //Check questions uuid, if there is one not set, generate one
+          let questionIndex: number = quiz.questions.findIndex((q) => !q.uuid);
+
+          while (questionIndex !== -1) {
+            let uuid: string = this.uuidv4();
+
+            while (quiz.questions.findIndex((q) => q.uuid === uuid) !== -1) {
+              uuid = this.uuidv4();
+            }
+
+            let questionUUID: Question = {
+              uuid: uuid,
+              question: quiz.questions[questionIndex].question,
+              type: quiz.questions[questionIndex].type,
+              rightAnswer: quiz.questions[questionIndex].rightAnswer,
+              answers: quiz.questions[questionIndex].answers,
+              extras: quiz.questions[questionIndex].extras,
+              category: quiz.questions[questionIndex].category,
+              authorId: quiz.questions[questionIndex].authorId
+            }
+
+            quiz.questions[questionIndex] = questionUUID;
+
+            questionIndex = quiz.questions.findIndex((q) => !q.uuid);
+          }
+
           this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
             resolve();
           }).catch(() => {

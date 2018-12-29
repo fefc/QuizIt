@@ -1,3 +1,5 @@
+import { Category } from './category';
+
 export enum QuestionType {
   classic = 0,
   time = 1,
@@ -7,10 +9,12 @@ export enum QuestionType {
 }
 
 export interface Question {
+  readonly uuid: string;
   question: string,
   type: QuestionType,
   rightAnswer: number,
   answers: Array<string>,
   extras: Array<string>,
+  category: Category;
   authorId: number
 }

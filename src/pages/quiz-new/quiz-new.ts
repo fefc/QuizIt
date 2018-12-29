@@ -15,9 +15,9 @@ export class QuizNewPage {
     categorys: [
       {
         name: 'uncategorized',
-        questions: []
       }
-    ]
+    ],
+    questions: [],
   };
 
   constructor(public viewCtrl: ViewController) {

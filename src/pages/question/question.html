@@ -19,8 +19,8 @@
     </ion-item>
     <ion-item>
       <ion-label fixed>Category</ion-label>
-      <ion-select [(ngModel)]="selectedCategoryName" interface="popover" (ionChange)="categoryChange($event)">
-        <ion-option *ngFor="let category of categoryNames" [value]="category">{{category}}</ion-option>
+      <ion-select [(ngModel)]="question.category.name" interface="popover" (ionChange)="categoryChange($event)">
+        <ion-option *ngFor="let category of categorys" [value]="category.name">{{category.name}}</ion-option>
         <ion-option value="new">New category</ion-option>
       </ion-select>
     </ion-item>
@@ -51,7 +51,7 @@
   <ion-toolbar>
     <ion-buttons end>
       <button ion-button (click)="selectPicture()">Select</button>
-      <button ion-button color="primary" (click)="create()" [disabled]="!enableCreateButton()">{{saveButtonName}}</button>
+      <button ion-button color="primary" (click)="save()" [disabled]="!enableSaveButton()">{{saveButtonName}}</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>
