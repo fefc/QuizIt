@@ -117,7 +117,7 @@ export class QuestionPage {
   selectPicture() {
     this.imagePicker.getPictures({maximumImagesCount: 4}).then((results) => {
       for (var i = 0; i < results.length; i++) {
-        this.question.answers[i] = results[i].replace(this.file.cacheDirectory, '');
+        this.question.answers[i] = results[i];//.replace(this.file.cacheDirectory, '');
       }
     }).catch(() => {
       alert('Could not get images.');

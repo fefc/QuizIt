@@ -1,9 +1,10 @@
 import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
+import { File } from '@ionic-native/file';
 
 import { Quiz } from '../../models/quiz';
 import { Question } from '../../models/question';
-
+import { QuestionType } from '../../models/question';
 /*
   Generated class for the QuizsProvider provider.
 
@@ -14,7 +15,7 @@ import { Question } from '../../models/question';
 export class QuizsProvider {
   public quizs: Array<Quiz>;
 
-  constructor(private storage: Storage) {
+  constructor(private storage: Storage, private file: File) {
     this.quizs = new Array<Quiz>();
   }
 
@@ -88,8 +89,26 @@ export class QuizsProvider {
             questionIndex = quiz.questions.findIndex((q) => !q.uuid);
           }
 
-          this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-            resolve();
+          //Check attachements
+          var promises = [];
+          questionIndex = quiz.questions.findIndex((q) => (q.type == QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///")) !== -1));
+
+          while (questionIndex !== -1) {
+            for (let i:number = 0; i < quiz.questions[questionIndex].answers.length; i++) {
+              quiz.questions[questionIndex].answers[i] = quiz.questions[questionIndex].answers[i].substring(quiz.questions[questionIndex].answers[i].lastIndexOf("/") + 1);
+            }
+
+            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, quiz.questions[questionIndex].uuid, quiz.questions[questionIndex].answers.filter((a) => a.startsWith("file:///"))));
+
+            questionIndex = quiz.questions.findIndex((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///")) !== -1));
+          }
+
+          Promise.all(promises).then(() => {
+            this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+              resolve();
+            }).catch(() => {
+              reject();
+            });
           }).catch(() => {
             reject();
           });
@@ -148,6 +167,76 @@ export class QuizsProvider {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
+    });
+  }
+
+  copyAttachementsToDataDirectory(quizUuid: string, questionUuid: string, attachements: Array<string>) {
+    return new Promise((resolve, reject) => {
+      this.checkAndCreateDirectories(quizUuid, questionUuid).then(() => {
+        this.moveAttachementsFromCacheToDataDir(quizUuid, questionUuid, attachements).then(() => {
+          resolve();
+        }).catch(() => {
+          reject();
+        });
+      }).catch(() => {
+        reject();
+      });
+    });
+  }
+
+  checkAndCreateDirectories(quizUuid: string, questionUuid: string) {
+    return new Promise((resolve, reject) => {
+      //check Quiz Dir
+      this.file.checkDir(this.file.dataDirectory, quizUuid).then(() => {
+        //check question Dir
+        this.file.checkDir(this.file.dataDirectory + quizUuid, questionUuid).then(() => {
+          resolve();
+        }).catch(() => {
+          this.file.createDir(this.file.dataDirectory + quizUuid, questionUuid, false).then(() => {
+            resolve();
+          }).catch(() => {
+            reject();
+          });
+        });
+      }).catch(() => {
+        //If non existent, create question dir
+        this.file.createDir(this.file.dataDirectory, quizUuid, false).then(() => {
+          this.file.createDir(this.file.dataDirectory + quizUuid, questionUuid, false).then(() => {
+            resolve();
+          }).catch(() => {
+            reject();
+          });
+        }).catch(() => {
+          reject();
+        });
+      });
+    });
+  }
+
+  moveAttachementsFromCacheToDataDir(quizUuid: string, questionUuid: string, attachements: Array<string>) {
+    return new Promise((resolve, reject) => {
+      var promises = [];
+      var destinationDir: string = this.file.dataDirectory + quizUuid + "/" + questionUuid;
+      var sourceDir: string;
+      var fileName: string;
+
+      for (let attachement of attachements) {
+        var indexOfSlash: number = attachement.lastIndexOf("/") + 1;
+        sourceDir = attachement.substring(0, indexOfSlash);
+        fileName = attachement.substring(indexOfSlash);
+        if (indexOfSlash > 0) {
+          promises.push(this.file.moveFile(sourceDir, fileName, destinationDir, fileName));
+        }
+        else {
+          reject();
+        }
+      }
+
+      Promise.all(promises).then(() => {
+        resolve();
+      }).catch(() => {
+        reject();
+      });
     });
   }
 }
