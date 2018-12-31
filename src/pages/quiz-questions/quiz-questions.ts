@@ -3,7 +3,7 @@ import { NavController, ModalController, LoadingController, AlertController, Nav
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
-import { QuestionType } from '../../models/question';
+//import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 
 import { QuizsProvider } from '../../providers/quizs/quizs';
@@ -93,7 +93,7 @@ export class QuizQuestionsPage {
   }
 
   openQuestionPage(question: Question) {
-    let modal = this.modalCtrl.create(QuestionPage, {categorys: this.quiz.categorys, question: question});
+    let modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys, question: question});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {
@@ -103,7 +103,7 @@ export class QuizQuestionsPage {
   }
 
   openNewQuestionPage() {
-    let modal = this.modalCtrl.create(QuestionPage, {categorys: this.quiz.categorys});
+    let modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {

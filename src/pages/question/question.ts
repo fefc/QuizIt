@@ -16,18 +16,19 @@ export class QuestionPage {
   private saveButtonName: string;
   private categorys: Array<Category>;
   private question: Question;
+  private attachementDir: string;
 
   constructor(public viewCtrl: ViewController,
               private alertCtrl: AlertController,
               private file: File,
               private imagePicker: ImagePicker,
               params: NavParams) {
-    //lets make deep copies, so that we don't modfiy anything before user confirmation
-    this.categorys = [];
+    //avoid ionic warnings
+    this.title = this.title;
+    this.saveButtonName = this.saveButtonName;
 
-    for (let category of params.data.categorys) {
-      this.categorys.push({name: category.name});
-    }
+    //lets make deep copies, so that we don't modfiy anything before user confirmation
+    this.categorys = JSON.parse(JSON.stringify(params.data.categorys));
 
     if (!params.data.question) {
       this.question = {
@@ -41,20 +42,21 @@ export class QuestionPage {
         authorId: -1
       };
 
+      this.attachementDir = '';
+
       this.title = "New Question";
       this.saveButtonName = "Create";
     }
     else {
-      this.question = {
-        uuid: params.data.question.uuid,
-        question: params.data.question.question,
-        type: params.data.question.type,
-        rightAnswer: params.data.question.rightAnswer,
-        answers: params.data.question.answers,
-        extras: params.data.question.extras,
-        category: {name: this.categorys.find((category) => category.name === params.data.question.category.name).name},
-        authorId: params.data.question.authorId
-      };
+      this.question = JSON.parse(JSON.stringify(params.data.question));
+
+      this.attachementDir = this.file.dataDirectory + params.data.quizUuid + '/' + this.question.uuid + '/';
+
+      if (this.question.type == QuestionType.rightPicture) {
+        for (let i: number = 0; i < this.question.answers.length; i++) {
+          this.question.answers[i] = this.attachementDir + this.question.answers[i];
+        }
+      }
 
       this.title = "Edit Question";
       this.saveButtonName = "Save";
@@ -117,7 +119,7 @@ export class QuestionPage {
   selectPicture() {
     this.imagePicker.getPictures({maximumImagesCount: 4}).then((results) => {
       for (var i = 0; i < results.length; i++) {
-        this.question.answers[i] = results[i];//.replace(this.file.cacheDirectory, '');
+        this.question.answers[i] = decodeURIComponent(results[i]);
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -151,6 +153,11 @@ export class QuestionPage {
 
   save() {
     if (this.enableSaveButton()) {
+      if (this.question.type == QuestionType.rightPicture) {
+        for (let i: number = 0; i < this.question.answers.length; i++) {
+          this.question.answers[i] = this.question.answers[i].replace(this.attachementDir, '');
+        }
+      }
       this.viewCtrl.dismiss({question: this.question});
     }
   }

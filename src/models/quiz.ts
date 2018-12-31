@@ -1,6 +1,6 @@
 import { Category } from './category';
 import { Question } from './question';
-import { Participant } from './participant';
+//import { Participant } from './participant';
 
 
 export interface Quiz {
