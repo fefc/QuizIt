@@ -12,11 +12,16 @@ import { Question } from '../../models/question';
   templateUrl: 'question.html'
 })
 export class QuestionPage {
+  private maxPictures: number = 5;
+  private QuestionType = QuestionType; //for use in Angluar html
   private title: string;
   private saveButtonName: string;
   private categorys: Array<Category>;
   private question: Question;
   private attachementDir: string;
+  private previousType: QuestionType;
+  private previousAnswers: Array<string>;
+  private previousRightAnswer: number;
 
   constructor(public viewCtrl: ViewController,
               private alertCtrl: AlertController,
@@ -61,6 +66,17 @@ export class QuestionPage {
       this.title = "Edit Question";
       this.saveButtonName = "Save";
     }
+
+    if (this.question.type === QuestionType.rightPicture) {
+      this.previousType = QuestionType.rightPicture;
+      this.previousAnswers = ['', '', '', ''];
+    }
+    else {
+      this.previousType = QuestionType.classic;
+      this.previousAnswers = [];
+    }
+
+    this.previousRightAnswer = -1;
   }
 
   indexTracker(index: number, obj: any) {
@@ -115,11 +131,48 @@ export class QuestionPage {
     }
   }
 
-  //https://stackoverflow.com/a/52970316
-  selectPicture() {
-    this.imagePicker.getPictures({maximumImagesCount: 4}).then((results) => {
+  typeChange(val: QuestionType) {
+    if (val !== this.previousType) {
+      if (val === QuestionType.rightPicture || this.previousType === QuestionType.rightPicture) {
+        let futurePreviousAnswers: Array<string> = JSON.parse(JSON.stringify(this.question.answers));
+        let futurePreviousRightAnswer: number = this.question.rightAnswer;
+
+        this.question.answers = JSON.parse(JSON.stringify(this.previousAnswers));
+        this.question.rightAnswer = this.previousRightAnswer;
+
+        this.previousAnswers = futurePreviousAnswers;
+        this.previousRightAnswer = futurePreviousRightAnswer;
+      }
+      this.previousType = val;
+    }
+  }
+
+  rightPicture(val: number) {
+    this.question.rightAnswer = val;
+  }
+
+  replacePicture(val: number) {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:1920, height: 1080}).then((results) => {
       for (var i = 0; i < results.length; i++) {
-        this.question.answers[i] = decodeURIComponent(results[i]);
+        this.question.answers[val] = results[i];
+      }
+    }).catch(() => {
+      alert('Could not get images.');
+    });
+  }
+
+  deletePicture(val: number) {
+    if (this.question.rightAnswer === val) {
+      this.question.rightAnswer = -1;
+    }
+    this.question.answers.splice(val, 1);
+  }
+
+  //https://stackoverflow.com/a/52970316
+  openImagePicker() {
+    this.imagePicker.getPictures({maximumImagesCount: this.maxPictures - this.question.answers.length, width:1920, height: 1080}).then((results) => {
+      for (var i = 0; i < results.length; i++) {
+        this.question.answers.push(decodeURIComponent(results[i]));
       }
     }).catch(() => {
       alert('Could not get images.');

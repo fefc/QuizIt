@@ -63,7 +63,7 @@ export class QuizsProvider {
           resolve();
         }).catch(() => {
           this.quizs.pop();
-          reject();
+          reject('Could not save quizs to storage.');
         });
       }
       else {
@@ -99,7 +99,7 @@ export class QuizsProvider {
           //Check attachements
           var promises = [];
 
-          for (let question of quiz.questions.filter((q) => (q.type == QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///")) !== -1))) {
+          for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///")) !== -1))) {
             promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, question.answers.filter((a) => a.startsWith("file:///"))));
           }
 
@@ -122,14 +122,14 @@ export class QuizsProvider {
             this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
               resolve();
             }).catch(() => {
-              reject();
+              reject('Could not save quizs to storage.');
             });
           }).catch(() => {
-            reject();
+            reject('Could not save attachements.');
           });
         }
         else {
-          reject();
+          reject('Could not find quiz.');
         }
       }
     });
@@ -201,11 +201,12 @@ export class QuizsProvider {
       this.checkAndCreateDirectories(quizUuid, questionUuid).then(() => {
         this.moveAttachementsFromCacheToDataDir(quizUuid, questionUuid, attachements).then((result: AttachementsResult) => {
           resolve(result);
-        }).catch(() => {
-          reject();
+        }).catch((err) => {
+          reject(err);
         });
-      }).catch(() => {
-        reject();
+      }).catch((err) => {
+        alert(err);
+        reject(err);
       });
     });
   }
@@ -215,25 +216,25 @@ export class QuizsProvider {
       //check Quiz Dir
       this.file.checkDir(this.file.dataDirectory, quizUuid).then(() => {
         //check question Dir
-        this.file.checkDir(this.file.dataDirectory + quizUuid, questionUuid).then(() => {
+        this.file.checkDir(this.file.dataDirectory, quizUuid + '/' + questionUuid).then(() => {
           resolve();
         }).catch(() => {
-          this.file.createDir(this.file.dataDirectory + quizUuid, questionUuid, false).then(() => {
+          this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, false).then(() => {
             resolve();
           }).catch(() => {
-            reject();
+            reject('Could not create question directory.');
           });
         });
       }).catch(() => {
         //If non existent, create question dir
         this.file.createDir(this.file.dataDirectory, quizUuid, false).then(() => {
-          this.file.createDir(this.file.dataDirectory + quizUuid, questionUuid, false).then(() => {
+          this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, false).then(() => {
             resolve();
           }).catch(() => {
-            reject();
+            reject('Could not create question directory.');
           });
         }).catch(() => {
-          reject();
+          reject('Could not create quiz directory.');
         });
       });
     });
@@ -259,14 +260,14 @@ export class QuizsProvider {
           result.fileNames.push(fileName);
         }
         else {
-          reject();
+          reject('Invalid sourceDir of fileName.');
         }
       }
 
       Promise.all(promises).then(() => {
         resolve(result);
       }).catch(() => {
-        reject();
+        reject('Something happend moving attachements.');
       });
     });
   }
