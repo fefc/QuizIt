@@ -8,14 +8,21 @@
   <div *ngIf="screenState === ScreenStateType.displayQuestion" [@timeBarAnimation] class="time-bar"></div>
 
   <div *ngIf="screenState === ScreenStateType.displayQuestion" [@questionAnimation] class="question">
-    {{quiz.categorys[currentCategory].questions[currentQuestion].question}}
+    {{currentQuestions[currentQuestion].question}}
   </div>
 
-  <div class="answers">
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="one">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[0]}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="two">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[1]}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="three">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[2]}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="four">{{quiz.categorys[currentCategory].questions[currentQuestion].answers[3]}}</div>
+  <div *ngIf="currentQuestions[currentQuestion].type !== QuestionType.rightPicture" class="answers">
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="zero">{{currentQuestions[currentQuestion].answers[0]}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="one">{{currentQuestions[currentQuestion].answers[1]}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="two">{{currentQuestions[currentQuestion].answers[2]}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="three">{{currentQuestions[currentQuestion].answers[3]}}</div>
+  </div>
+
+  <div *ngIf="screenState === ScreenStateType.displayQuestion && currentQuestions[currentQuestion].type == QuestionType.rightPicture" [@pictureAnimation] class="picture">
+    <div class="picture-container">
+      <img src="assets/imgs/logo.png">
+      <!--<img [src]="getAttachamentsDir(currentQuestion) + currentQuestions[currentQuestion].answers[0]">-->
+    </div>
   </div>
 
 

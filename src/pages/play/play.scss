@@ -1,6 +1,7 @@
 page-play {
 
 $dark: rgba(0, 0, 0, 0.7);
+$fullDark: rgba(0, 0, 0, 1.0);
 
   * {
     box-sizing: border-box;
@@ -35,24 +36,24 @@ $dark: rgba(0, 0, 0, 0.7);
     position: absolute;
     top: 0;
     left: 0;
-    width: 95vw;
+    width: 94.5vw;
     height: 10vh;
-    margin: 5vh 2.5vw;
+    margin: 5vh 2.75vw;
     background-color: #ccc;
     border-radius: 2vh;
     opacity: 0;
 
-    z-index:9;
+    z-index: 9;
   }
 
   .question {
     position: absolute;
     top: 0;
     left: 0;
-    width: 96vw;
+    width: 95.5vw;
     height: 12vh;
     line-height: 12vh;
-    margin: 4vh 2vw;
+    margin: 4vh 2.25vw;
     padding: 0 2vw;
     font-size: 6vh;
 
@@ -75,8 +76,8 @@ $dark: rgba(0, 0, 0, 0.7);
     top: 20.5vh;
     left: 0;
     height: 72vh;
-    min-width: 25vw;
-    margin: 4vh 2.5vw;
+    min-width: 25.5vw;
+    margin: 4vh 2.25vw;
     display: flex;
     flex-direction: column;
 
@@ -102,24 +103,66 @@ $dark: rgba(0, 0, 0, 0.7);
       transform-origin: -15vw top;
     }
 
-    .one {
+    .zero {
       background-color: #200691;
       border: 0.2vh solid #200691;
     }
 
-    .two {
+    .one {
       background-color: #a64a00;
       border: 0.2vh solid #a64a00;
     }
 
-    .three {
+    .two {
       background-color: #1f9807;
       border: 0.2vh solid #1f9807;
     }
 
-    .four {
+    .three {
       background-color: #929401;
       border: 0.2vh solid #929401;
+    }
+  }
+
+  .picture {
+    position: absolute;
+    top: 20.5vh;
+    left: 0;
+    height: 72vh;
+    width: 72vw;
+    margin: 4vh 2.25vw;
+    padding: 0.6vh;
+    background-color: $fullDark;
+    border: 0.3vh solid rgba(25, 25, 25, 0.9);
+    box-shadow:
+      -0.25vw 0.25vh  0.4vw 0.4vh rgba(0, 0, 0, .3),
+      inset -0.25vw 0.25vh 0.4vw 0.4vh rgba(25, 25, 25, 0.9),
+      inset 0.25vw -0.25vh 0.4vw 0.4vh rgba(125, 125, 125, 0.2);
+    border-radius: 2vh;
+
+    z-index: 9;
+
+    .picture-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      border-radius: 1.4vh;
+
+      img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        height: 100%;
+        margin: auto;
+        flex: 1;
+
+        z-index:10;
+      }
     }
   }
 
