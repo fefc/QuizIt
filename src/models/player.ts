@@ -5,9 +5,10 @@ enum Role {
   Speeker = 3
 }
 
-export interface Participant {
-  deviceId: number,
+export interface Player {
+  deviceId?: number,
   nickname: string,
   avatar: string,
-  role: Role
+  points?: number,
+  role?: Role
 }

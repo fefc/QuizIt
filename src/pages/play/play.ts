@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
+import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
+import { Player } from '../../models/player';
 
 enum ScreenStateType {
   displayTitle = 0,
@@ -87,8 +89,20 @@ export class PlayPage {
   private currentQuestion: number;
   private screenState: ScreenStateType;
 
-  constructor(public navCtrl: NavController, private file: File, params: NavParams) {
+  private players: Array<Player>;
+
+  constructor(public navCtrl: NavController, private file: File, private httpd: Httpd, params: NavParams) {
     this.quiz = params.data.quiz;
+
+    this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar:"Dog.png"},
+                    {nickname: "Totgg", avatar:"Bunny.png"},
+                  {nickname: "Totgg", avatar:"Duck_Guy.png"},
+                {nickname: "Totgg", avatar:"Frankie.png"},
+              {nickname: "Totgg", avatar:"Happy_Girl.png"},
+            {nickname: "Totgg", avatar:"Mad_Guy.png"},
+          {nickname: "Totgg", avatar:"Proog.png"},
+        {nickname: "Totgg", avatar:"Sintel.png"},];
+
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -103,6 +117,28 @@ export class PlayPage {
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
         this.screenState = ScreenStateType.displayTitle;
+
+        /*let options: HttpdOptions = {
+          www_root: 'httpd', // relative path to app's www directory
+          port: 8080,
+          localhost_only: false
+        };
+
+        this.httpd.attachRequestsListener().subscribe((data) => {
+          let player: Player = JSON.parse(data);
+          this.players.push(player);
+        })
+
+        this.httpd.startServer(options).subscribe((data) => {
+          //alert('Server is live: ' + data);
+        });
+
+        //encore non fonctionnel
+        /*this.httpd.detachRequestsListener().then((data) => {
+          alert(data);
+        }).catch((data) => {
+          alert(data);
+        })*/
       }
     }
   }
@@ -139,6 +175,14 @@ export class PlayPage {
 
   getAttachamentsDir(questionIndex: number) {
     return this.file.dataDirectory + this.quiz.uuid + '/' + this.currentQuestions[questionIndex].uuid + '/';
+  }
+
+  getPlayerAvatar(player: Player) {
+    return "assets/imgs/" + player.avatar;
+  }
+
+  getAvatarWidth() {
+    return document.querySelector(".avatar").offsetWidth;
   }
 
 }

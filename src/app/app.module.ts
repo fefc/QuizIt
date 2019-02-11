@@ -7,6 +7,7 @@ import { IonicStorageModule } from '@ionic/storage';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
+import { Httpd } from '@ionic-native/httpd';
 
 import { MyApp } from './app.component';
 
@@ -48,6 +49,7 @@ import { PlayPage } from '../pages/play/play';
     SplashScreen,
     ImagePicker,
     File,
+    Httpd,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     QuizsProvider
   ]
