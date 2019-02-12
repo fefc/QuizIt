@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
@@ -11,9 +11,10 @@ import { Question } from '../../models/question';
 import { Player } from '../../models/player';
 
 enum ScreenStateType {
-  displayTitle = 0,
-  displayCategoryTitle = 1,
-  displayQuestion = 2,
+  playersJoining = 0,
+  displayTitle = 1,
+  displayCategoryTitle = 2,
+  displayQuestion = 3,
 }
 
 @Component({
@@ -22,12 +23,12 @@ enum ScreenStateType {
     trigger(
       'titleAnimation', [
         transition(':enter', [
-          style({transform: 'translateX(100%)', opacity: 0}),
-          animate('500ms', style({transform: 'translateX(0)', opacity: 1}))
+          style({transform: 'scale(0)', opacity: 0}),
+          animate('500ms', style({transform: 'scale(1)', opacity: 1}))
         ]),
         transition(':leave', [
-          style({transform: 'translateX(0)', opacity: 1}),
-          animate('500ms', style({transform: 'translateX(100%)', opacity: 0}))
+          style({transform: 'scale(1)', opacity: 1}),
+          animate('500ms', style({transform: 'scale(0)', opacity: 0}))
         ])
       ]),
       trigger(
@@ -103,12 +104,16 @@ export class PlayPage {
   private currentCategory: number;
   private currentQuestions: Array<Question>;
   private currentQuestion: number;
-  private screenState: ScreenStateType;
 
   private players: Array<Player>;
 
-  constructor(public navCtrl: NavController, private file: File, private httpd: Httpd, params: NavParams) {
+  private screenState: ScreenStateType;
+
+  constructor(public navCtrl: NavController, private ngZone: NgZone, private file: File, private httpd: Httpd, params: NavParams) {
     this.quiz = params.data.quiz;
+
+    this.players = [];
+
 
     this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar:"Dog.png"},
                     {nickname: "Totgg", avatar:"Bunny.png"},
@@ -118,7 +123,6 @@ export class PlayPage {
             {nickname: "Totgg", avatar:"Mad_Guy.png"},
           {nickname: "Totgg", avatar:"Proog.png"},
         {nickname: "Totgg", avatar:"Sintel.png"},];
-
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -132,7 +136,7 @@ export class PlayPage {
         this.currentQuestion = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
-        this.screenState = ScreenStateType.displayTitle;
+        this.screenState = ScreenStateType.playersJoining;
 
         /*let options: HttpdOptions = {
           www_root: 'httpd', // relative path to app's www directory
@@ -142,7 +146,9 @@ export class PlayPage {
 
         this.httpd.attachRequestsListener().subscribe((data) => {
           let player: Player = JSON.parse(data);
-          this.players.push(player);
+          this.ngZone.run(() => {
+             this.players.push(player);
+          });
         })
 
         this.httpd.startServer(options).subscribe((data) => {
@@ -160,7 +166,10 @@ export class PlayPage {
   }
 
   next() {
-    if (this.screenState === ScreenStateType.displayTitle) {
+    if (this.screenState === ScreenStateType.playersJoining) {
+      this.screenState = ScreenStateType.displayTitle;
+    }
+    else if (this.screenState === ScreenStateType.displayTitle) {
       this.screenState = ScreenStateType.displayCategoryTitle;
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
@@ -185,16 +194,27 @@ export class PlayPage {
     }
   }
 
+  showNext() {
+    if (this.screenState === ScreenStateType.playersJoining) {
+      return this.players.length > 0;
+    }
+    else {
+      return false;
+    }
+  }
+
+  removePlayer(player: Player, index: number) {
+    if (index > -1) {
+       this.players.splice(index, 1);
+    }
+  }
+
   getQuestionsFromCategory(category: Category) {
     return this.quiz.questions.filter((question) => question.category.name === category.name);
   }
 
   getAttachamentsDir(questionIndex: number) {
     return this.file.dataDirectory + this.quiz.uuid + '/' + this.currentQuestions[questionIndex].uuid + '/';
-  }
-
-  getPlayerAvatar(player: Player) {
-    return "assets/imgs/" + player.avatar;
   }
 
   getAvatarWidth() {

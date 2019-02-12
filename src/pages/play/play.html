@@ -1,4 +1,12 @@
-<ion-content class="main" (click)="next()">
+<ion-content class="main">
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="players-joining">
+    The quiz will start shortly...<br>
+    You would like to join?<br>
+    Connect to the following Wifi:<br><br>
+    CallMeMaybe<br><br>
+    And open the following page in a browser:<br><br>
+    10.0.0.13:8080
+  </div>
 
   <div *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle" [@titleAnimation] class="title">
     <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
@@ -27,16 +35,25 @@
 
 
   <div class="players">
-    <div class="player" *ngFor="let player of players" [@playerAnimation]>
+    <div class="player" *ngFor="let player of players; let i = index" [@playerAnimation]>
+      <button *ngIf="screenState === ScreenStateType.playersJoining" [@playerAnimation] ion-button icon-only class="remove-button" (click)="removePlayer(player,i)">
+        <ion-icon name="remove-circle"></ion-icon>
+      </button>
       <div class="info" [ngStyle]="{'margin-right': '' + getAvatarWidth() + 'px'}">
         <div class="nickname">{{player.nickname}}</div>
         <div class="nickname">{{player.points}}</div>
       </div>
       <div class="avatar-container">
-        <canvas class="avatar" width="1" height="1" [ngStyle]="{'background-image': 'url(' + getPlayerAvatar(player) + ')'}"></canvas>
+        <canvas class="avatar" width="1" height="1" [ngStyle]="{'background-image': 'url(assets/imgs/' + player.avatar + ')'}"></canvas>
       </div>
     </div>
   </div>
+
+  <ion-fab *ngIf="showNext()" center bottom>
+    <button ion-fab (click)="next()">
+      <ion-icon name="play"></ion-icon>
+    </button>
+  </ion-fab>
 </ion-content>
 <!--<div class="avatar-picture">
   <div class="center-vertical">
