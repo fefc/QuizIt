@@ -27,7 +27,7 @@
 
 
   <div class="players">
-    <div class="player" *ngFor="let player of players">
+    <div class="player" *ngFor="let player of players" [@playerAnimation]>
       <div class="info" [ngStyle]="{'margin-right': '' + getAvatarWidth() + 'px'}">
         <div class="nickname">{{player.nickname}}</div>
         <div class="nickname">{{player.points}}</div>

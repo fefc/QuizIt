@@ -31,6 +31,22 @@ enum ScreenStateType {
         ])
       ]),
       trigger(
+        'playerAnimation', [
+          transition(':enter', [
+            style({transform: 'scale(0)', opacity: 0}),
+            animate('250ms',
+              keyframes([
+                style({transform: 'scale(1.1)', opacity: 1, offset: 0.9}),
+                style({transform: 'scale(1)', offset: 1}),
+              ])
+            )
+          ]),
+          transition(':leave', [
+            style({transform: 'scale(1)', opacity: 1}),
+            animate('250ms', style({transform: 'scale(0)', opacity: 0}))
+          ])
+        ]),
+      trigger(
       'questionAnimation' , [
         transition(':enter', [
           style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}),
@@ -182,7 +198,7 @@ export class PlayPage {
   }
 
   getAvatarWidth() {
-    return document.querySelector(".avatar").offsetWidth;
+    let avatar = <HTMLElement> document.querySelector(".avatar");
+    return avatar.offsetWidth;
   }
-
 }
