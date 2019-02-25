@@ -11,4 +11,5 @@ export interface Player {
   avatar: string,
   points?: number,
   role?: Role
+  answer?: number,
 }

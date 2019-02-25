@@ -11,10 +11,14 @@ import { Question } from '../../models/question';
 import { Player } from '../../models/player';
 
 enum ScreenStateType {
-  playersJoining = 0,
-  displayTitle = 1,
-  displayCategoryTitle = 2,
-  displayQuestion = 3,
+  playersJoining,
+  displayTitle,
+  hideTitle,
+  displayCategoryTitle,
+  hideCategoryTitle,
+  displayQuestion,
+  displayPlayersAnswer,
+  hideQuestion,
 }
 
 @Component({
@@ -47,40 +51,51 @@ enum ScreenStateType {
             animate('250ms', style({transform: 'scale(0)', opacity: 0}))
           ])
         ]),
+        trigger(
+          'playerAnswerAnimation', [
+            transition(':enter', [
+              style({opacity: 0}),
+              animate('{{time}}ms', style({opacity: 1}))
+            ], { params: { time: 600 } }),
+            transition(':leave', [
+              style({opacity: 1}),
+              animate('{{time}}ms', style({opacity: 0}))
+            ], { params: { time: 600 } })
+          ]),
       trigger(
       'questionAnimation' , [
         transition(':enter', [
           style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}),
-          animate('600ms', style({transform: 'none', opacity: 1}))
-        ]),
+          animate('{{time}}ms', style({transform: 'none', opacity: 1}))
+          ], { params: { time: 600 } }),
         transition(':leave', [
           style({transform: 'none', opacity: 1}),
-          animate('600ms', style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}))
-        ]),
+          animate('{{time}}ms', style({transform: 'rotate3d(0, 0.9, 0.05, 90deg)', opacity: 0}))
+        ], { params: { time: 600 } }),
       ]),
       trigger(
       'timeBarAnimation' , [
         transition(':enter', [
           style({opacity: 0}),
-          animate('20600ms',
+          animate('{{time}}ms',
             keyframes([
               style({opacity: 0, offset: 0.029}),
               style({opacity: 1, offset: 0.03}),
               style({width: 0, offset: 1}),
             ])
           )
-        ])
+        ], { params: { time: 20600 } })
       ]),
       trigger(
       'answerAnimation' , [
         transition(':enter', [
           style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}),
-          animate('600ms', style({transform: 'none', opacity: 1}))
-        ]),
+          animate('{{time}}ms', style({transform: 'none', opacity: 1}))
+        ], { params: { time: 600 } }),
         transition(':leave', [
           style({transform: 'none', opacity: 1}),
-          animate('600ms', style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}))
-        ]),
+          animate('{{time}}ms', style({transform: 'rotate3d(0, 0.9, 0.05, 90deg)', opacity: 0}))
+        ], { params: { time: 600 } }),
       ]),
       trigger(
       'pictureAnimation' , [
@@ -98,6 +113,10 @@ enum ScreenStateType {
 })
 
 export class PlayPage {
+  private commonAnimationDuration: number = 600;
+  private timeBarAnimationDuration: number = 20000 + this.commonAnimationDuration;
+  private showNextDuration: number = 1000;
+  private playerAnswerAnimationDuration: number = 300;
   private ScreenStateType = ScreenStateType; //for use in Angluar html
   private QuestionType = QuestionType; //for use in Angular html
   private quiz: Quiz;
@@ -109,34 +128,38 @@ export class PlayPage {
 
   private screenState: ScreenStateType;
 
+  private showNext: boolean;
+
   constructor(public navCtrl: NavController, private ngZone: NgZone, private file: File, private httpd: Httpd, params: NavParams) {
     this.quiz = params.data.quiz;
 
     this.players = [];
 
 
-    this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar:"Dog.png"},
-                    {nickname: "Totgg", avatar:"Bunny.png"},
-                  {nickname: "Totgg", avatar:"Duck_Guy.png"},
-                {nickname: "Totgg", avatar:"Frankie.png"},
-              {nickname: "Totgg", avatar:"Happy_Girl.png"},
-            {nickname: "Totgg", avatar:"Mad_Guy.png"},
-          {nickname: "Totgg", avatar:"Proog.png"},
-        {nickname: "Totgg", avatar:"Sintel.png"},];
+    this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar: "Dog.png", answer: 0},
+                    {nickname: "Totgg", avatar: "Bunny.png", answer: null},
+                  {nickname: "Totgg", avatar: "Duck_Guy.png", answer: 2},
+                {nickname: "Totgg", avatar: "Frankie.png", answer: 3},
+              {nickname: "Totgg", avatar: "Happy_Girl.png", answer: 0},
+            {nickname: "Totgg", avatar: "Mad_Guy.png", answer: 1},
+          {nickname: "Totgg", avatar: "Proog.png", answer: 2},
+        {nickname: "Totgg", avatar: "Sintel.png", answer: 3},];
 
     if (!this.quiz) {
       this.navCtrl.pop();
     }
-    else {
+    else {true
       if (this.quiz.categorys.length < 1 || this.quiz.questions.length < 1) {
         this.navCtrl.pop();
       }
       else {
+        this.showNext = false;
         this.currentCategory = 0;
         this.currentQuestion = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
         this.screenState = ScreenStateType.playersJoining;
+        setTimeout(() => this.setShowNext(), this.showNextDuration);
 
         /*let options: HttpdOptions = {
           www_root: 'httpd', // relative path to app's www directory
@@ -149,7 +172,7 @@ export class PlayPage {
           this.ngZone.run(() => {
              this.players.push(player);
           });
-        })
+        })true
 
         this.httpd.startServer(options).subscribe((data) => {
           //alert('Server is live: ' + data);
@@ -166,26 +189,45 @@ export class PlayPage {
   }
 
   next() {
+    this.showNext = false;
+
     if (this.screenState === ScreenStateType.playersJoining) {
       this.screenState = ScreenStateType.displayTitle;
+      setTimeout(() => this.setShowNext(), this.showNextDuration);
     }
     else if (this.screenState === ScreenStateType.displayTitle) {
       this.screenState = ScreenStateType.displayCategoryTitle;
+      setTimeout(() => this.next(), this.commonAnimationDuration);
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
+      this.screenState = ScreenStateType.hideCategoryTitle;
+      setTimeout(() => this.next(), this.commonAnimationDuration);
+    }
+    else if (this.screenState === ScreenStateType.hideCategoryTitle) {
       this.screenState = ScreenStateType.displayQuestion;
+      setTimeout(() => this.next(), this.timeBarAnimationDuration);
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
+      this.screenState = ScreenStateType.displayPlayersAnswer;
+      setTimeout(() => this.setShowNext(), this.showNextDuration);
+    }
+    else if (this.screenState === ScreenStateType.displayPlayersAnswer) {
+      this.screenState = ScreenStateType.hideQuestion;
+      setTimeout(() => this.next(), this.commonAnimationDuration * 2);
+    }
+    else if (this.screenState === ScreenStateType.hideQuestion) {
       if (this.currentQuestion < this.currentQuestions.length - 1) {
         this.currentQuestion++;
+        this.screenState = ScreenStateType.displayQuestion;
+        setTimeout(() => this.next(), this.timeBarAnimationDuration);
       }
       else {
         if (this.currentCategory < this.quiz.categorys.length - 1) {
           this.currentCategory++;
-          this.screenState = ScreenStateType.displayCategoryTitle;
-
           this.currentQuestion = 0;
           this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
+          this.screenState = ScreenStateType.displayCategoryTitle;
+          setTimeout(() => this.next(), this.commonAnimationDuration);
         }
         else {
           this.navCtrl.pop();
@@ -194,13 +236,8 @@ export class PlayPage {
     }
   }
 
-  showNext() {
-    if (this.screenState === ScreenStateType.playersJoining) {
-      return this.players.length > 0;
-    }
-    else {
-      return false;
-    }
+  setShowNext() {
+    this.showNext = true;
   }
 
   removePlayer(player: Player, index: number) {
@@ -220,5 +257,17 @@ export class PlayPage {
   getAvatarWidth() {
     let avatar = <HTMLElement> document.querySelector(".avatar");
     return avatar.offsetWidth;
+  }
+
+  getInfoFontSize() {
+    let avatar = <HTMLElement> document.querySelector(".avatar");
+    return avatar.offsetWidth / 3.5;
+  }
+
+  displayPlayers() {
+    return this.screenState === ScreenStateType.playersJoining
+          || this.screenState === ScreenStateType.displayQuestion
+          || this.screenState === ScreenStateType.displayPlayersAnswer
+          || this.screenState === ScreenStateType.hideQuestion;
   }
 }

@@ -8,57 +8,59 @@
     10.0.0.13:8080
   </div>
 
-  <div *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle" [@titleAnimation] class="title">
-    <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{quiz.categorys[currentCategory].name}}</div>
-  </div>
-
-  <div *ngIf="screenState === ScreenStateType.displayQuestion" [@timeBarAnimation] class="time-bar"></div>
-
-  <div *ngIf="screenState === ScreenStateType.displayQuestion" [@questionAnimation] class="question">
-    {{currentQuestions[currentQuestion].question}}
-  </div>
-
-  <div *ngIf="currentQuestions[currentQuestion].type !== QuestionType.rightPicture" class="answers">
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="zero">{{currentQuestions[currentQuestion].answers[0]}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="one">{{currentQuestions[currentQuestion].answers[1]}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="two">{{currentQuestions[currentQuestion].answers[2]}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayQuestion" [@answerAnimation] class="three">{{currentQuestions[currentQuestion].answers[3]}}</div>
-  </div>
-
-  <div *ngIf="screenState === ScreenStateType.displayQuestion && currentQuestions[currentQuestion].type == QuestionType.rightPicture" [@pictureAnimation] class="picture">
-    <div class="picture-container">
-      <img src="assets/imgs/logo.png">
-      <!--<img [src]="getAttachamentsDir(currentQuestion) + currentQuestions[currentQuestion].answers[0]">-->
-    </div>
-  </div>
-
-
-  <div class="players">
+  <div class="players" *ngIf="displayPlayers()" [@playerAnimation]>
     <div class="player" *ngFor="let player of players; let i = index" [@playerAnimation]>
       <button *ngIf="screenState === ScreenStateType.playersJoining" [@playerAnimation] ion-button icon-only class="remove-button" (click)="removePlayer(player,i)">
         <ion-icon name="remove-circle"></ion-icon>
       </button>
       <div class="info" [ngStyle]="{'margin-right': '' + getAvatarWidth() + 'px'}">
-        <div class="nickname">{{player.nickname}}</div>
-        <div class="nickname">{{player.points}}</div>
+        <div class="nickname" [ngStyle]="{'font-size': '' + getInfoFontSize() + 'px'}">{{player.nickname}}</div>
+        <div class="nickname" [ngStyle]="{'font-size': '' + getInfoFontSize() + 'px'}">{{player.points}}</div>
       </div>
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1" [ngStyle]="{'background-image': 'url(assets/imgs/' + player.avatar + ')'}"></canvas>
+        <canvas class="player-answer" width="1" height="1"
+                [ngClass]="{'player-answer-right': player.answer === currentQuestions[currentQuestion].rightAnswer,
+                            'player-answer-wrong': player.answer !== null && player.answer !== currentQuestions[currentQuestion].rightAnswer}"
+                *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{value: time, params: {time: playerAnswerAnimationDuration}}"></canvas>
       </div>
     </div>
   </div>
 
-  <ion-fab *ngIf="showNext()" center bottom>
+  <div class="title" *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle"
+        [@titleAnimation]="{value: time, params: {time: commonAnimationDuration}}">
+    <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{quiz.categorys[currentCategory].name}}</div>
+  </div>
+
+  <div class="time-bar" *ngIf="screenState === ScreenStateType.displayQuestion"
+        [@timeBarAnimation]="{value: time, params: {time: timeBarAnimationDuration}}"></div>
+
+  <div class="question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
+        [@questionAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].question}}
+  </div>
+
+  <div class="answers" *ngIf="currentQuestions[currentQuestion].type !== QuestionType.rightPicture">
+    <div class="zero" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
+          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[0]}}</div>
+    <div class="one" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
+          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[1]}}</div>
+    <div class="two" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
+          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[2]}}</div>
+    <div class="three" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
+          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
+  </div>
+
+  <!--<div *ngIf="screenState === ScreenStateType.displayQuestion && currentQuestions[currentQuestion].type == QuestionType.rightPicture" [@pictureAnimation] class="picture">
+    <div class="picture-container">
+      <img src="assets/imgs/logo.png">
+      <!--<img [src]="getAttachamentsDir(currentQuestion) + currentQuestions[currentQuestion].answers[0]">-->
+    <!--</div>
+  </div>-->
+
+  <ion-fab center bottom *ngIf="showNext === true" [@titleAnimation]="{value: time, params: {time: commonAnimationDuration}}">
     <button ion-fab (click)="next()">
       <ion-icon name="play"></ion-icon>
     </button>
   </ion-fab>
 </ion-content>
-<!--<div class="avatar-picture">
-  <div class="center-vertical">
-    <div class="center-horizontal">
-      <img src="../www/httpd/Dog.png">
-    </div>
-  </div>
-</div>-->
