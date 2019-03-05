@@ -2,7 +2,7 @@ import { Component, NgZone } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
-import { trigger, keyframes, style, animate, transition } from '@angular/animations';
+import { trigger, state, keyframes, style, animate, transition } from '@angular/animations';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -98,16 +98,45 @@ enum ScreenStateType {
         ], { params: { time: 600 } }),
       ]),
       trigger(
-      'pictureAnimation' , [
+      'pictureInOutAnimation' , [
         transition(':enter', [
-          style({transform: 'rotate3d(1, 1, 0.5, -360deg)', opacity: 1}),
-          animate('12000ms', style({transform: 'none', opacity: 1}))
+          style({transform: 'rotate3d(1, 1, 0, -90deg)', opacity: 0}),
+          animate('600ms', style({transform: 'none', opacity: 1}))
         ]),
         transition(':leave', [
           style({transform: 'none', opacity: 1}),
-          animate('12000ms', style({transform: 'rotate3d(0, 1, 0, -360deg)', opacity: 1}))
+          animate('600ms', style({transform: 'rotate3d(1, 0.4, 0, -90deg)', opacity: 0}))
         ]),
       ]),
+      trigger(
+      'pictureTransitionAnimation', [
+        transition('0 => 1', [
+          style({transform: 'rotate3d(0, 0, 0, 0) scale(1)', transformOrigin: "50%"}),
+          animate('600ms',
+            keyframes([
+              style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
+              style({transform: 'rotate3d(0, 1, 0, 90deg) scale(0.5)'}),
+              style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
+            ])
+          )
+        ]),
+        transition('1 => 0', [
+          style({transform: 'rotate3d(0, 0, 0, 180deg) scale(1)', transformOrigin: "50%"}),
+          animate('600ms',
+            keyframes([
+              style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
+              style({transform: 'rotate3d(0, 1, 0, 90deg) scale(0.5)'}),
+              style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
+            ])
+          )
+        ]),
+]),
+trigger('hideShowAnimatorTwo', [
+state('true' , style({ opacity: 1 })),
+state('false', style({ opacity: 0 })),
+transition('0 => 1', animate('10s')),
+transition('1 => 0', animate('10s'))
+])
   ],
   templateUrl: 'play.html'
 })
@@ -123,6 +152,10 @@ export class PlayPage {
   private currentCategory: number;
   private currentQuestions: Array<Question>;
   private currentQuestion: number;
+
+  private currentAnswer: number;
+  private currentAnswerCounter: number;
+  private currentAnswerStayDuration: number = 4000;
 
   private players: Array<Player>;
 
@@ -156,6 +189,8 @@ export class PlayPage {
         this.showNext = false;
         this.currentCategory = 0;
         this.currentQuestion = 0;
+        this.currentAnswer = 0;
+        this.currentAnswerCounter = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
         this.screenState = ScreenStateType.playersJoining;
@@ -206,6 +241,10 @@ export class PlayPage {
     else if (this.screenState === ScreenStateType.hideCategoryTitle) {
       this.screenState = ScreenStateType.displayQuestion;
       setTimeout(() => this.next(), this.timeBarAnimationDuration);
+
+      if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+        setTimeout(() => this.currentAnswerSwitch(), this.currentAnswerStayDuration + this.commonAnimationDuration);
+      }
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
       this.screenState = ScreenStateType.displayPlayersAnswer;
@@ -238,6 +277,19 @@ export class PlayPage {
 
   setShowNext() {
     this.showNext = true;
+  }
+
+  currentAnswerSwitch() {
+    this.currentAnswerCounter++;
+    this.currentAnswer = this.currentAnswerCounter % this.currentQuestions[this.currentQuestion].answers.length;
+
+    if (this.currentAnswerCounter * this.currentAnswerStayDuration < this.timeBarAnimationDuration) {
+      setTimeout(() => this.currentAnswerSwitch(), this.currentAnswerStayDuration);
+    }
+  }
+
+  getPic(index: number) {
+    return "assets/imgs/" + (index + 1) + ".png";
   }
 
   removePlayer(player: Player, index: number) {

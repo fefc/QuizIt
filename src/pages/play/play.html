@@ -40,7 +40,7 @@
         [@questionAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].question}}
   </div>
 
-  <div class="answers" *ngIf="currentQuestions[currentQuestion].type !== QuestionType.rightPicture">
+  <div class="answers" *ngIf="currentQuestions[currentQuestion].type != QuestionType.rightPicture">
     <div class="zero" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
           [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[0]}}</div>
     <div class="one" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
@@ -51,12 +51,11 @@
           [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
   </div>
 
-  <!--<div *ngIf="screenState === ScreenStateType.displayQuestion && currentQuestions[currentQuestion].type == QuestionType.rightPicture" [@pictureAnimation] class="picture">
-    <div class="picture-container">
-      <img src="assets/imgs/logo.png">
-      <!--<img [src]="getAttachamentsDir(currentQuestion) + currentQuestions[currentQuestion].answers[0]">-->
-    <!--</div>
-  </div>-->
+  <div class="picture" *ngIf="(screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer) && currentQuestions[currentQuestion].type == QuestionType.rightPicture"
+        [@pictureInOutAnimation]
+        [@pictureTransitionAnimation]="currentAnswer % 2 === 1">
+        <canvas class="avatar" [ngStyle]="{'background-image': 'url(' + getPic(currentAnswer) + ')'}"></canvas>
+  </div>
 
   <ion-fab center bottom *ngIf="showNext === true" [@titleAnimation]="{value: time, params: {time: commonAnimationDuration}}">
     <button ion-fab (click)="next()">
