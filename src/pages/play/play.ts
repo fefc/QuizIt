@@ -100,50 +100,48 @@ enum ScreenStateType {
       trigger(
       'pictureInOutAnimation' , [
         transition(':enter', [
-          style({transform: 'rotate3d(1, 1, 0, -90deg)', opacity: 0}),
+          style({transform: 'rotate3d(1, 1, 0, -90deg)', transformOrigin: "0 92.5vh", opacity: 0}),
           animate('600ms', style({transform: 'none', opacity: 1}))
         ]),
         transition(':leave', [
-          style({transform: 'none', opacity: 1}),
-          animate('600ms', style({transform: 'rotate3d(1, 0.4, 0, -90deg)', opacity: 0}))
+          style({transform: 'none', transformOrigin: "72vw 92.5vh", opacity: 1}),
+          animate('600ms', style({transform: 'rotate3d(1, 0, 1, -90deg)', opacity: 0}))
         ]),
       ]),
       trigger(
       'pictureTransitionAnimation', [
-        transition('0 => 1', [
+            //transition(':decrement', [style({ opacity: 0 }), animate('5s ease', style({ opacity: 1 }))]),
+        //transition('0 => 1', [
+        transition(':increment', [
           style({transform: 'rotate3d(0, 0, 0, 0) scale(1)', transformOrigin: "50%"}),
-          animate('600ms',
+          animate('{{time}}ms',
             keyframes([
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
               style({transform: 'rotate3d(0, 1, 0, 90deg) scale(0.5)'}),
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
             ])
           )
-        ]),
-        transition('1 => 0', [
+        ], { params: { time: 600 } }),
+        //transition('1 => 0', [
+        transition(':decrement', [
           style({transform: 'rotate3d(0, 0, 0, 180deg) scale(1)', transformOrigin: "50%"}),
-          animate('600ms',
+          animate('{{time}}ms',
             keyframes([
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
               style({transform: 'rotate3d(0, 1, 0, 90deg) scale(0.5)'}),
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
             ])
           )
-        ]),
-]),
-trigger('hideShowAnimatorTwo', [
-state('true' , style({ opacity: 1 })),
-state('false', style({ opacity: 0 })),
-transition('0 => 1', animate('10s')),
-transition('1 => 0', animate('10s'))
-])
+        ],  { params: { time: 600 } }),
+      ]),
   ],
   templateUrl: 'play.html'
 })
 
 export class PlayPage {
   private commonAnimationDuration: number = 600;
-  private timeBarAnimationDuration: number = 20000 + this.commonAnimationDuration;
+  private timeBarAnimationDuration: number = 20000;
+  private fullTimeBarAnimationDuration: number = this.timeBarAnimationDuration + this.commonAnimationDuration;
   private showNextDuration: number = 1000;
   private playerAnswerAnimationDuration: number = 300;
   private ScreenStateType = ScreenStateType; //for use in Angluar html
@@ -153,9 +151,9 @@ export class PlayPage {
   private currentQuestions: Array<Question>;
   private currentQuestion: number;
 
-  private currentAnswer: number;
-  private currentAnswerCounter: number;
-  private currentAnswerStayDuration: number = 4000;
+  private currentPicture: number;
+  private currentPictureCounter: number;
+  private currentPictureStayDuration: number = (this.timeBarAnimationDuration / 8); //The dividing number is the number of picture I want to see
 
   private players: Array<Player>;
 
@@ -189,8 +187,8 @@ export class PlayPage {
         this.showNext = false;
         this.currentCategory = 0;
         this.currentQuestion = 0;
-        this.currentAnswer = 0;
-        this.currentAnswerCounter = 0;
+        this.currentPicture = 0;
+        this.currentPictureCounter = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
         this.screenState = ScreenStateType.playersJoining;
@@ -240,14 +238,20 @@ export class PlayPage {
     }
     else if (this.screenState === ScreenStateType.hideCategoryTitle) {
       this.screenState = ScreenStateType.displayQuestion;
-      setTimeout(() => this.next(), this.timeBarAnimationDuration);
+      setTimeout(() => this.next(), this.fullTimeBarAnimationDuration);
 
       if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
-        setTimeout(() => this.currentAnswerSwitch(), this.currentAnswerStayDuration + this.commonAnimationDuration);
+        this.currentPictureCounter = 0;
+        setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration + (this.commonAnimationDuration / 2));
       }
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
       this.screenState = ScreenStateType.displayPlayersAnswer;
+
+      if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+        this.currentPictureSwitch();
+      }
+
       setTimeout(() => this.setShowNext(), this.showNextDuration);
     }
     else if (this.screenState === ScreenStateType.displayPlayersAnswer) {
@@ -258,7 +262,7 @@ export class PlayPage {
       if (this.currentQuestion < this.currentQuestions.length - 1) {
         this.currentQuestion++;
         this.screenState = ScreenStateType.displayQuestion;
-        setTimeout(() => this.next(), this.timeBarAnimationDuration);
+        setTimeout(() => this.next(), this.fullTimeBarAnimationDuration); //// TODO:
       }
       else {
         if (this.currentCategory < this.quiz.categorys.length - 1) {
@@ -279,12 +283,21 @@ export class PlayPage {
     this.showNext = true;
   }
 
-  currentAnswerSwitch() {
-    this.currentAnswerCounter++;
-    this.currentAnswer = this.currentAnswerCounter % this.currentQuestions[this.currentQuestion].answers.length;
+  currentPictureSwitch() {
+    this.currentPictureCounter++;
 
-    if (this.currentAnswerCounter * this.currentAnswerStayDuration < this.timeBarAnimationDuration) {
-      setTimeout(() => this.currentAnswerSwitch(), this.currentAnswerStayDuration);
+    setTimeout(() => {
+      //This picture switch occurs in the middle of the rotation animation so no one can se
+      if (this.screenState === ScreenStateType.displayPlayersAnswer) {
+        this.currentPicture = this.currentQuestions[this.currentQuestion].rightAnswer;
+      } else {
+        this.currentPicture = this.currentPictureCounter % this.currentQuestions[this.currentQuestion].answers.length;
+      }
+
+    }, this.commonAnimationDuration / 2);
+
+    if ((this.currentPictureCounter + 1) * this.currentPictureStayDuration < this.timeBarAnimationDuration) {
+      setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration);
     }
   }
 

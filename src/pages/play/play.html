@@ -1,4 +1,6 @@
 <ion-content class="main">
+
+  <!--General Texts and title Zone-->
   <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="players-joining">
     The quiz will start shortly...<br>
     You would like to join?<br>
@@ -8,6 +10,13 @@
     10.0.0.13:8080
   </div>
 
+  <div class="title" *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle"
+        [@titleAnimation]="{params: {time: commonAnimationDuration}}">
+    <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{quiz.categorys[currentCategory].name}}</div>
+  </div>
+
+  <!--Player Avatar, nickname & points Zone-->
   <div class="players" *ngIf="displayPlayers()" [@playerAnimation]>
     <div class="player" *ngFor="let player of players; let i = index" [@playerAnimation]>
       <button *ngIf="screenState === ScreenStateType.playersJoining" [@playerAnimation] ion-button icon-only class="remove-button" (click)="removePlayer(player,i)">
@@ -22,42 +31,40 @@
         <canvas class="player-answer" width="1" height="1"
                 [ngClass]="{'player-answer-right': player.answer === currentQuestions[currentQuestion].rightAnswer,
                             'player-answer-wrong': player.answer !== null && player.answer !== currentQuestions[currentQuestion].rightAnswer}"
-                *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{value: time, params: {time: playerAnswerAnimationDuration}}"></canvas>
+                *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{params: {time: playerAnswerAnimationDuration}}"></canvas>
       </div>
     </div>
   </div>
 
-  <div class="title" *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle"
-        [@titleAnimation]="{value: time, params: {time: commonAnimationDuration}}">
-    <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{quiz.categorys[currentCategory].name}}</div>
-  </div>
-
+  <!--Question & Timebar Zone-->
   <div class="time-bar" *ngIf="screenState === ScreenStateType.displayQuestion"
-        [@timeBarAnimation]="{value: time, params: {time: timeBarAnimationDuration}}"></div>
+        [@timeBarAnimation]="{params: {time: fullTimeBarAnimationDuration}}">
+  </div>
 
   <div class="question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-        [@questionAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].question}}
+        [@questionAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].question}}
   </div>
 
+  <!--Common answers Zone-->
   <div class="answers" *ngIf="currentQuestions[currentQuestion].type != QuestionType.rightPicture">
     <div class="zero" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[0]}}</div>
+          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[0]}}</div>
     <div class="one" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[1]}}</div>
+          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[1]}}</div>
     <div class="two" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[2]}}</div>
+          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[2]}}</div>
     <div class="three" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{value: time, params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
+          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
   </div>
 
+  <!--Picture answers Zone-->
   <div class="picture" *ngIf="(screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer) && currentQuestions[currentQuestion].type == QuestionType.rightPicture"
         [@pictureInOutAnimation]
-        [@pictureTransitionAnimation]="currentAnswer % 2 === 1">
-        <canvas class="avatar" [ngStyle]="{'background-image': 'url(' + getPic(currentAnswer) + ')'}"></canvas>
+        [@pictureTransitionAnimation]="{value: currentPictureCounter, params: {time: commonAnimationDuration}}">
+        <canvas [ngStyle]="{'background-image': 'url(' + getPic(currentPicture) + ')'}"></canvas>
   </div>
 
-  <ion-fab center bottom *ngIf="showNext === true" [@titleAnimation]="{value: time, params: {time: commonAnimationDuration}}">
+  <ion-fab center bottom *ngIf="showNext === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
     <button ion-fab (click)="next()">
       <ion-icon name="play"></ion-icon>
     </button>
