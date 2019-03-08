@@ -23,8 +23,8 @@
         <ion-icon name="remove-circle"></ion-icon>
       </button>
       <div class="info" [ngStyle]="{'margin-right': '' + getAvatarWidth() + 'px'}">
-        <div class="nickname" [ngStyle]="{'font-size': '' + getInfoFontSize() + 'px'}">{{player.nickname}}</div>
-        <div class="nickname" [ngStyle]="{'font-size': '' + getInfoFontSize() + 'px'}">{{player.points}}</div>
+        <div class="nickname" [ngStyle]="{'font-size': '' + getNicknameFontSize() + 'px'}">{{player.nickname}}</div>
+        <div class="nickname" [ngStyle]="{'font-size': '' + getPointsFontSize() + 'px'}" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.points}}</div>
       </div>
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1" [ngStyle]="{'background-image': 'url(assets/imgs/' + player.avatar + ')'}"></canvas>
@@ -64,9 +64,12 @@
         <canvas [ngStyle]="{'background-image': 'url(' + getPic(currentPicture) + ')'}"></canvas>
   </div>
 
-  <ion-fab center bottom *ngIf="showNext === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
-    <button ion-fab (click)="next()">
+  <ion-fab center bottom >
+    <button ion-fab (click)="next()" *ngIf="showNext === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
       <ion-icon name="play"></ion-icon>
+    </button>
+    <button ion-fab (click)="exit()" *ngIf="showExit === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
+      <ion-icon name="square"></ion-icon>
     </button>
   </ion-fab>
 </ion-content>

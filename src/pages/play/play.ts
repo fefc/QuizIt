@@ -2,7 +2,7 @@ import { Component, NgZone } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
-import { trigger, state, keyframes, style, animate, transition } from '@angular/animations';
+import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -19,6 +19,7 @@ enum ScreenStateType {
   displayQuestion,
   displayPlayersAnswer,
   hideQuestion,
+  end,
 }
 
 @Component({
@@ -122,7 +123,6 @@ enum ScreenStateType {
             ])
           )
         ], { params: { time: 600 } }),
-        //transition('1 => 0', [
         transition(':decrement', [
           style({transform: 'rotate3d(0, 0, 0, 180deg) scale(1)', transformOrigin: "50%"}),
           animate('{{time}}ms',
@@ -130,6 +130,29 @@ enum ScreenStateType {
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
               style({transform: 'rotate3d(0, 1, 0, 90deg) scale(0.5)'}),
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
+            ])
+          )
+        ],  { params: { time: 600 } }),
+      ]),
+      trigger(
+      'playerPointsAnimation', [
+        transition(':increment', [
+          style({transform: 'scale(1)', transformOrigin: "0 50%"}),
+          animate('{{time}}ms',
+            keyframes([
+              style({transform: 'scale(1)', offset: 0}),
+              style({transform: 'scale(1.5)', offset: 0.3}),
+              style({transform: 'scale(1)', offset: 1}),
+            ])
+          )
+        ], { params: { time: 600 } }),
+        transition(':decrement', [
+          style({transform: 'scale(1)', transformOrigin: "0 50%"}),
+          animate('{{time}}ms',
+            keyframes([
+              style({transform: 'scale(1)', offset: 0}),
+              style({transform: 'scale(0.5)', offset: 0.3}),
+              style({transform: 'scale(1)', offset: 1}),
             ])
           )
         ],  { params: { time: 600 } }),
@@ -160,6 +183,7 @@ export class PlayPage {
   private screenState: ScreenStateType;
 
   private showNext: boolean;
+  private showExit: boolean;
 
   constructor(public navCtrl: NavController, private ngZone: NgZone, private file: File, private httpd: Httpd, params: NavParams) {
     this.quiz = params.data.quiz;
@@ -167,14 +191,16 @@ export class PlayPage {
     this.players = [];
 
 
-    this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar: "Dog.png", answer: 0},
-                    {nickname: "Totgg", avatar: "Bunny.png", answer: null},
-                  {nickname: "Totgg", avatar: "Duck_Guy.png", answer: 2},
-                {nickname: "Totgg", avatar: "Frankie.png", answer: 3},
-              {nickname: "Totgg", avatar: "Happy_Girl.png", answer: 0},
-            {nickname: "Totgg", avatar: "Mad_Guy.png", answer: 1},
-          {nickname: "Totgg", avatar: "Proog.png", answer: 2},
-        {nickname: "Totgg", avatar: "Sintel.png", answer: 3},];
+    this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar: "Dog.png", points: null, answer: 0},
+                    {nickname: "Totgg", avatar: "Bunny.png", points: null, answer: null},
+                  {nickname: "Totgg", avatar: "Duck_Guy.png", points: null, answer: 2},
+                {nickname: "Totgg", avatar: "Frankie.png", points: null, answer: 3},
+              {nickname: "Totgg", avatar: "Happy_Girl.png", points: null, answer: 0},
+            {nickname: "Totgg", avatar: "Mad_Guy.png", points: null, answer: 1},
+          {nickname: "Totgg", avatar: "Proog.png", points: null, answer: 2},
+        {nickname: "Totgg", avatar: "Sintel.png", points: null, answer: 3},];
+
+
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -185,6 +211,7 @@ export class PlayPage {
       }
       else {
         this.showNext = false;
+        this.showExit = false;
         this.currentCategory = 0;
         this.currentQuestion = 0;
         this.currentPicture = 0;
@@ -226,11 +253,20 @@ export class PlayPage {
 
     if (this.screenState === ScreenStateType.playersJoining) {
       this.screenState = ScreenStateType.displayTitle;
+
+      for (var player of this.players) {
+        player.points = 0;
+      }
+
       setTimeout(() => this.setShowNext(), this.showNextDuration);
     }
     else if (this.screenState === ScreenStateType.displayTitle) {
-      this.screenState = ScreenStateType.displayCategoryTitle;
+      this.screenState = ScreenStateType.hideTitle;
       setTimeout(() => this.next(), this.commonAnimationDuration);
+    }
+    else if (this.screenState === ScreenStateType.hideTitle) {
+      this.screenState = ScreenStateType.displayCategoryTitle;
+      setTimeout(() => this.setShowNext(), this.showNextDuration);
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
       this.screenState = ScreenStateType.hideCategoryTitle;
@@ -249,9 +285,10 @@ export class PlayPage {
       this.screenState = ScreenStateType.displayPlayersAnswer;
 
       if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
-        this.currentPictureSwitch();
+        this.currentPictureSwitch(); //This will switch to the right answer picture
       }
 
+      setTimeout(() => this.updatePlayersPoints(), this.playerAnswerAnimationDuration * 2);
       setTimeout(() => this.setShowNext(), this.showNextDuration);
     }
     else if (this.screenState === ScreenStateType.displayPlayersAnswer) {
@@ -262,18 +299,19 @@ export class PlayPage {
       if (this.currentQuestion < this.currentQuestions.length - 1) {
         this.currentQuestion++;
         this.screenState = ScreenStateType.displayQuestion;
-        setTimeout(() => this.next(), this.fullTimeBarAnimationDuration); //// TODO:
+        setTimeout(() => this.next(), this.fullTimeBarAnimationDuration);
       }
       else {
         if (this.currentCategory < this.quiz.categorys.length - 1) {
           this.currentCategory++;
           this.currentQuestion = 0;
           this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
-          this.screenState = ScreenStateType.displayCategoryTitle;
+          this.screenState = ScreenStateType.hideTitle;
           setTimeout(() => this.next(), this.commonAnimationDuration);
         }
         else {
-          this.navCtrl.pop();
+          this.screenState = ScreenStateType.end;
+          setTimeout(() => this.setShowExit(), this.showNextDuration);
         }
       }
     }
@@ -281,6 +319,22 @@ export class PlayPage {
 
   setShowNext() {
     this.showNext = true;
+  }
+
+  exit() {
+    this.navCtrl.pop();
+  }
+
+  setShowExit() {
+    this.showExit = true;
+  }
+
+  updatePlayersPoints() {
+    for (var player of this.players) {
+      if (player.answer === this.currentQuestions[this.currentQuestion].rightAnswer) {
+        player.points += 100;
+      }
+    }
   }
 
   currentPictureSwitch() {
@@ -324,15 +378,21 @@ export class PlayPage {
     return avatar.offsetWidth;
   }
 
-  getInfoFontSize() {
+  getNicknameFontSize() {
     let avatar = <HTMLElement> document.querySelector(".avatar");
     return avatar.offsetWidth / 3.5;
+  }
+
+  getPointsFontSize() {
+    let avatar = <HTMLElement> document.querySelector(".avatar");
+    return avatar.offsetWidth / 5.0;
   }
 
   displayPlayers() {
     return this.screenState === ScreenStateType.playersJoining
           || this.screenState === ScreenStateType.displayQuestion
           || this.screenState === ScreenStateType.displayPlayersAnswer
-          || this.screenState === ScreenStateType.hideQuestion;
+          || this.screenState === ScreenStateType.hideQuestion
+          || this.screenState === ScreenStateType.end;
   }
 }

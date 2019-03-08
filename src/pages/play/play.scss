@@ -1,6 +1,8 @@
 page-play {
 
+$light: rgba(0.7, 0.7, 0.7, 0.1);
 $dark: rgba(0, 0, 0, 0.75);
+$mediumDark: rgba(0, 0, 0, 0.8);
 $fullDark: rgba(0, 0, 0, 0.9);
 
   * {
@@ -14,6 +16,8 @@ $fullDark: rgba(0, 0, 0, 0.9);
     background-repeat: no-repeat;
     background-position: center;
     background-image: url('../../assets/imgs/background.jpg');
+
+    font-family: "Tahoma", "Geneva", "sans-serif";
   }
 
   .scroll-content {
@@ -30,9 +34,8 @@ $fullDark: rgba(0, 0, 0, 0.9);
     vertical-align: middle;
     text-align: center;
     font-size: 5vh;
-    font-family: roboto;
-    color: #ccc;
-    /*text-shadow: 2px 2px #ff0000;*/
+    color: $mediumDark;
+    text-shadow: 0.2vh 0.2vh $light;
     word-break: normal;
   }
 
@@ -45,10 +48,9 @@ $fullDark: rgba(0, 0, 0, 0.9);
       display:  table-cell;
       vertical-align: middle;
       text-align: center;
-      font-size: 8vh;
-      font-family: fantasy;
-      color: #ccc;
-      /*text-shadow: 2px 2px #ff0000;*/
+      font-size: 10vh;
+      color: $mediumDark;
+      text-shadow: 0.4vh 0.4vh $light;
       word-break: normal;
     }
   }
@@ -77,7 +79,6 @@ $fullDark: rgba(0, 0, 0, 0.9);
     margin: 4vh 2.25vw;
     padding: 0 2vw;
     font-size: 6vh;
-
     color: #ccc;
     background-color: $dark;
     border: 0.3vh solid rgba(25, 25, 25, 0.9);
@@ -152,7 +153,7 @@ $fullDark: rgba(0, 0, 0, 0.9);
     height: 72vh;
     width: 72vw;
     margin: 4vh 2.25vw;
-    background-color: rgba(0, 0, 0, 1); /*$fullDark;*/
+    background-color: $dark;
     border: 0.3vh solid rgba(25, 25, 25, 0.9);
     box-shadow:
       -0.25vw 0.25vh  0.4vw 0.4vh rgba(0, 0, 0, .3),
