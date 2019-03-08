@@ -1,4 +1,4 @@
-<ion-content class="main">
+<ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/background.jpg)'}">
 
   <!--General Texts and title Zone-->
   <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="players-joining">
@@ -31,6 +31,10 @@
         <canvas class="player-answer" width="1" height="1"
                 [ngClass]="{'player-answer-right': player.answer === currentQuestions[currentQuestion].rightAnswer,
                             'player-answer-wrong': player.answer !== null && player.answer !== currentQuestions[currentQuestion].rightAnswer}"
+
+                [ngStyle]="player.answer === currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/right-answer.png)'}
+                || player.answer !== null && {'background-image': 'url(assets/imgs/wrong-answer.png)'}"
+
                 *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{params: {time: playerAnswerAnimationDuration}}"></canvas>
       </div>
     </div>

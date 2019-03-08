@@ -15,7 +15,7 @@ $fullDark: rgba(0, 0, 0, 0.9);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    background-image: url('../../assets/imgs/background.jpg');
+    //background-image: url('assets/imgs/background.jpg');
 
     font-family: "Tahoma", "Geneva", "sans-serif";
   }
@@ -269,7 +269,7 @@ $fullDark: rgba(0, 0, 0, 0.9);
         }
 
         .player-answer-right {
-          background-image: url('../../assets/imgs/right-answer.png');
+          //background-image: url('../../assets/imgs/right-answer.png');
 
           border: 0.5vh solid rgba(0, 255, 0, 1);
           box-shadow:
@@ -279,7 +279,7 @@ $fullDark: rgba(0, 0, 0, 0.9);
         }
 
         .player-answer-wrong {
-          background-image: url('../../assets/imgs/wrong-answer.png');
+          //background-image: url('../../assets/imgs/wrong-answer.png');
 
           border: 0.5vh solid rgba(202, 23, 39, 1);
           box-shadow:
