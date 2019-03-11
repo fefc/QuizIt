@@ -8,10 +8,9 @@ import { Question } from '../../models/question';
 
 import { QuizsProvider } from '../../providers/quizs/quizs';
 
+import { QuizSettingsPage } from '../quiz-settings/quiz-settings';
 import { QuestionPage } from '../question/question';
 import { PlayPage } from '../play/play';
-
-
 
 @Component({
   selector: 'page-quiz-questions',
@@ -153,6 +152,16 @@ export class QuizQuestionsPage {
     return this.quiz.questions.filter((question) => question.category.name === category.name);
   }
 
+
+  openQuizSettingsPage() {
+    let modal = this.modalCtrl.create(QuizSettingsPage);
+    modal.present();
+    /*modal.onDidDismiss(data => {
+      if (data) {
+        this.saveChanges(data.question);
+      }
+    });*/
+  }
 
   startQuiz() {
     this.navCtrl.push(PlayPage, {quiz: this.quiz});

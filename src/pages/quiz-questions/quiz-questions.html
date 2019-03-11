@@ -4,6 +4,9 @@
       {{quiz.title}}
     </ion-title>
     <ion-buttons end>
+      <button ion-button icon-only (click)="openQuizSettingsPage()">
+        <ion-icon name="settings"></ion-icon>
+      </button>
       <button ion-button icon-only (click)="startQuiz()">
         <ion-icon name="play"></ion-icon>
       </button>

@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Quiz settings
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <!--<ion-item>
+    <ion-label color="primary" fixed>Title</ion-label>
+      <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="newQuiz.title"></ion-input>
+    </ion-item>-->
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar color="fulldark">
+    <ion-buttons end>
+      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">Save</button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>
