@@ -14,7 +14,7 @@
 <ion-content>
   <ion-list>
     <ion-item-group *ngFor="let category of quiz.categorys">
-      <ion-item-divider color="light">
+      <ion-item-divider>
         <ion-label>{{ category.name }}</ion-label>
         <button ion-button icon-only item-end (click)="renameCategory(category)"><ion-icon name="create"></ion-icon></button>
       </ion-item-divider>

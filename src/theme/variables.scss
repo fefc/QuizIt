@@ -34,34 +34,60 @@ $app-direction: ltr;
 // The "primary" color is the only required color in the map.
 
 $colors: (
-  primary:    #488aff,
+  primary:    #940000,
   secondary:  #32db64,
   danger:     #f53d3d,
-  light:      #f4f4f4,
-  dark:       #222
+  fulllight:  #bbb,
+  light:      #333,
+  dark:       #222,
+  fulldark:   #111,
 );
 
+$background-color: color($colors, dark);
+
+$toolbar-md-title-text-color: color($colors, fulllight);
+$toolbar-md-text-color: color($colors, fulllight);
+$toolbar-background: color($colors, primary);
+
+$alert-md-input-text-color: color($colors, fulllight);
+$alert-md-background-color: color($colors, dark);
+
+$alert-md-message-text-color: #fff;
+
+//$alert-md-button-background-color: color($colors, primary);
+
+$text-color: color($colors, fulllight);
+//$label-text-color: #fff;
+
+$item-md-divider-color: color($colors, fulllight);
+$item-md-divider-background: color($colors, fulldark);
+$item-md-divider-border-bottom: 1px solid color($colors, light);
+
+$list-md-border-color: color($colors, light);
 
 // App iOS Variables
 // --------------------------------------------------
 // iOS only Sass variables can go here
-
-
-
+$background-ios-color: color($colors, dark);
+$toolbar-ios-background: color($colors, primary);
+$loading-ios-background: color($colors, dark);
+$loading-ios-text-color: color($colors, fulllight);
 
 // App Material Design Variables
 // --------------------------------------------------
 // Material Design only Sass variables can go here
-
-
-
+$background-md-color: color($colors, dark);
+$toolbar-md-background: color($colors, primary);
+$loading-md-background: color($colors, dark);
+$loading-md-text-color: color($colors, fulllight);
 
 // App Windows Variables
 // --------------------------------------------------
 // Windows only Sass variables can go here
-
-
-
+$background-wp-color: color($colors, dark);
+$toolbar-wp-background: color($colors, primary);
+$loading-wp-background: color($colors, dark);
+$loading-wp-text-color: color($colors, fulllight);
 
 // App Theme
 // --------------------------------------------------
