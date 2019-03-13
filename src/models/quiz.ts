@@ -1,6 +1,6 @@
 import { Category } from './category';
 import { Question } from './question';
-import { QuizSettings } from './quizSettings';
+import { QuizSettings } from './quiz-settings';
 //import { Participant } from './participant';
 
 

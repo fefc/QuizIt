@@ -4,6 +4,12 @@
       Quiz settings
     </ion-title>
     <ion-buttons end>
+      <button ion-button icon-only (click)="setDefaultValues()">
+        <ion-icon name="medkit"></ion-icon>
+      </button>
+      <button ion-button icon-only (click)="showAdvanced()">
+        <ion-icon name="color-wand"></ion-icon>
+      </button>
       <button ion-button icon-only (click)="dismiss()">
         <ion-icon name="close"></ion-icon>
       </button>
@@ -13,10 +19,44 @@
 
 <ion-content>
   <ion-list>
-    <!--<ion-item>
-    <ion-label color="primary" fixed>Title</ion-label>
-      <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="newQuiz.title"></ion-input>
-    </ion-item>-->
+    <ion-item-group>
+      <!--<ion-item-divider>
+        <ion-label>Basic</ion-label>
+      </ion-item-divider>-->
+      <ion-item>
+        <ion-label>Auto play</ion-label>
+        <ion-toggle slot="end" [(ngModel)]="settings.autoPlay"></ion-toggle>
+      </ion-item>
+      <ion-item>
+        <ion-label>Time peer question</ion-label>
+        <ion-input type="number" min="1" placeholder="Available time for each question in ms" [(ngModel)]="settings.timeBarAnimationDuration"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label>Amount of pictures</ion-label>
+        <ion-input type="number" min="1" placeholder="Number of pictures you want to be displayed" [(ngModel)]="settings.amountOfPicturesToShow"></ion-input>
+      </ion-item>
+      </ion-item-group>
+      <ion-item-group *ngIf="showAdvancedCounter > 2">
+        <ion-item-divider>
+          <ion-label>Advanced</ion-label>
+        </ion-item-divider>
+        <ion-item>
+          <ion-label>Common animation</ion-label>
+          <ion-input type="number" min="1" placeholder="Time of usual animations in ms" [(ngModel)]="settings.commonAnimationDuration"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>Player answers animation</ion-label>
+          <ion-input type="number" min="1" placeholder="Time of player answer animation in ms" [(ngModel)]="settings.playerAnswerAnimationDuration"></ion-input>
+        </ion-item>
+        <ion-item *ngIf="settings.autoPlay">
+          <ion-label>Delay between questions</ion-label>
+          <ion-input type="number" min="1" placeholder="Time before switching to next question in ms" [(ngModel)]="settings.showNextDelay"></ion-input>
+        </ion-item>
+        <ion-item *ngIf="!settings.autoPlay">
+          <ion-label>Delay before showing next button</ion-label>
+          <ion-input type="number" min="1" placeholder="Time before showing the next button in ms" [(ngModel)]="settings.showNextDelay"></ion-input>
+        </ion-item>
+        </ion-item-group>
   </ion-list>
 </ion-content>
 

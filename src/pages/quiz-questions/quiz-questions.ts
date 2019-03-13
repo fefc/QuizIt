@@ -154,13 +154,26 @@ export class QuizQuestionsPage {
 
 
   openQuizSettingsPage() {
-    let modal = this.modalCtrl.create(QuizSettingsPage);
+    let modal = this.modalCtrl.create(QuizSettingsPage, {settings: this.quiz.settings});
     modal.present();
-    /*modal.onDidDismiss(data => {
+    modal.onDidDismiss(data => {
       if (data) {
-        this.saveChanges(data.question);
+        let loading = this.loadingCtrl.create({
+          content: 'Saving settings...'
+        });
+
+        loading.present();
+
+        this.quiz.settings = data.settings;
+
+        this.quizsProv.saveToStorage(this.quiz).then(() => {
+          loading.dismiss();
+        }).catch(() => {
+          loading.dismiss();
+          alert('Unable to save Quiz.');
+        });
       }
-    });*/
+    });
   }
 
   startQuiz() {

@@ -5,6 +5,8 @@ import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 
 import { Quiz } from '../../models/quiz';
+import { QuizSettings } from '../../models/quiz-settings';
+import { DefaultQuizSettings } from '../../models/quiz-settings';
 import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
@@ -162,11 +164,11 @@ enum ScreenStateType {
 })
 
 export class PlayPage {
-  private commonAnimationDuration: number = 600;
-  private timeBarAnimationDuration: number = 20000;
+  private commonAnimationDuration: number = DefaultQuizSettings.COMMON_ANIMATION_DURATION;
+  private timeBarAnimationDuration: number = DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION;
   private fullTimeBarAnimationDuration: number = this.timeBarAnimationDuration + this.commonAnimationDuration;
-  private showNextDuration: number = 1000;
-  private playerAnswerAnimationDuration: number = 300;
+  private showNextDelay: number = DefaultQuizSettings.SHOW_NEXT_DELAY;
+  private playerAnswerAnimationDuration: number = DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION;
   private ScreenStateType = ScreenStateType; //for use in Angluar html
   private QuestionType = QuestionType; //for use in Angular html
   private quiz: Quiz;
@@ -176,7 +178,7 @@ export class PlayPage {
 
   private currentPicture: number;
   private currentPictureCounter: number;
-  private currentPictureStayDuration: number = (this.timeBarAnimationDuration / 8); //The dividing number is the number of picture I want to see
+  private currentPictureStayDuration: number = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW); //The dividing number is the number of picture I want to see
 
   private players: Array<Player>;
 
@@ -185,11 +187,40 @@ export class PlayPage {
   private showNext: boolean;
   private showExit: boolean;
 
+  private autoPlay: boolean = DefaultQuizSettings.AUTO_PLAY;
+
   constructor(public navCtrl: NavController, private ngZone: NgZone, private file: File, private httpd: Httpd, params: NavParams) {
     this.quiz = params.data.quiz;
 
-    this.players = [];
+    //Get Quiz settings
+    if (this.quiz.settings) {
+      if (this.quiz.settings.commonAnimationDuration !== undefined) {
+        this.commonAnimationDuration = this.quiz.settings.commonAnimationDuration;
+      }
 
+      if (this.quiz.settings.timeBarAnimationDuration !== undefined) {
+        this.timeBarAnimationDuration = this.quiz.settings.timeBarAnimationDuration;
+        this.fullTimeBarAnimationDuration = this.timeBarAnimationDuration + this.commonAnimationDuration;
+      }
+
+      if (this.quiz.settings.playerAnswerAnimationDuration !== undefined) {
+        this.playerAnswerAnimationDuration = this.quiz.settings.playerAnswerAnimationDuration;
+      }
+
+      if (this.quiz.settings.showNextDelay !== undefined) {
+        this.showNextDelay = this.quiz.settings.showNextDelay;
+      }
+
+      if (this.quiz.settings.amountOfPicturesToShow !== undefined) {
+        this.currentPictureStayDuration = (this.timeBarAnimationDuration / this.quiz.settings.amountOfPicturesToShow);
+      }
+
+      if (this.quiz.settings.autoPlay !== undefined) {
+        this.autoPlay = this.quiz.settings.autoPlay;
+      }
+    }
+
+    this.players = [];
 
     this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar: "Dog.png", points: null, answer: 0},
                     {nickname: "Totgg", avatar: "Bunny.png", points: null, answer: null},
@@ -205,7 +236,7 @@ export class PlayPage {
     if (!this.quiz) {
       this.navCtrl.pop();
     }
-    else {true
+    else {
       if (this.quiz.categorys.length < 1 || this.quiz.questions.length < 1) {
         this.navCtrl.pop();
       }
@@ -219,7 +250,7 @@ export class PlayPage {
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
         this.screenState = ScreenStateType.playersJoining;
-        setTimeout(() => this.setShowNext(), this.showNextDuration);
+        setTimeout(() => this.setShowNext(), this.showNextDelay);
 
         /*let options: HttpdOptions = {
           www_root: 'httpd', // relative path to app's www directory
@@ -258,7 +289,7 @@ export class PlayPage {
         player.points = 0;
       }
 
-      setTimeout(() => this.setShowNext(), this.showNextDuration);
+      this.handleNextStep();
     }
     else if (this.screenState === ScreenStateType.displayTitle) {
       this.screenState = ScreenStateType.hideTitle;
@@ -266,7 +297,8 @@ export class PlayPage {
     }
     else if (this.screenState === ScreenStateType.hideTitle) {
       this.screenState = ScreenStateType.displayCategoryTitle;
-      setTimeout(() => this.setShowNext(), this.showNextDuration);
+
+      this.handleNextStep();
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
       this.screenState = ScreenStateType.hideCategoryTitle;
@@ -289,7 +321,8 @@ export class PlayPage {
       }
 
       setTimeout(() => this.updatePlayersPoints(), this.playerAnswerAnimationDuration * 2);
-      setTimeout(() => this.setShowNext(), this.showNextDuration);
+
+      this.handleNextStep();
     }
     else if (this.screenState === ScreenStateType.displayPlayersAnswer) {
       this.screenState = ScreenStateType.hideQuestion;
@@ -311,9 +344,17 @@ export class PlayPage {
         }
         else {
           this.screenState = ScreenStateType.end;
-          setTimeout(() => this.setShowExit(), this.showNextDuration);
+          setTimeout(() => this.setShowExit(), this.showNextDelay);
         }
       }
+    }
+  }
+
+  handleNextStep() {
+    if (this.autoPlay) {
+      setTimeout(() => this.next(), this.showNextDelay + this.commonAnimationDuration);
+    } else {
+      setTimeout(() => this.setShowNext(), this.showNextDelay);
     }
   }
 
