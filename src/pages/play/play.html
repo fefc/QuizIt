@@ -17,9 +17,18 @@
   </div>
 
   <!--Player Avatar, nickname & points Zone-->
-  <div class="players" *ngIf="displayPlayers()" [@playerAnimation]>
-    <div class="player" *ngFor="let player of players; let i = index" [@playerAnimation]>
-      <button *ngIf="screenState === ScreenStateType.playersJoining" [@playerAnimation] ion-button icon-only class="remove-button" (click)="removePlayer(player,i)">
+  <div class="players" *ngIf="displayPlayers()" [@playersContainerAnimation]>
+    <div class="player" *ngFor="let player of players; let i = index"
+    [@playerPositionAnimation]="{value: player.actualPosition,
+      params: {
+          time: commonAnimationDuration,
+          previousYTranslation: getPlayerPreviousYTranslation(player),
+          actualYTranslation: getPlayerActualYTranslation(player),
+          actualYTranslationHalf: getPlayerActualYTranslation(player) / 2
+        }
+    }"
+    (@playerPositionAnimation.done) = "saveActualYTranslation($event, i)">
+      <button *ngIf="screenState === ScreenStateType.playersJoining" ion-button icon-only class="remove-button" (click)="removePlayer(player,i)">
         <ion-icon name="remove-circle"></ion-icon>
       </button>
       <div class="info" [ngStyle]="{'margin-right': '' + getAvatarWidth() + 'px'}">

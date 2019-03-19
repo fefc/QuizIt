@@ -39,33 +39,6 @@ enum ScreenStateType {
         ])
       ]),
       trigger(
-        'playerAnimation', [
-          transition(':enter', [
-            style({transform: 'scale(0)', opacity: 0}),
-            animate('250ms',
-              keyframes([
-                style({transform: 'scale(1.1)', opacity: 1, offset: 0.9}),
-                style({transform: 'scale(1)', offset: 1}),
-              ])
-            )
-          ]),
-          transition(':leave', [
-            style({transform: 'scale(1)', opacity: 1}),
-            animate('250ms', style({transform: 'scale(0)', opacity: 0}))
-          ])
-        ]),
-        trigger(
-          'playerAnswerAnimation', [
-            transition(':enter', [
-              style({opacity: 0}),
-              animate('{{time}}ms', style({opacity: 1}))
-            ], { params: { time: 600 } }),
-            transition(':leave', [
-              style({opacity: 1}),
-              animate('{{time}}ms', style({opacity: 0}))
-            ], { params: { time: 600 } })
-          ]),
-      trigger(
       'questionAnimation' , [
         transition(':enter', [
           style({transform: 'rotate3d(1, 1, 1, -90deg)', opacity: 0}),
@@ -113,8 +86,6 @@ enum ScreenStateType {
       ]),
       trigger(
       'pictureTransitionAnimation', [
-            //transition(':decrement', [style({ opacity: 0 }), animate('5s ease', style({ opacity: 1 }))]),
-        //transition('0 => 1', [
         transition(':increment', [
           style({transform: 'rotate3d(0, 0, 0, 0) scale(1)', transformOrigin: "50%"}),
           animate('{{time}}ms',
@@ -135,6 +106,29 @@ enum ScreenStateType {
             ])
           )
         ],  { params: { time: 600 } }),
+      ]),
+      trigger(
+      'playersContainerAnimation', [
+        transition(':enter', [
+          style({transform: 'scale(0)', opacity: 0}),
+          animate('250ms', style({transform: 'scale(1)', opacity: 1})
+          )
+        ]),
+        transition(':leave', [
+          style({transform: 'scale(1)', opacity: 1}),
+          animate('250ms', style({transform: 'scale(0)', opacity: 0}))
+        ])
+      ]),
+      trigger(
+      'playerAnswerAnimation', [
+        transition(':enter', [
+          style({opacity: 0}),
+          animate('{{time}}ms', style({opacity: 1}))
+        ], { params: { time: 600 } }),
+        transition(':leave', [
+          style({opacity: 1}),
+          animate('{{time}}ms', style({opacity: 0}))
+        ], { params: { time: 600 } })
       ]),
       trigger(
       'playerPointsAnimation', [
@@ -158,6 +152,30 @@ enum ScreenStateType {
             ])
           )
         ],  { params: { time: 600 } }),
+      ]),
+      ,
+      trigger(
+      'playerPositionAnimation', [
+        transition(':increment', [
+          style({transform: 'translateY({{previousYTranslation}}px) scale(1)'}),
+          animate('{{time}}ms',
+            keyframes([
+              style({transform: 'translateY({{previousYTranslation}}px) scale(1)'}),
+              style({transform: 'translateY({{actualYTranslationHalf}}px) scale(0.9)'}),
+              style({transform: 'translateY({{actualYTranslation}}px) scale(1)'}),
+            ])
+          )
+        ], { params: { time: 600, previousYTranslation: 0, actualYTranslationHalf: 0, actualYTranslation: 0 } }),
+        transition(':decrement', [
+          style({transform: 'translateY({{previousYTranslation}}px) scale(1)'}),
+          animate('{{time}}ms',
+            keyframes([
+              style({transform: 'translateY({{previousYTranslation}}px) scale(1)'}),
+              style({transform: 'translateY({{actualYTranslationHalf}}px) scale(1.1)'}),
+              style({transform: 'translateY({{actualYTranslation}}px) scale(1)'}),
+            ])
+          )
+        ],  { params: { time: 600, previousYTranslation: 0, actualYTranslationHalf: 0, actualYTranslation: 0 } }),
       ]),
   ],
   templateUrl: 'play.html'
@@ -222,16 +240,14 @@ export class PlayPage {
 
     this.players = [];
 
-    this.players = [{nickname: "Totggfjggfgfgfdgdfo", avatar: "Dog.png", points: null, answer: 0},
-                    {nickname: "Totgg", avatar: "Bunny.png", points: null, answer: null},
-                  {nickname: "Totgg", avatar: "Duck_Guy.png", points: null, answer: 2},
-                {nickname: "Totgg", avatar: "Frankie.png", points: null, answer: 3},
-              {nickname: "Totgg", avatar: "Happy_Girl.png", points: null, answer: 0},
-            {nickname: "Totgg", avatar: "Mad_Guy.png", points: null, answer: 1},
-          {nickname: "Totgg", avatar: "Proog.png", points: null, answer: 2},
-        {nickname: "Totgg", avatar: "Sintel.png", points: null, answer: 3},];
-
-
+    this.players = [{deviceId: 0, nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: 0},
+                    {deviceId: 1, nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: null},
+                    {deviceId: 2, nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: 2},
+                    {deviceId: 3, nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: 3},
+                    {deviceId: 4, nickname: "Four", avatar: "Happy_Girl.png", initialPosition: 4, previousPosition: 4, actualPosition: 4, points: null, answer: 0},
+                    {deviceId: 5, nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: 1},
+                    {deviceId: 6, nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: 2},
+                    {deviceId: 7, nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: 3},];
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -320,7 +336,7 @@ export class PlayPage {
         this.currentPictureSwitch(); //This will switch to the right answer picture
       }
 
-      setTimeout(() => this.updatePlayersPoints(), this.playerAnswerAnimationDuration * 2);
+      setTimeout(() => this.updatePlayersPointsAndPosition(), this.playerAnswerAnimationDuration * 2);
 
       this.handleNextStep();
     }
@@ -358,23 +374,22 @@ export class PlayPage {
     }
   }
 
-  setShowNext() {
-    this.showNext = true;
-  }
-
-  exit() {
-    this.navCtrl.pop();
-  }
-
-  setShowExit() {
-    this.showExit = true;
-  }
-
-  updatePlayersPoints() {
+  updatePlayersPointsAndPosition() {
     for (var player of this.players) {
       if (player.answer === this.currentQuestions[this.currentQuestion].rightAnswer) {
-        player.points += 100;
+        player.points += 100; //TODO set settings
       }
+    }
+
+    //JSON usefull to make a quick and dirty depp copy
+    let sortedPlayers = JSON.parse(JSON.stringify(this.players)).sort((pOne, pTwo) => {
+      return pTwo.points - pOne.points;
+    });;
+
+    for (let newPlayerPosition = 0; newPlayerPosition < sortedPlayers.length; newPlayerPosition++) {
+      let realPlayer = this.players.find((player) => player.deviceId === sortedPlayers[newPlayerPosition].deviceId);
+      realPlayer.previousPosition = realPlayer.actualPosition;
+      realPlayer.actualPosition = newPlayerPosition;
     }
   }
 
@@ -396,14 +411,32 @@ export class PlayPage {
     }
   }
 
-  getPic(index: number) {
-    return "assets/imgs/" + (index + 1) + ".png";
+  saveActualYTranslation(e, i) {
+      e.element.setAttribute('style',
+        "transform: translateY(" + (this.players[i].actualPosition - this.players[i].initialPosition)  * this.getPlayerHeight() +"px)");
+  }
+
+  getPlayerHeight() {
+    let player = <HTMLElement> document.querySelector(".player");
+    return player.offsetHeight;
+  }
+
+  getPlayerActualYTranslation(player: Player) {
+    return (player.actualPosition - player.initialPosition) * this.getPlayerHeight();
+  }
+
+  getPlayerPreviousYTranslation(player: Player) {
+    return (player.previousPosition - player.initialPosition) * this.getPlayerHeight();
   }
 
   removePlayer(player: Player, index: number) {
     if (index > -1) {
        this.players.splice(index, 1);
     }
+  }
+
+  getPic(index: number) {
+    return "assets/imgs/" + (index + 1) + ".png";
   }
 
   getQuestionsFromCategory(category: Category) {
@@ -435,5 +468,17 @@ export class PlayPage {
           || this.screenState === ScreenStateType.displayPlayersAnswer
           || this.screenState === ScreenStateType.hideQuestion
           || this.screenState === ScreenStateType.end;
+  }
+
+  setShowNext() {
+    this.showNext = true;
+  }
+
+  setShowExit() {
+    this.showExit = true;
+  }
+
+  exit() {
+    this.navCtrl.pop();
   }
 }
