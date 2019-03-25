@@ -3,6 +3,7 @@ import { NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
+import { Subscription } from "rxjs/Subscription";
 
 import { Quiz } from '../../models/quiz';
 import { QuizSettings } from '../../models/quiz-settings';
@@ -153,7 +154,6 @@ enum ScreenStateType {
           )
         ],  { params: { time: 600 } }),
       ]),
-      ,
       trigger(
       'playerPositionAnimation', [
         transition(':increment', [
@@ -207,6 +207,14 @@ export class PlayPage {
 
   private autoPlay: boolean = DefaultQuizSettings.AUTO_PLAY;
 
+  private httpdSubscription: Subscription;
+  private requestsSubscription: Subscription;
+
+  private httpdOptions: HttpdOptions = {
+            www_root: 'httpd', // relative path to app's www directory
+            port: 8080,
+            localhost_only: false };
+
   constructor(public navCtrl: NavController, private ngZone: NgZone, private file: File, private httpd: Httpd, params: NavParams) {
     this.quiz = params.data.quiz;
 
@@ -240,14 +248,14 @@ export class PlayPage {
 
     this.players = [];
 
-    this.players = [{deviceId: 0, nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: 0},
+    /*this.players = [{deviceId: 0, nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: 0},
                     {deviceId: 1, nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: null},
                     {deviceId: 2, nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: 2},
                     {deviceId: 3, nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: 3},
                     {deviceId: 4, nickname: "Four", avatar: "Happy_Girl.png", initialPosition: 4, previousPosition: 4, actualPosition: 4, points: null, answer: 0},
                     {deviceId: 5, nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: 1},
                     {deviceId: 6, nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: 2},
-                    {deviceId: 7, nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: 3},];
+                    {deviceId: 7, nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: 3},];*/
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -268,31 +276,84 @@ export class PlayPage {
         this.screenState = ScreenStateType.playersJoining;
         setTimeout(() => this.setShowNext(), this.showNextDelay);
 
-        /*let options: HttpdOptions = {
-          www_root: 'httpd', // relative path to app's www directory
-          port: 8080,
-          localhost_only: false
-        };
+        /* Setup httpd stuff */
+        this.requestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => {
+          if (data.uri === "/addPlayer" && this.screenState === ScreenStateType.playersJoining) {
+            let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
 
-        this.httpd.attachRequestsListener().subscribe((data) => {
-          let player: Player = JSON.parse(data);
-          this.ngZone.run(() => {
-             this.players.push(player);
-          });
-        })true
+            this.httpd.setRequestResponse({uuid: newPlayer ? newPlayer.uuid : undefined }).catch(() => {
+              console.log("Could not setRequestResponse for /addPlayer.");
+            });
 
-        this.httpd.startServer(options).subscribe((data) => {
-          //alert('Server is live: ' + data);
+            if (newPlayer) {
+              this.ngZone.run(() => {
+                this.players.push(newPlayer);
+              });
+            }
+          } else if (data.uri === "/answer" && this.screenState === ScreenStateType.displayQuestion) {
+            let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
+
+            this.httpd.setRequestResponse({success: answeringPlayer ? true : false }).catch(() => {
+              console.log("Could not setRequestResponse for /answer.");
+            });
+
+            if (answeringPlayer) {
+              this.ngZone.run(() => {
+                answeringPlayer.answer = parseInt(data.answer);
+              });
+            }
+          } else {
+            this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
+              console.log("Could not setRequestResponse for some useless case.");
+            });
+          }
+        }, (error) => {
+          console.log("Could not attach request listener.");
         });
 
-        //encore non fonctionnel
-        /*this.httpd.detachRequestsListener().then((data) => {
-          alert(data);
-        }).catch((data) => {
-          alert(data);
-        })*/
+        this.httpdSubscription = this.httpd.startServer(this.httpdOptions).subscribe((data) => {
+          console.log("Successfully started server.");
+        }, (error) => {
+          console.log("Could not sstart server.");
+        });
       }
     }
+  }
+
+  addPlayer(nickname: string, avatar: string) {
+    if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
+      let newPlayer: Player;
+      let uuid: string = this.uuidv4();
+
+      while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
+        uuid = this.uuidv4();
+      }
+
+      newPlayer = {
+        uuid: uuid,
+        nickname: nickname,
+        avatar: avatar,
+        initialPosition: this.players.length,
+        previousPosition: this.players.length,
+        actualPosition: this.players.length,
+        answer: undefined
+      };
+
+      return newPlayer;
+    }
+    return undefined;
+  }
+
+  getAnsweringPlayer(uuid: string) {
+    let player: Player = this.players.find((p) => p.uuid === uuid);
+
+    if (player) {
+      if (player.answer === undefined) {
+        return player;
+      }
+    }
+
+    return undefined;
   }
 
   next() {
@@ -345,6 +406,11 @@ export class PlayPage {
       setTimeout(() => this.next(), this.commonAnimationDuration * 2);
     }
     else if (this.screenState === ScreenStateType.hideQuestion) {
+
+      for (var player of this.players) {
+        player.answer = undefined;
+      }
+
       if (this.currentQuestion < this.currentQuestions.length - 1) {
         this.currentQuestion++;
         this.screenState = ScreenStateType.displayQuestion;
@@ -387,7 +453,7 @@ export class PlayPage {
     });;
 
     for (let newPlayerPosition = 0; newPlayerPosition < sortedPlayers.length; newPlayerPosition++) {
-      let realPlayer = this.players.find((player) => player.deviceId === sortedPlayers[newPlayerPosition].deviceId);
+      let realPlayer = this.players.find((player) => player.uuid === sortedPlayers[newPlayerPosition].uuid);
       realPlayer.previousPosition = realPlayer.actualPosition;
       realPlayer.actualPosition = newPlayerPosition;
     }
@@ -479,6 +545,16 @@ export class PlayPage {
   }
 
   exit() {
+    this.requestsSubscription.unsubscribe();
+    this.httpdSubscription.unsubscribe();
     this.navCtrl.pop();
+  }
+
+  //From https://stackoverflow.com/a/2117523
+  uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 }

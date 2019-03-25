@@ -39,10 +39,10 @@
         <canvas class="avatar" width="1" height="1" [ngStyle]="{'background-image': 'url(assets/imgs/' + player.avatar + ')'}"></canvas>
         <canvas class="player-answer" width="1" height="1"
                 [ngClass]="{'player-answer-right': player.answer === currentQuestions[currentQuestion].rightAnswer,
-                            'player-answer-wrong': player.answer !== null && player.answer !== currentQuestions[currentQuestion].rightAnswer}"
+                            'player-answer-wrong': player.answer !== undefined && player.answer !== currentQuestions[currentQuestion].rightAnswer}"
 
                 [ngStyle]="player.answer === currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/right-answer.png)'}
-                || player.answer !== null && {'background-image': 'url(assets/imgs/wrong-answer.png)'}"
+                || player.answer !== undefined && {'background-image': 'url(assets/imgs/wrong-answer.png)'}"
 
                 *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{params: {time: playerAnswerAnimationDuration}}"></canvas>
       </div>

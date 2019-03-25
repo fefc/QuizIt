@@ -6,9 +6,9 @@ enum Role {
 }
 
 export interface Player {
-  deviceId: number,
-  nickname: string,
-  avatar: string,
+  readonly uuid: string,
+  readonly nickname: string,
+  readonly avatar: string,
   readonly initialPosition: number,
   actualPosition: number,
   previousPosition: number,
