@@ -1,9 +1,11 @@
 import { Component, NgZone } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { Platform, NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 import { Subscription } from "rxjs/Subscription";
+import { AndroidFullScreen } from '@ionic-native/android-full-screen';
+import { ScreenOrientation } from '@ionic-native/screen-orientation';
 
 import { Quiz } from '../../models/quiz';
 import { QuizSettings } from '../../models/quiz-settings';
@@ -215,7 +217,14 @@ export class PlayPage {
             port: 8080,
             localhost_only: false };
 
-  constructor(public navCtrl: NavController, private ngZone: NgZone, private file: File, private httpd: Httpd, params: NavParams) {
+  constructor(private platform: Platform,
+              private navCtrl: NavController,
+              private ngZone: NgZone,
+              private file: File,
+              private httpd: Httpd,
+              private androidFullScreen: AndroidFullScreen,
+              private screenOrientation: ScreenOrientation,
+              params: NavParams) {
     this.quiz = params.data.quiz;
 
     //Get Quiz settings
@@ -246,7 +255,7 @@ export class PlayPage {
       }
     }
 
-    this.players = [];
+
 
     /*this.players = [{deviceId: 0, nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: 0},
                     {deviceId: 1, nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: null},
@@ -265,6 +274,7 @@ export class PlayPage {
         this.navCtrl.pop();
       }
       else {
+        /* We can now start init the serious stuff */
         this.showNext = false;
         this.showExit = false;
         this.currentCategory = 0;
@@ -273,49 +283,71 @@ export class PlayPage {
         this.currentPictureCounter = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
+        this.players = [];
+
         this.screenState = ScreenStateType.playersJoining;
         setTimeout(() => this.setShowNext(), this.showNextDelay);
 
-        /* Setup httpd stuff */
-        this.requestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => {
-          if (data.uri === "/addPlayer" && this.screenState === ScreenStateType.playersJoining) {
-            let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
-
-            this.httpd.setRequestResponse({uuid: newPlayer ? newPlayer.uuid : undefined }).catch(() => {
-              console.log("Could not setRequestResponse for /addPlayer.");
+        /* First lets go fullScreenMode if possible */
+        if (this.platform.is('android')) {
+          this.androidFullScreen.isSupported().then(() => {
+            this.androidFullScreen.isImmersiveModeSupported().then(() => {
+              this.androidFullScreen.immersiveMode().catch((err) => {
+                console.log("Could not enable immersiveMode: " + err);
+              })
+            })
+            .catch(err => {
+              console.log("ImmersiveMode is not supported: " + err);
             });
+          }).catch((err) => {
+            console.log("AndroidFullScreen is not supported: " + err);
+          });
 
-            if (newPlayer) {
-              this.ngZone.run(() => {
-                this.players.push(newPlayer);
+
+          /* Lock screen orientation to landscape */
+          this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+
+          /* Setup httpd stuff */
+          this.requestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => {
+            if (data.uri === "/addPlayer" && this.screenState === ScreenStateType.playersJoining) {
+              let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
+
+              this.httpd.setRequestResponse({uuid: newPlayer ? newPlayer.uuid : undefined }).catch(() => {
+                console.log("Could not setRequestResponse for /addPlayer.");
+              });
+
+              if (newPlayer) {
+                this.ngZone.run(() => {
+                  this.players.push(newPlayer);
+                });
+              }
+            } else if (data.uri === "/answer" && this.screenState === ScreenStateType.displayQuestion) {
+              let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
+
+              this.httpd.setRequestResponse({success: answeringPlayer ? true : false }).catch(() => {
+                console.log("Could not setRequestResponse for /answer.");
+              });
+
+              if (answeringPlayer) {
+                this.ngZone.run(() => {
+                  answeringPlayer.answer = parseInt(data.answer);
+                });
+              }
+            } else {
+              this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
+                console.log("Could not setRequestResponse for some useless case.");
               });
             }
-          } else if (data.uri === "/answer" && this.screenState === ScreenStateType.displayQuestion) {
-            let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
+          }, (error) => {
+            console.log("Could not attach request listener.");
+          });
 
-            this.httpd.setRequestResponse({success: answeringPlayer ? true : false }).catch(() => {
-              console.log("Could not setRequestResponse for /answer.");
-            });
-
-            if (answeringPlayer) {
-              this.ngZone.run(() => {
-                answeringPlayer.answer = parseInt(data.answer);
-              });
-            }
-          } else {
-            this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
-              console.log("Could not setRequestResponse for some useless case.");
-            });
-          }
-        }, (error) => {
-          console.log("Could not attach request listener.");
-        });
-
-        this.httpdSubscription = this.httpd.startServer(this.httpdOptions).subscribe((data) => {
-          console.log("Successfully started server.");
-        }, (error) => {
-          console.log("Could not sstart server.");
-        });
+          this.httpdSubscription = this.httpd.startServer(this.httpdOptions).subscribe((data) => {
+            console.log("Successfully started server.");
+          }, (error) => {
+            console.log("Could not sstart server.");
+          });
+        }
       }
     }
   }
@@ -545,9 +577,28 @@ export class PlayPage {
   }
 
   exit() {
-    this.requestsSubscription.unsubscribe();
-    this.httpdSubscription.unsubscribe();
     this.navCtrl.pop();
+  }
+
+  /* this will be executed when view is poped, either by exit() or by back button */
+  ionViewWillUnload() {
+    if (this.platform.is('android')) {
+      /* disable httpd */
+      this.requestsSubscription.unsubscribe();
+      this.httpdSubscription.unsubscribe();
+
+      /* Unlock screen orientation */
+      this.screenOrientation.unlock();
+
+      /* Exit immersiveMode */
+      this.androidFullScreen.isSupported().then(() => {
+          this.androidFullScreen.showSystemUI().catch((err) => {
+            console.log("Could not disable immersiveMode: " + err);
+          });
+      }).catch((err) => {
+        console.log("AndroidFullScreen is not supported: " + err);
+      });
+    }
   }
 
   //From https://stackoverflow.com/a/2117523

@@ -8,6 +8,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
 import { Httpd } from '@ionic-native/httpd';
+import { AndroidFullScreen } from '@ionic-native/android-full-screen';
+import { ScreenOrientation } from '@ionic-native/screen-orientation';
 
 import { MyApp } from './app.component';
 
@@ -54,6 +56,8 @@ import { PlayPage } from '../pages/play/play';
     ImagePicker,
     File,
     Httpd,
+    AndroidFullScreen,
+    ScreenOrientation,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     QuizsProvider
   ]

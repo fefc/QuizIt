@@ -20,24 +20,31 @@
     "@angular/http": "5.2.11",
     "@angular/platform-browser": "5.2.11",
     "@angular/platform-browser-dynamic": "5.2.11",
+    "@ionic-native/android-full-screen": "^4.20.0",
     "@ionic-native/core": "~4.15.0",
     "@ionic-native/file": "^4.18.0",
     "@ionic-native/httpd": "^4.19.0",
     "@ionic-native/image-picker": "^4.18.0",
+    "@ionic-native/screen-orientation": "^4.20.0",
     "@ionic-native/splash-screen": "~4.15.0",
+    "@ionic-native/sqlite": "^4.20.0",
     "@ionic-native/status-bar": "~4.15.0",
     "@ionic/storage": "2.2.0",
     "cordova-android": "7.1.4",
+    "cordova-browser": "5.0.4",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-file": "6.0.1",
+    "cordova-plugin-fullscreen": "1.2.0",
     "cordova-plugin-httpd": "0.9.3",
     "cordova-plugin-ionic-keyboard": "^2.1.3",
     "cordova-plugin-ionic-webview": "^3.0.0",
+    "cordova-plugin-screen-orientation": "3.0.1",
     "cordova-plugin-splashscreen": "^5.0.2",
     "cordova-plugin-statusbar": "^2.4.2",
     "cordova-plugin-telerik-imagepicker": "2.2.2",
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-sqlite-storage": "2.5.0",
+    "es6-promise-plugin": "4.2.2",
     "ionic": "^4.6.0",
     "ionic-angular": "3.9.2",
     "ionicons": "3.0.0",
@@ -65,10 +72,13 @@
       "cordova-plugin-ionic-keyboard": {},
       "cordova-plugin-file": {},
       "cordova-plugin-ionic-webview": {},
-      "cordova-plugin-httpd": {}
+      "cordova-plugin-httpd": {},
+      "cordova-plugin-fullscreen": {},
+      "cordova-plugin-screen-orientation": {}
     },
     "platforms": [
-      "android"
+      "android",
+      "browser"
     ]
   }
 }
