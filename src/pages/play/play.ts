@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, HostListener } from '@angular/core';
 import { Platform, NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
@@ -599,6 +599,11 @@ export class PlayPage {
         console.log("AndroidFullScreen is not supported: " + err);
       });
     }
+  }
+
+  @HostListener('document:keypress', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    console.log(event.key);
   }
 
   //From https://stackoverflow.com/a/2117523
