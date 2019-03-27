@@ -1,5 +1,46 @@
 <ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/background.jpg)'}">
 
+  <!--menu-->
+  <div class="menu">
+    <div class="menu-title">Exit</div>
+    <table>
+      <tr class="fab-line">
+        <td>
+          <ion-fab>
+            <button ion-fab (click)="next()">
+              <ion-icon name="pause"></ion-icon>
+            </button>
+          </ion-fab>
+        </td>
+        <td>
+          <ion-fab>
+            <button ion-fab (click)="next()">
+              <ion-icon name="close"></ion-icon>
+            </button>
+          </ion-fab>
+        </td>
+        <td>
+          <ion-fab>
+            <button ion-fab (click)="exit()">
+              <ion-icon name="square"></ion-icon>
+            </button>
+          </ion-fab>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div>Pause</div>
+        </td>
+        <td>
+          <div>Close menu</div>
+        </td>
+        <td>
+          <div>Exit</div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
   <!--General Texts and title Zone-->
   <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="players-joining">
     The quiz will start shortly...<br>
@@ -77,12 +118,12 @@
         <canvas [ngStyle]="{'background-image': 'url(' + getPic(currentPicture) + ')'}"></canvas>
   </div>
 
-  <ion-fab center bottom >
+  <!--<ion-fab center bottom >
     <button ion-fab (click)="next()" *ngIf="showNext === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
       <ion-icon name="play"></ion-icon>
     </button>
     <button ion-fab (click)="exit()" *ngIf="showExit === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
       <ion-icon name="square"></ion-icon>
     </button>
-  </ion-fab>
+  </ion-fab>-->
 </ion-content>
