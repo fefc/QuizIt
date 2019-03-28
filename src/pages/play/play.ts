@@ -1,11 +1,13 @@
 import { Component, NgZone, HostListener } from '@angular/core';
-import { Platform, NavController, NavParams } from 'ionic-angular';
+import { Platform, AlertController, NavController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 import { Subscription } from "rxjs/Subscription";
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
+
+declare var WifiWizard2: any;
 
 import { Quiz } from '../../models/quiz';
 import { QuizSettings } from '../../models/quiz-settings';
@@ -14,6 +16,7 @@ import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 import { Player } from '../../models/player';
+
 
 enum ScreenStateType {
   playersJoining,
@@ -217,8 +220,12 @@ export class PlayPage {
             port: 8080,
             localhost_only: false };
 
+  private currentWifi: string;
+  private currentIp: string;
+
   constructor(private platform: Platform,
               private navCtrl: NavController,
+              private alertCtrl: AlertController,
               private ngZone: NgZone,
               private file: File,
               private httpd: Httpd,
@@ -303,9 +310,76 @@ export class PlayPage {
             console.log("AndroidFullScreen is not supported: " + err);
           });
 
-
           /* Lock screen orientation to landscape */
           this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+
+          /* Lets try to find out if Wifi is enabled and configure the welcome message */
+          WifiWizard2.getConnectedSSID().then((ssid) => {
+              this.currentWifi  = ssid;
+              /* Once wifi is done, lets find ip address of the device over wifi and configure the welcome message */
+              WifiWizard2.getWifiIP().then((ip) => {
+                this.currentIp = ip;
+              })
+              .catch((error) => {
+                this.currentIp  = "unknown";
+
+                let alert = this.alertCtrl.create({
+                  title: 'Error',
+                  message: 'There has been an error getting the device ip address. Please enter device ip here.',
+                  inputs: [
+                    {
+                      name: 'ip',
+                      placeholder: 'Ip address'
+                    }
+                  ],
+                  buttons: [
+                    {
+                      text: 'Cancel',
+                      role: 'cancel',
+                    },
+                    {
+                      text: 'Save',
+                      handler: data => {
+                        this.currentIp = data.ip;
+                      }
+                    }
+                  ]
+                });
+                alert.present();
+              });
+            }).catch((error) => {
+              this.currentWifi  = "unknown";
+
+              let alert = this.alertCtrl.create({
+                title: 'Error',
+                message: 'There has been an error getting the Wifi name, please check that you are connected to a Wifi. If your device is an Access Point, pleace enter the Wifi name and device ip here.',
+                enableBackdropDismiss: false,
+                inputs: [
+                  {
+                    name: 'ssid',
+                    placeholder: 'Wifi name'
+                  },
+                  {
+                    name: 'ip',
+                    placeholder: 'Ip address'
+                  }
+                ],
+                buttons: [
+                  {
+                    text: 'Cancel',
+                    role: 'cancel',
+                  },
+                  {
+                    text: 'Save',
+                    handler: data => {
+                      this.currentWifi = data.ssid;
+                      this.currentIp = data.ip;
+                    }
+                  }
+                ]
+              });
+              alert.present();
+            });
 
           /* Setup httpd stuff */
           this.requestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => {

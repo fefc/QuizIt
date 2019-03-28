@@ -71,9 +71,33 @@ $fullDark: rgba(0, 0, 0, 0.9);
     }
   }
 
-  .players-joining {
+  .network-info {
     position: absolute;
-    top: 2.5vw;
+    top: 0;
+    height: 12vh;
+    line-height: 12vh;
+    margin: 4vh 2.25vw;
+    padding: 0 2vw;
+    font-size: 6vh;
+
+    vertical-align: middle;
+    text-align: center;
+    color: $mediumDark;
+    text-shadow: 0.2vh 0.2vh $light;
+    word-break: normal;
+  }
+
+  .wifi {
+    left: 0;
+  }
+
+  .webpage {
+    right: 0;
+  }
+
+  .start-message {
+    position: absolute;
+    top: 40.5vh;
     left: 2.5vw;
     width: 70vw;
     height: 100vh;
@@ -85,6 +109,8 @@ $fullDark: rgba(0, 0, 0, 0.9);
     text-shadow: 0.2vh 0.2vh $light;
     word-break: normal;
   }
+
+
 
   .title {
     width: 100vw;

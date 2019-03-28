@@ -1,8 +1,8 @@
 <ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/background.jpg)'}">
 
   <!--menu-->
-  <div class="menu">
-    <div class="menu-title">Exit</div>
+  <!--<div class="menu">
+    <div class="menu-title">Menu</div>
     <table>
       <tr class="fab-line">
         <td>
@@ -39,16 +39,22 @@
         </td>
       </tr>
     </table>
-  </div>
+  </div>-->
 
   <!--General Texts and title Zone-->
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="players-joining">
-    The quiz will start shortly...<br>
-    You would like to join?<br>
-    Connect to the following Wifi:<br><br>
-    CallMeMaybe<br><br>
-    And open the following page in a browser:<br><br>
-    10.0.0.13:8080
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="network-info wifi">
+    Wifi: {{currentWifi}}
+  </div>
+
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="network-info webpage">
+    http://{{currentIp}}:8080
+  </div>
+
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="start-message">
+    The quiz will start shortly...<br><br>
+    Play now by connecting to the Wifi above<br>
+    and follow the instructions on the webpage.<br><br>
+    :)
   </div>
 
   <div class="title" *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle"
