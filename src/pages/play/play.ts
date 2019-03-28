@@ -262,16 +262,15 @@ export class PlayPage {
       }
     }
 
-
-
-    /*this.players = [{deviceId: 0, nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: 0},
-                    {deviceId: 1, nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: null},
-                    {deviceId: 2, nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: 2},
-                    {deviceId: 3, nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: 3},
-                    {deviceId: 4, nickname: "Four", avatar: "Happy_Girl.png", initialPosition: 4, previousPosition: 4, actualPosition: 4, points: null, answer: 0},
-                    {deviceId: 5, nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: 1},
-                    {deviceId: 6, nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: 2},
-                    {deviceId: 7, nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: 3},];*/
+    /*this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: 0},
+                    {uuid: "1", nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: -1},
+                    {uuid: "2", nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: 2},
+                    {uuid: "3", nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: 3},
+                    {uuid: "4", nickname: "Four", avatar: "Happy_Girl.png", initialPosition: 4, previousPosition: 4, actualPosition: 4, points: null, answer: 0},
+                    {uuid: "5", nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: 1},
+                    {uuid: "6", nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: 2},
+                    {uuid: "7", nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: 3},];
+                    */
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -454,7 +453,7 @@ export class PlayPage {
     let player: Player = this.players.find((p) => p.uuid === uuid);
 
     if (player) {
-      if (player.answer === undefined) {
+      if (player.answer === -1) {
         return player;
       }
     }
@@ -514,7 +513,7 @@ export class PlayPage {
     else if (this.screenState === ScreenStateType.hideQuestion) {
 
       for (var player of this.players) {
-        player.answer = undefined;
+        player.answer = -1;
       }
 
       if (this.currentQuestion < this.currentQuestions.length - 1) {

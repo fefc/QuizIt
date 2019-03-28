@@ -13,5 +13,5 @@ export interface Player {
   actualPosition: number,
   previousPosition: number,
   points?: number,
-  answer?: number,
+  answer: number,
 }

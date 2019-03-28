@@ -85,11 +85,13 @@
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1" [ngStyle]="{'background-image': 'url(assets/imgs/' + player.avatar + ')'}"></canvas>
         <canvas class="player-answer" width="1" height="1"
-                [ngClass]="{'player-answer-right': player.answer === currentQuestions[currentQuestion].rightAnswer,
-                            'player-answer-wrong': player.answer !== undefined && player.answer !== currentQuestions[currentQuestion].rightAnswer}"
+                [ngClass]="{'zero': player.answer === 0 && currentQuestions[currentQuestion].type != QuestionType.rightPicture,
+                            'one': player.answer === 1 && currentQuestions[currentQuestion].type != QuestionType.rightPicture,
+                            'two': player.answer === 2 && currentQuestions[currentQuestion].type != QuestionType.rightPicture,
+                            'three': player.answer === 3 && currentQuestions[currentQuestion].type != QuestionType.rightPicture}"
 
                 [ngStyle]="player.answer === currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/right-answer.png)'}
-                || player.answer !== undefined && {'background-image': 'url(assets/imgs/wrong-answer.png)'}"
+                        || player.answer !== currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/wrong-answer.png)'}"
 
                 *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{params: {time: playerAnswerAnimationDuration}}"></canvas>
       </div>
@@ -124,12 +126,12 @@
         <canvas [ngStyle]="{'background-image': 'url(' + getPic(currentPicture) + ')'}"></canvas>
   </div>
 
-  <!--<ion-fab center bottom >
+  <ion-fab center bottom >
     <button ion-fab (click)="next()" *ngIf="showNext === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
       <ion-icon name="play"></ion-icon>
     </button>
     <button ion-fab (click)="exit()" *ngIf="showExit === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
       <ion-icon name="square"></ion-icon>
     </button>
-  </ion-fab>-->
+  </ion-fab>
 </ion-content>
