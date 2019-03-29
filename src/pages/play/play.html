@@ -1,20 +1,25 @@
-<ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/background.jpg)'}">
+<ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/background.jpg)'}" (tap)="setShowMenu($event)">
 
   <!--menu-->
-  <!--<div class="menu">
-    <div class="menu-title">Menu</div>
+  <div class="menu" *ngIf="showMenu === true" [@titleAnimation]>
+    <!--<div class="menu-title">Menu</div>-->
     <table>
       <tr class="fab-line">
         <td>
-          <ion-fab>
-            <button ion-fab (click)="next()">
+          <ion-fab *ngIf="pause === false">
+            <button ion-fab (click)="togglePause()">
               <ion-icon name="pause"></ion-icon>
+            </button>
+          </ion-fab>
+          <ion-fab *ngIf="pause === true">
+            <button ion-fab (click)="togglePause()">
+              <ion-icon name="play"></ion-icon>
             </button>
           </ion-fab>
         </td>
         <td>
           <ion-fab>
-            <button ion-fab (click)="next()">
+            <button ion-fab (click)="closeMenu()">
               <ion-icon name="close"></ion-icon>
             </button>
           </ion-fab>
@@ -29,17 +34,18 @@
       </tr>
       <tr>
         <td>
-          <div>Pause</div>
+          <div *ngIf="pause === false">Pause</div>
+          <div *ngIf="pause === true">Resume</div>
         </td>
         <td>
-          <div>Close menu</div>
+          <div>Back</div>
         </td>
         <td>
           <div>Exit</div>
         </td>
       </tr>
     </table>
-  </div>-->
+  </div>
 
   <!--General Texts and title Zone-->
   <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="network-info wifi">
