@@ -60,7 +60,11 @@
     The quiz will start shortly...<br><br>
     Play now by connecting to the Wifi above<br>
     and follow the instructions on the webpage.<br><br>
-    :)
+    {{startMessage}}
+  </div>
+
+  <div *ngIf="screenState === ScreenStateType.end" [@titleAnimation] class="end-message">
+    {{endMessage}}
   </div>
 
   <div class="title" *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle"

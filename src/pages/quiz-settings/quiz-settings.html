@@ -35,6 +35,14 @@
         <ion-label>Amount of pictures</ion-label>
         <ion-input type="number" min="1" placeholder="Number of pictures you want to be displayed" [(ngModel)]="settings.amountOfPicturesToShow"></ion-input>
       </ion-item>
+      <ion-item>
+      <ion-label>Welcome message</ion-label>
+        <ion-input type="text" placeholder="A short welcome message" [(ngModel)]="settings.startMessage"></ion-input>
+      </ion-item>
+      <ion-item>
+      <ion-label>End message</ion-label>
+        <ion-input type="text" placeholder="Message showing up at the end" [(ngModel)]="settings.endMessage"></ion-input>
+      </ion-item>
       </ion-item-group>
       <ion-item-group *ngIf="showAdvancedCounter > 2">
         <ion-item-divider>

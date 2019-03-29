@@ -227,6 +227,9 @@ export class PlayPage {
   private currentWifi: string;
   private currentIp: string;
 
+  private startMessage: string = DefaultQuizSettings.START_MESSAGE;
+  private endMessage: string = DefaultQuizSettings.END_MESSAGE;
+
   constructor(private platform: Platform,
               private navCtrl: NavController,
               private alertCtrl: AlertController,
@@ -264,6 +267,10 @@ export class PlayPage {
 
       if (this.quiz.settings.autoPlay !== undefined) {
         this.autoPlay = this.quiz.settings.autoPlay;
+      }
+
+      if (this.quiz.settings.startMessage !== undefined) {
+        this.startMessage = this.quiz.settings.startMessage;
       }
     }
 

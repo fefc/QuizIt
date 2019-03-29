@@ -5,6 +5,8 @@ export namespace DefaultQuizSettings {
     export const SHOW_NEXT_DELAY: number = 4000;
     export const AMOUNT_OF_PICUTRES_TO_SHOW: number = 8;
     export const AUTO_PLAY: boolean = true;
+    export const START_MESSAGE: string = ":)";
+    export const END_MESSAGE: string = "The End";
 }
 
 export interface QuizSettings {
@@ -13,5 +15,7 @@ export interface QuizSettings {
   playerAnswerAnimationDuration?: number,
   showNextDelay?: number,
   amountOfPicturesToShow?: number,
-  autoPlay?: boolean
+  autoPlay?: boolean,
+  startMessage?: string,
+  endMessage?: string,
 }
