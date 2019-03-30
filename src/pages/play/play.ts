@@ -319,7 +319,7 @@ export class PlayPage {
 
         let toast = this.toastCtrl.create({
           message: 'Click screen twice to open menu',
-          duration: 3000
+          duration: 5000
         });
         toast.present();
 
@@ -688,12 +688,6 @@ export class PlayPage {
 
       if ( this.showMenuCounter >= 2 ) {
         this.showMenu = true;
-      } else {
-        let toast = this.toastCtrl.create({
-          message: 'Click screen one more time to show menu',
-          duration: 2000
-        });
-        toast.present();
       }
 
       setTimeout(() => { this.showMenuCounter = 0; }, 600);
