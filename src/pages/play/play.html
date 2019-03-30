@@ -1,4 +1,4 @@
-<ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/background.jpg)'}" (tap)="setShowMenu($event)">
+<ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/backgrounds/' + backgroundImage + ')'}" (tap)="setShowMenu($event)">
 
   <!--menu-->
   <div class="menu" *ngIf="showMenu === true" [@titleAnimation]>

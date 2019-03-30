@@ -56,6 +56,10 @@ export class QuizSettingsPage {
     if (this.settings.endMessage === undefined) {
       this.settings.endMessage = DefaultQuizSettings.END_MESSAGE;
     }
+
+    if (this.settings.backgroundImage === undefined) {
+      this.settings.backgroundImage = DefaultQuizSettings.BACKGROUND_IMAGE;
+    }
   }
 
   enableSaveButton() {
@@ -119,6 +123,10 @@ export class QuizSettingsPage {
         newSettings.endMessage = this.settings.endMessage;
       }
 
+      if (this.settings.backgroundImage !== DefaultQuizSettings.BACKGROUND_IMAGE) {
+        newSettings.backgroundImage = this.settings.backgroundImage;
+      }
+
       this.viewCtrl.dismiss({settings: newSettings});
     }
   }
@@ -133,6 +141,7 @@ export class QuizSettingsPage {
       this.settings.startMessage = DefaultQuizSettings.START_MESSAGE;
       this.settings.autoPlay = DefaultQuizSettings.AUTO_PLAY;
       this.settings.endMessage = DefaultQuizSettings.END_MESSAGE;
+      this.settings.backgroundImage = DefaultQuizSettings.BACKGROUND_IMAGE;
   }
 
   showAdvanced() {

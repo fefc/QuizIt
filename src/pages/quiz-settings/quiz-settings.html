@@ -43,6 +43,13 @@
       <ion-label>End message</ion-label>
         <ion-input type="text" placeholder="Message showing up at the end" [(ngModel)]="settings.endMessage"></ion-input>
       </ion-item>
+      <ion-item>
+        <ion-label>Background</ion-label>
+        <ion-select [(ngModel)]="settings.backgroundImage" interface="popover">
+          <ion-option value="0.jpg">Blur</ion-option>
+          <ion-option value="1.jpg">Geometry</ion-option>
+        </ion-select>
+      </ion-item>
       </ion-item-group>
       <ion-item-group *ngIf="showAdvancedCounter > 2">
         <ion-item-divider>

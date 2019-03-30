@@ -7,6 +7,7 @@ export namespace DefaultQuizSettings {
     export const AUTO_PLAY: boolean = true;
     export const START_MESSAGE: string = ":)";
     export const END_MESSAGE: string = "The End";
+    export const BACKGROUND_IMAGE: string = "0.jpg";
 }
 
 export interface QuizSettings {
@@ -18,4 +19,5 @@ export interface QuizSettings {
   autoPlay?: boolean,
   startMessage?: string,
   endMessage?: string,
+  backgroundImage?: string,
 }

@@ -230,6 +230,8 @@ export class PlayPage {
   private startMessage: string = DefaultQuizSettings.START_MESSAGE;
   private endMessage: string = DefaultQuizSettings.END_MESSAGE;
 
+  private backgroundImage: string = DefaultQuizSettings.BACKGROUND_IMAGE;
+
   constructor(private platform: Platform,
               private navCtrl: NavController,
               private alertCtrl: AlertController,
@@ -271,6 +273,10 @@ export class PlayPage {
 
       if (this.quiz.settings.startMessage !== undefined) {
         this.startMessage = this.quiz.settings.startMessage;
+      }
+
+      if (this.quiz.settings.backgroundImage !== undefined) {
+        this.backgroundImage = this.quiz.settings.backgroundImage;
       }
     }
 
