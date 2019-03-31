@@ -41,12 +41,12 @@ enum ScreenStateType {
       'titleAnimation', [
         transition(':enter', [
           style({transform: 'scale(0)', opacity: 0}),
-          animate('500ms', style({transform: 'scale(1)', opacity: 1}))
-        ]),
+          animate('{{time}}ms', style({transform: 'scale(1)', opacity: 1}))
+        ], { params: { time: 600 } }),
         transition(':leave', [
           style({transform: 'scale(1)', opacity: 1}),
-          animate('500ms', style({transform: 'scale(0)', opacity: 0}))
-        ])
+          animate('{{time}}ms', style({transform: 'scale(0)', opacity: 0}))
+        ], { params: { time: 600 } })
       ]),
       trigger(
       'questionAnimation' , [
@@ -65,8 +65,8 @@ enum ScreenStateType {
           style({opacity: 0}),
           animate('{{time}}ms',
             keyframes([
-              style({opacity: 0, offset: 0.029}),
-              style({opacity: 1, offset: 0.03}),
+              style({opacity: 0, offset: 0.029 }),
+              style({opacity: 1, offset: 0.030 }),
               style({width: 0, offset: 1}),
             ])
           )
@@ -87,12 +87,12 @@ enum ScreenStateType {
       'pictureInOutAnimation' , [
         transition(':enter', [
           style({transform: 'rotate3d(1, 1, 0, -90deg)', transformOrigin: "0 92.5vh", opacity: 0}),
-          animate('600ms', style({transform: 'none', opacity: 1}))
-        ]),
+          animate('{{time}}ms', style({transform: 'none', opacity: 1}))
+        ], { params: { time: 600 } }),
         transition(':leave', [
           style({transform: 'none', transformOrigin: "72vw 92.5vh", opacity: 1}),
-          animate('600ms', style({transform: 'rotate3d(1, 0, 1, -90deg)', opacity: 0}))
-        ]),
+          animate('{{time}}ms', style({transform: 'rotate3d(1, 0, 1, -90deg)', opacity: 0}))
+        ], { params: { time: 600 } }),
       ]),
       trigger(
       'pictureTransitionAnimation', [
@@ -258,6 +258,7 @@ export class PlayPage {
       if (this.quiz.settings.timeBarAnimationDuration !== undefined) {
         this.timeBarAnimationDuration = this.quiz.settings.timeBarAnimationDuration;
         this.fullTimeBarAnimationDuration = this.timeBarAnimationDuration + this.commonAnimationDuration;
+        this.currentPictureStayDuration = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW);
       }
 
       if (this.quiz.settings.playerAnswerAnimationDuration !== undefined) {
@@ -696,7 +697,7 @@ export class PlayPage {
   togglePause() {
     this.pause = !this.pause;
   }
-  
+
   /* this will be executed when view is poped, either by exit() or by back button */
   ionViewWillUnload() {
     this.remoteButtonsRequestsSubscription.unsubscribe();
@@ -747,7 +748,7 @@ export class PlayPage {
         }
 
         this.ngZone.run(() => {
-          answeringPlayer.answer = parseInt(data.answer);
+          answeringPlayer.answer = Number(data.answer);
         });
       }
     } else {

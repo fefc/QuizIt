@@ -1,7 +1,7 @@
 <ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/backgrounds/' + backgroundImage + ')'}" (tap)="setShowMenu($event)">
 
   <!--menu-->
-  <div class="menu" *ngIf="showMenu === true" [@titleAnimation]>
+  <div class="menu" *ngIf="showMenu === true" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}">
     <!--<div class="menu-title">Menu</div>-->
     <table>
       <tr class="fab-line">
@@ -48,27 +48,27 @@
   </div>
 
   <!--General Texts and title Zone-->
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="network-info wifi">
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info wifi">
     Wifi: {{currentWifi}}
   </div>
 
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="network-info webpage">
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info webpage">
     http://{{currentIp}}:8080
   </div>
 
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation] class="start-message">
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
     The quiz will start shortly...<br><br>
     Play now by connecting to the Wifi above<br>
     and follow the instructions on the webpage.<br><br>
     {{startMessage}}
   </div>
 
-  <div *ngIf="screenState === ScreenStateType.end" [@titleAnimation] class="end-message">
+  <div *ngIf="screenState === ScreenStateType.end" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="end-message">
     {{endMessage}}
   </div>
 
   <div class="title" *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle"
-        [@titleAnimation]="{params: {time: commonAnimationDuration}}">
+        [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}">
     <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
     <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{quiz.categorys[currentCategory].name}}</div>
   </div>
@@ -106,44 +106,44 @@
                 [ngStyle]="player.answer === currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/right-answer.png)'}
                         || player.answer !== currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/wrong-answer.png)'}"
 
-                *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{params: {time: playerAnswerAnimationDuration}}"></canvas>
+                *ngIf="screenState === ScreenStateType.displayPlayersAnswer" [@playerAnswerAnimation]="{value: '', params: {time: playerAnswerAnimationDuration}}"></canvas>
       </div>
     </div>
   </div>
 
   <!--Question & Timebar Zone-->
   <div class="time-bar" *ngIf="screenState === ScreenStateType.displayQuestion"
-        [@timeBarAnimation]="{params: {time: fullTimeBarAnimationDuration}}">
+        [@timeBarAnimation]="{value: '', params: {time: fullTimeBarAnimationDuration}}">
   </div>
 
   <div class="question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-        [@questionAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].question}}
+        [@questionAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].question}}
   </div>
 
   <!--Common answers Zone-->
   <div class="answers" *ngIf="currentQuestions[currentQuestion].type != QuestionType.rightPicture">
     <div class="zero" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[0]}}</div>
+          [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[0]}}</div>
     <div class="one" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[1]}}</div>
+          [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[1]}}</div>
     <div class="two" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[2]}}</div>
+          [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[2]}}</div>
     <div class="three" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-          [@answerAnimation]="{params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
+          [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
   </div>
 
   <!--Picture answers Zone-->
   <div class="picture" *ngIf="(screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer) && currentQuestions[currentQuestion].type == QuestionType.rightPicture"
-        [@pictureInOutAnimation]
+        [@pictureInOutAnimation]="{value: '', params: {time: commonAnimationDuration}}"
         [@pictureTransitionAnimation]="{value: currentPictureCounter, params: {time: commonAnimationDuration}}">
         <canvas [ngStyle]="{'background-image': 'url(' + getPic(currentPicture) + ')'}"></canvas>
   </div>
 
   <ion-fab center bottom >
-    <button ion-fab (click)="next()" *ngIf="showNext === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
+    <button ion-fab (click)="next()" *ngIf="showNext === true" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}">
       <ion-icon name="play"></ion-icon>
     </button>
-    <button ion-fab (click)="exit()" *ngIf="showExit === true" [@titleAnimation]="{params: {time: commonAnimationDuration}}">
+    <button ion-fab (click)="exit()" *ngIf="showExit === true" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}">
       <ion-icon name="square"></ion-icon>
     </button>
   </ion-fab>
