@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { ViewController, ToastController, NavParams } from 'ionic-angular';
 
-import { Quiz } from '../../models/quiz';
 import { QuizSettings } from '../../models/quiz-settings';
 import { DefaultQuizSettings } from '../../models/quiz-settings';
 

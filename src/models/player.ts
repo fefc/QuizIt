@@ -1,10 +1,3 @@
-enum Role {
-  Administrator = 0,
-  Editor = 1,
-  Player = 2,
-  Speeker = 3
-}
-
 export interface Player {
   readonly uuid: string,
   readonly nickname: string,

@@ -212,9 +212,9 @@ export class PlayPage {
 
   private screenState: ScreenStateType;
 
-  private showNext: boolean;
-  private showMenu: boolean;
-  private showExit: boolean;
+  private showNext: boolean; //for use in Angular html
+  private showMenu: boolean; //for use in Angular html
+  private showExit: boolean; //for use in Angular html
   private showMenuCounter: number;
 
   private pause: boolean;
@@ -229,13 +229,13 @@ export class PlayPage {
             port: 8080,
             localhost_only: false };
 
-  private currentWifi: string;
-  private currentIp: string;
+  private currentWifi: string; //for use in Angular html
+  private currentIp: string; //for use in Angular html
 
-  private startMessage: string = DefaultQuizSettings.START_MESSAGE;
-  private endMessage: string = DefaultQuizSettings.END_MESSAGE;
+  private startMessage: string = DefaultQuizSettings.START_MESSAGE; //for use in Angular html
+  private endMessage: string = DefaultQuizSettings.END_MESSAGE; //for use in Angular html
 
-  private backgroundImage: string = DefaultQuizSettings.BACKGROUND_IMAGE;
+  private backgroundImage: string = DefaultQuizSettings.BACKGROUND_IMAGE; //for use in Angular html
 
   constructor(private platform: Platform,
               private navCtrl: NavController,
@@ -487,12 +487,13 @@ export class PlayPage {
   }
 
   next() {
+    var player: Player;
     this.showNext = false;
 
     if (this.screenState === ScreenStateType.playersJoining) {
       this.screenState = ScreenStateType.displayTitle;
 
-      for (var player of this.players) {
+      for (player of this.players) {
         player.points = 0;
       }
 
@@ -537,7 +538,7 @@ export class PlayPage {
     }
     else if (this.screenState === ScreenStateType.hideQuestion) {
 
-      for (var player of this.players) {
+      for (player of this.players) {
         player.answer = -1;
       }
 
