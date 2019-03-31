@@ -93,7 +93,10 @@
         <div class="nickname" [ngStyle]="{'font-size': '' + getPointsFontSize() + 'px'}" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.points}}</div>
       </div>
       <div class="avatar-container">
-        <canvas class="avatar" width="1" height="1" [ngStyle]="{'background-image': 'url(assets/imgs/' + player.avatar + ')'}"></canvas>
+        <canvas class="avatar" width="1" height="1"
+                [ngClass]="{'player-answered': player.answer > -1 && screenState === ScreenStateType.displayQuestion}"
+
+                [ngStyle]="{'background-image': 'url(assets/imgs/' + player.avatar + ')'}"></canvas>
         <canvas class="player-answer" width="1" height="1"
                 [ngClass]="{'zero': player.answer === 0 && currentQuestions[currentQuestion].type != QuestionType.rightPicture,
                             'one': player.answer === 1 && currentQuestions[currentQuestion].type != QuestionType.rightPicture,

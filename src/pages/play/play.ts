@@ -1,8 +1,10 @@
-import { Component, NgZone, HostListener } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { Platform, AlertController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
 import { Subscription } from "rxjs/Subscription";
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
@@ -17,6 +19,8 @@ import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 import { Player } from '../../models/player';
 
+import { Buzzer } from '../../models/buzzers';
+import { BuzzersConstants } from '../../models/buzzers';
 
 enum ScreenStateType {
   playersJoining,
@@ -187,6 +191,7 @@ enum ScreenStateType {
 })
 
 export class PlayPage {
+  private menuTapMessageDuration: number = 6000;
   private commonAnimationDuration: number = DefaultQuizSettings.COMMON_ANIMATION_DURATION;
   private timeBarAnimationDuration: number = DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION;
   private fullTimeBarAnimationDuration: number = this.timeBarAnimationDuration + this.commonAnimationDuration;
@@ -217,7 +222,7 @@ export class PlayPage {
   private autoPlay: boolean = DefaultQuizSettings.AUTO_PLAY;
 
   private httpdSubscription: Subscription;
-  private requestsSubscription: Subscription;
+  private remoteButtonsRequestsSubscription: Subscription;
 
   private httpdOptions: HttpdOptions = {
             www_root: 'httpd', // relative path to app's www directory
@@ -280,15 +285,15 @@ export class PlayPage {
       }
     }
 
-    /*this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: 0},
+    this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
                     {uuid: "1", nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: -1},
-                    {uuid: "2", nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: 2},
-                    {uuid: "3", nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: 3},
-                    {uuid: "4", nickname: "Four", avatar: "Happy_Girl.png", initialPosition: 4, previousPosition: 4, actualPosition: 4, points: null, answer: 0},
-                    {uuid: "5", nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: 1},
-                    {uuid: "6", nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: 2},
-                    {uuid: "7", nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: 3},];
-                    */
+                    {uuid: "2", nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: -1},
+                    {uuid: "3", nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: -1},
+                    {uuid: "4", nickname: "Four", avatar: "Happy_Girl.png", initialPosition: 4, previousPosition: 4, actualPosition: 4, points: null, answer: -1},
+                    {uuid: "5", nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: -1},
+                    {uuid: "6", nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: -1},
+                    {uuid: "7", nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: -1},];
+
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -312,14 +317,14 @@ export class PlayPage {
         this.currentPictureCounter = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
-        this.players = [];
+        //this.players = [];
 
         this.screenState = ScreenStateType.playersJoining;
-        setTimeout(() => this.setShowNext(), this.showNextDelay);
+        setTimeout(() => this.setShowNext(), this.menuTapMessageDuration);
 
         let toast = this.toastCtrl.create({
           message: 'Click screen twice to open menu',
-          duration: 5000
+          duration: this.menuTapMessageDuration
         });
         toast.present();
 
@@ -410,84 +415,74 @@ export class PlayPage {
             });
 
           /* Setup httpd stuff */
-          this.requestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => {
-            if (data.uri === "/addPlayer" && this.screenState === ScreenStateType.playersJoining) {
-              let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
-
-              this.httpd.setRequestResponse({uuid: newPlayer ? newPlayer.uuid : undefined }).catch(() => {
-                console.log("Could not setRequestResponse for /addPlayer.");
-              });
-
-              if (newPlayer) {
-                this.ngZone.run(() => {
-                  this.players.push(newPlayer);
-                });
-              }
-            } else if (data.uri === "/answer" && this.screenState === ScreenStateType.displayQuestion) {
-              let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
-
-              this.httpd.setRequestResponse({success: answeringPlayer ? true : false }).catch(() => {
-                console.log("Could not setRequestResponse for /answer.");
-              });
-
-              if (answeringPlayer) {
-                this.ngZone.run(() => {
-                  answeringPlayer.answer = parseInt(data.answer);
-                });
-              }
-            } else {
-              this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
-                console.log("Could not setRequestResponse for some useless case.");
-              });
-            }
-          }, (error) => {
+          this.remoteButtonsRequestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => this.handleHttpdEvent(data), (error) => {
             console.log("Could not attach request listener.");
           });
 
-          this.httpdSubscription = this.httpd.startServer(this.httpdOptions).subscribe((data) => {
-            console.log("Successfully started server.");
-          }, (error) => {
+          this.httpdSubscription = this.httpd.startServer(this.httpdOptions).subscribe((data) => {console.log("Successfully started server.");}, (error) => {
             console.log("Could not sstart server.");
           });
+
+        } else {
+          //We are one a web browser so it is intended to be used with buzz buzzers, so we need to listen to keyboard events
+          this.remoteButtonsRequestsSubscription = Observable.fromEvent(document, 'keypress').subscribe((e: any) => this.handleKeyboardEvent(e), (error) => {
+            console.log("Could not attach request listener.");});
         }
       }
     }
   }
 
   addPlayer(nickname: string, avatar: string) {
-    if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
-      let newPlayer: Player;
-      let uuid: string = this.uuidv4();
+    if (this.screenState === ScreenStateType.playersJoining) {
+      if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
+        let newPlayer: Player;
+        let uuid: string = this.uuidv4();
 
-      while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
-        uuid = this.uuidv4();
+        while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
+          uuid = this.uuidv4();
+        }
+
+        newPlayer = {
+          uuid: uuid,
+          nickname: nickname,
+          avatar: avatar,
+          initialPosition: this.players.length,
+          previousPosition: this.players.length,
+          actualPosition: this.players.length,
+          answer: undefined
+        };
+
+        return newPlayer;
       }
-
-      newPlayer = {
-        uuid: uuid,
-        nickname: nickname,
-        avatar: avatar,
-        initialPosition: this.players.length,
-        previousPosition: this.players.length,
-        actualPosition: this.players.length,
-        answer: undefined
-      };
-
-      return newPlayer;
     }
+
     return undefined;
   }
 
   getAnsweringPlayer(uuid: string) {
-    let player: Player = this.players.find((p) => p.uuid === uuid);
+    if (this.screenState === ScreenStateType.displayQuestion) {
+      let player: Player = this.players.find((p) => p.uuid === uuid);
 
-    if (player) {
-      if (player.answer === -1) {
-        return player;
+      if (player) {
+        if (player.answer === -1) {
+          return player;
+        }
       }
     }
 
     return undefined;
+  }
+
+  checkIfRightRemoteButtonUsed(button: number) {
+    if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+      if (button >= 4) {
+        return true;
+      }
+    } else {
+      if (button > -1 && button < this.currentQuestions[this.currentQuestion].answers.length) {
+        return true;
+      }
+    }
   }
 
   next() {
@@ -701,11 +696,13 @@ export class PlayPage {
   togglePause() {
     this.pause = !this.pause;
   }
+  
   /* this will be executed when view is poped, either by exit() or by back button */
   ionViewWillUnload() {
+    this.remoteButtonsRequestsSubscription.unsubscribe();
+
     if (this.platform.is('android')) {
       /* disable httpd */
-      this.requestsSubscription.unsubscribe();
       this.httpdSubscription.unsubscribe();
 
       /* Unlock screen orientation */
@@ -722,9 +719,65 @@ export class PlayPage {
     }
   }
 
-  @HostListener('document:keypress', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    console.log(event.key);
+  handleHttpdEvent(data: any) {
+    if (data.uri === "/addPlayer") {
+      let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
+
+      this.httpd.setRequestResponse({uuid: newPlayer ? newPlayer.uuid : undefined }).catch(() => {
+        console.log("Could not setRequestResponse for /addPlayer.");
+      });
+
+      if (newPlayer) {
+        this.ngZone.run(() => {
+          this.players.push(newPlayer);
+        });
+      }
+    } else if (data.uri === "/answer") {
+      let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
+
+      this.httpd.setRequestResponse({success: answeringPlayer ? true : false }).catch(() => {
+        console.log("Could not setRequestResponse for /answer.");
+      });
+
+      if (answeringPlayer && this.checkIfRightRemoteButtonUsed(data.answer)) {
+
+        if (data.answer >= 4) {
+          //This is buzzer
+          data.answer = this.currentPicture;
+        }
+
+        this.ngZone.run(() => {
+          answeringPlayer.answer = parseInt(data.answer);
+        });
+      }
+    } else {
+      this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
+        console.log("Could not setRequestResponse for some useless case.");
+      });
+    }
+  }
+
+  handleKeyboardEvent(event: any) {
+    var buzzer: Buzzer = BuzzersConstants.KEYSETS.find((x) => x.keys.indexOf(event.key) > -1);
+    let answeringPlayer: Player;
+    var answer: number;
+
+    if (buzzer) {
+      answer = buzzer.keys.indexOf(event.key);
+      answeringPlayer = this.getAnsweringPlayer(buzzer.uuid);
+
+      if (answeringPlayer  && this.checkIfRightRemoteButtonUsed(answer)) {
+        if (answer >= buzzer.keys.length - 1) {
+          //This is buzzer
+          answer = this.currentPicture;
+        }
+
+        this.ngZone.run(() => {
+          console.log(answer);
+          answeringPlayer.answer = answer;
+        });
+      }
+    }
   }
 
   //From https://stackoverflow.com/a/2117523
