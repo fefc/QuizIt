@@ -60,11 +60,15 @@
             <button ion-fab (click)="deletePicture(i)"><ion-icon name="trash"></ion-icon></button>
           </ion-fab-list>
         </ion-fab>
-        <img [src]="answer"/>
+        <img [src]="pictures[i]"/>
       </div>
     </div>
     <div padding *ngIf="question.type === QuestionType.rightPicture && question.answers.length < maxPictures">
       <button ion-button block color="primary" (click)="openImagePicker()">Add pictures</button>
+      <!-- Picture selector for browser -->
+       <div ng-controller="myCtrl">
+         <input #fileInput type="file" style="display: none" (change)="getBrowserImages()" accept="image/png, image/jpeg" multiple/>
+       </div>
     </div>
   </div>
 </ion-content>
