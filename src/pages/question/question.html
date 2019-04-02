@@ -68,6 +68,7 @@
       <!-- Picture selector for browser -->
        <div ng-controller="myCtrl">
          <input #fileInput type="file" style="display: none" (change)="getBrowserImages()" accept="image/png, image/jpeg" multiple/>
+         <input #fileInputReplace type="file" style="display: none" (change)="getBrowserReplaceImage()" accept="image/png, image/jpeg"/>
        </div>
     </div>
   </div>

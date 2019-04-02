@@ -28,6 +28,9 @@ export class QuestionPage {
   private pictures: Array<SafeUrl>;
 
   @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
+  @ViewChild('fileInputReplace') fileInputReplace: ElementRef; //Picture selector for browser
+
+  private replacePictureIndex: number;
 
   constructor(private platform: Platform,
               public viewCtrl: ViewController,
@@ -161,6 +164,18 @@ export class QuestionPage {
     this.question.rightAnswer = val;
   }
 
+  openImagePicker() {
+    if (this.platform.is('android')) {
+      this.openMobileImagePicker();
+    } else {
+      this.openBrowserImagePicker();
+    }
+  }
+
+  openBrowserImagePicker(){
+    this.fileInput.nativeElement.click();
+  };
+
   replacePicture(val: number) {
     if (this.platform.is('android')) {
       this.replacePictureMobile(val);
@@ -169,35 +184,9 @@ export class QuestionPage {
     }
   }
 
-  replacePictureMobile(val: number) {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:1920, height: 1080}).then((results) => {
-      for (var i = 0; i < results.length; i++) {
-        this.question.answers[val] = decodeURIComponent(results[i]);
-        this.renderPicture(this.file.cacheDirectory, results[i].replace(this.file.cacheDirectory, ''), val);
-      }
-    }).catch(() => {
-      alert('Could not get images.');
-    });
-  }
-
   replacePictureBrowser(val: number) {
-    alert("ToBeDone");
-  }
-
-  deletePicture(val: number) {
-    if (this.question.rightAnswer === val) {
-      this.question.rightAnswer = -1;
-    }
-    this.question.answers.splice(val, 1);
-    this.pictures.splice(val, 1);
-  }
-
-  openImagePicker() {
-    if (this.platform.is('android')) {
-      this.openMobileImagePicker();
-    } else {
-      this.openBrowserImagePicker();
-    }
+    this.fileInputReplace.nativeElement.click();
+    this.replacePictureIndex = val;
   }
 
   //https://stackoverflow.com/a/52970316
@@ -212,9 +201,16 @@ export class QuestionPage {
     });
   }
 
-  openBrowserImagePicker(){
-    this.fileInput.nativeElement.click();
-  };
+  replacePictureMobile(val: number) {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:1920, height: 1080}).then((results) => {
+      if (results.length === 1) {
+        this.question.answers[val] = decodeURIComponent(results[0]);
+        this.renderPicture(this.file.cacheDirectory, results[0].replace(this.file.cacheDirectory, ''), val);
+      }
+    }).catch(() => {
+      alert('Could not get images.');
+    });
+  }
 
   getBrowserImages() {
     let files: Array<any> = this.fileInput.nativeElement.files;
@@ -238,6 +234,32 @@ export class QuestionPage {
         };
       }
     }
+  }
+
+  getBrowserReplaceImage() {
+    console.log("ok", this.replacePictureIndex);
+    let file: any = this.fileInputReplace.nativeElement.files[0];
+    console.log(file);
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = (e: any) => {
+      var filename: string = this.uuidv4() + file.name.split('.').pop();
+
+      this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
+        this.question.answers[this.replacePictureIndex] = this.file.cacheDirectory + filename;
+        this.renderPicture(this.file.cacheDirectory, filename, this.replacePictureIndex);
+      }).catch((error) => {
+        alert(error);
+      });
+    };
+  }
+
+  deletePicture(val: number) {
+    if (this.question.rightAnswer === val) {
+      this.question.rightAnswer = -1;
+    }
+    this.question.answers.splice(val, 1);
+    this.pictures.splice(val, 1);
   }
 
   enableSaveButton() {
@@ -282,7 +304,7 @@ export class QuestionPage {
 
   renderPicture(directory: string, fileName: string, position?: number) {
     this.file.readAsDataURL(directory, fileName).then((picture) => {
-      if (position) {
+      if (position >= 0) {
         this.pictures[position] = this.sanitizer.bypassSecurityTrustUrl(picture);
       } else {
         this.pictures.push(this.sanitizer.bypassSecurityTrustUrl(picture));
