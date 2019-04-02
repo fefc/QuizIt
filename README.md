@@ -20,16 +20,17 @@ If you are running the app in a web browser then you will need Sony Buzz Buzzers
 video example
 
 ## Supported devices
-Android (>5.0)
-Web browser (Firefox only for now)
+* Android (>5.0)
+* Web browser (Firefox only for now)
 
 ## How to install it
-Android devices: download the .apk
-Web browser:
+### Android devices
+download the .apk
 
+### Web browser:
+Not so sure right now
 
 ## Development
-
 This app is developed with the ionic v3 framework, using cordova for device compilation. Most of the libraries are ionic native, except for WifiWizard2 and httpd which as been customized.
 
 ## License
