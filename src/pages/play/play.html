@@ -136,7 +136,7 @@
   <div class="picture" *ngIf="(screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer) && currentQuestions[currentQuestion].type == QuestionType.rightPicture"
         [@pictureInOutAnimation]="{value: '', params: {time: commonAnimationDuration}}"
         [@pictureTransitionAnimation]="{value: currentPictureCounter, params: {time: commonAnimationDuration}}">
-        <canvas [ngStyle]="{'background-image': 'url(' + getPic(currentPicture) + ')'}"></canvas>
+        <canvas [style.background-image]="currentPictures[currentPicture]"></canvas>
   </div>
 
   <ion-fab center bottom >

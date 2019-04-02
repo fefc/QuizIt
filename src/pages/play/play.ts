@@ -1,4 +1,5 @@
 import { Component, NgZone } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, AlertController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
@@ -26,8 +27,10 @@ enum ScreenStateType {
   playersJoining,
   displayTitle,
   hideTitle,
+  beforeDisplayCategoryTitle,
   displayCategoryTitle,
   hideCategoryTitle,
+  beforeDisplayNextQuestion,
   displayQuestion,
   displayPlayersAnswer,
   hideQuestion,
@@ -195,8 +198,10 @@ export class PlayPage {
   private commonAnimationDuration: number = DefaultQuizSettings.COMMON_ANIMATION_DURATION;
   private timeBarAnimationDuration: number = DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION;
   private fullTimeBarAnimationDuration: number = this.timeBarAnimationDuration + this.commonAnimationDuration;
-  private showNextDelay: number = DefaultQuizSettings.SHOW_NEXT_DELAY;
   private playerAnswerAnimationDuration: number = DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION;
+  private currentPictureStayDuration: number = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW); //The dividing number is the number of picture I want to see
+  private showNextDelay: number = DefaultQuizSettings.SHOW_NEXT_DELAY;
+
   private ScreenStateType = ScreenStateType; //for use in Angluar html
   private QuestionType = QuestionType; //for use in Angular html
   private quiz: Quiz;
@@ -206,7 +211,7 @@ export class PlayPage {
 
   private currentPicture: number;
   private currentPictureCounter: number;
-  private currentPictureStayDuration: number = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW); //The dividing number is the number of picture I want to see
+  private currentPictures: Array<SafeUrl>;
 
   private players: Array<Player>;
 
@@ -246,6 +251,7 @@ export class PlayPage {
               private httpd: Httpd,
               private androidFullScreen: AndroidFullScreen,
               private screenOrientation: ScreenOrientation,
+              private sanitizer:DomSanitizer,
               params: NavParams) {
     this.quiz = params.data.quiz;
 
@@ -491,12 +497,13 @@ export class PlayPage {
     this.showNext = false;
 
     if (this.screenState === ScreenStateType.playersJoining) {
-      this.screenState = ScreenStateType.displayTitle;
+      this.currentCategory = -1;
 
       for (player of this.players) {
         player.points = 0;
       }
 
+      this.screenState = ScreenStateType.displayTitle;
       this.handleNextStep();
     }
     else if (this.screenState === ScreenStateType.displayTitle) {
@@ -504,21 +511,67 @@ export class PlayPage {
       setTimeout(() => this.next(), this.commonAnimationDuration);
     }
     else if (this.screenState === ScreenStateType.hideTitle) {
-      this.screenState = ScreenStateType.displayCategoryTitle;
+      this.currentCategory++;
 
-      this.handleNextStep();
+      if (this.currentCategory < this.quiz.categorys.length) {
+        this.screenState = ScreenStateType.displayCategoryTitle;
+        this.handleNextStep();
+      }
+      else {
+        this.screenState = ScreenStateType.end;
+        setTimeout(() => this.setShowExit(), this.showNextDelay);
+      }
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
       this.screenState = ScreenStateType.hideCategoryTitle;
       setTimeout(() => this.next(), this.commonAnimationDuration);
     }
     else if (this.screenState === ScreenStateType.hideCategoryTitle) {
-      this.screenState = ScreenStateType.displayQuestion;
-      setTimeout(() => this.next(), this.fullTimeBarAnimationDuration);
+      this.currentQuestion = -1;
+      this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
 
-      if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
-        this.currentPictureCounter = 0;
-        setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration + (this.commonAnimationDuration / 2));
+      this.screenState = ScreenStateType.beforeDisplayNextQuestion;
+      this.next();
+    }
+    else if (this.screenState === ScreenStateType.beforeDisplayNextQuestion) {
+      this.currentQuestion++;
+
+      this.currentPicture = 0;
+      this.currentPictureCounter = 0;
+      this.currentPictures = [];
+
+      for (player of this.players) {
+        player.answer = -1;
+      }
+
+      if (this.currentQuestion < this.currentQuestions.length) {
+        var promises = [];
+
+        if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+          for (let i: number = 0; i < this.currentQuestions[this.currentQuestion].answers.length; i++) {
+            promises.push(this.file.readAsDataURL(this.file.dataDirectory, this.getPicturePath(this.currentQuestions[this.currentQuestion], i)));
+          }
+        }
+
+        Promise.all(promises).then((pictures) => {
+          for (let picture of pictures) {
+            console.log(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
+            this.currentPictures.push(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
+          }
+
+          this.screenState = ScreenStateType.displayQuestion;
+          setTimeout(() => this.next(), this.fullTimeBarAnimationDuration);
+
+          if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+            setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration + (this.commonAnimationDuration / 2));
+          }
+        }).catch(() => {
+          console.log("Something went wrong when reading pictures.");
+        });
+      }
+      else {
+        this.screenState = ScreenStateType.hideTitle;
+        setTimeout(() => this.next(), this.commonAnimationDuration);
       }
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
@@ -529,37 +582,15 @@ export class PlayPage {
       }
 
       setTimeout(() => this.updatePlayersPointsAndPosition(), this.playerAnswerAnimationDuration * 2);
-
       this.handleNextStep();
     }
     else if (this.screenState === ScreenStateType.displayPlayersAnswer) {
       this.screenState = ScreenStateType.hideQuestion;
-      setTimeout(() => this.next(), this.commonAnimationDuration * 2);
+      setTimeout(() => this.next(), this.commonAnimationDuration);
     }
     else if (this.screenState === ScreenStateType.hideQuestion) {
-
-      for (player of this.players) {
-        player.answer = -1;
-      }
-
-      if (this.currentQuestion < this.currentQuestions.length - 1) {
-        this.currentQuestion++;
-        this.screenState = ScreenStateType.displayQuestion;
-        setTimeout(() => this.next(), this.fullTimeBarAnimationDuration);
-      }
-      else {
-        if (this.currentCategory < this.quiz.categorys.length - 1) {
-          this.currentCategory++;
-          this.currentQuestion = 0;
-          this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
-          this.screenState = ScreenStateType.hideTitle;
-          setTimeout(() => this.next(), this.commonAnimationDuration);
-        }
-        else {
-          this.screenState = ScreenStateType.end;
-          setTimeout(() => this.setShowExit(), this.showNextDelay);
-        }
-      }
+      this.screenState = ScreenStateType.beforeDisplayNextQuestion;
+      setTimeout(() => this.next(), this.commonAnimationDuration);
     }
   }
 
@@ -640,8 +671,8 @@ export class PlayPage {
     return this.quiz.questions.filter((question) => question.category.name === category.name);
   }
 
-  getAttachamentsDir(questionIndex: number) {
-    return this.file.dataDirectory + this.quiz.uuid + '/' + this.currentQuestions[questionIndex].uuid + '/';
+  getPicturePath(question: Question, answerIndex: number) {
+    return this.quiz.uuid + '/' + question.uuid + '/' + question.answers[answerIndex];
   }
 
   getAvatarWidth() {
@@ -661,6 +692,7 @@ export class PlayPage {
 
   displayPlayers() {
     return this.screenState === ScreenStateType.playersJoining
+          || this.screenState === ScreenStateType.beforeDisplayNextQuestion
           || this.screenState === ScreenStateType.displayQuestion
           || this.screenState === ScreenStateType.displayPlayersAnswer
           || this.screenState === ScreenStateType.hideQuestion
