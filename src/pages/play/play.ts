@@ -230,6 +230,8 @@ export class PlayPage {
   private currentQuestion: number;
   private currentQuestions: Array<Question>;
 
+  private currentQuestionStartDate: number;
+
   private currentPicture: number;
   private currentPictureCounter: number;
   private currentPictures: Array<SafeUrl>;
@@ -440,6 +442,7 @@ export class PlayPage {
 
           this.screenState = ScreenStateType.displayQuestion;
           this.displayPlayers = true;
+          this.currentQuestionStartDate = Date.now();
           setTimeout(() => this.next(), this.fullTimeBarAnimationDuration);
 
           if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
@@ -787,8 +790,9 @@ export class PlayPage {
       }
     } else if (data.uri === "/answer") {
       let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
+      let remainingMillis: number = (this.fullTimeBarAnimationDuration + this.commonAnimationDuration) - (Date.now() - this.currentQuestionStartDate);
 
-      this.httpd.setRequestResponse({success: answeringPlayer ? true : false }).catch(() => {
+      this.httpd.setRequestResponse({success: answeringPlayer ? true : false, remainingMillis: remainingMillis }).catch(() => {
         console.log("Could not setRequestResponse for /answer.");
       });
 
