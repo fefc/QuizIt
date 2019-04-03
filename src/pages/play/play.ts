@@ -272,7 +272,7 @@ export class PlayPage {
 
     this.players = [];
 
-    this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
+    /*this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
                     {uuid: "1", nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: -1},
                     {uuid: "2", nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: -1},
                     {uuid: "3", nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: -1},
@@ -280,6 +280,7 @@ export class PlayPage {
                     {uuid: "5", nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: -1},
                     {uuid: "6", nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: -1},
                     {uuid: "7", nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: -1},];
+                    */
 
     this.quiz = params.data.quiz;
 
@@ -505,14 +506,20 @@ export class PlayPage {
     }
   }
 
-  addPlayer(nickname: string, avatar: string) {
+  addPlayer(nickname: string, avatar: string, uuid?: string) {
     if (this.screenState === ScreenStateType.playersJoining) {
       if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
         let newPlayer: Player;
-        let uuid: string = this.uuidv4();
-
-        while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
+        if (uuid === undefined) {
           uuid = this.uuidv4();
+
+          while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
+            uuid = this.uuidv4();
+          }
+        } else {
+          if (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
+            return undefined;
+          }
         }
 
         newPlayer = {
@@ -522,7 +529,7 @@ export class PlayPage {
           initialPosition: this.players.length,
           previousPosition: this.players.length,
           actualPosition: this.players.length,
-          answer: undefined
+          answer: -1
         };
 
         return newPlayer;
@@ -533,24 +540,17 @@ export class PlayPage {
   }
 
   openPlayAddPlayerPage() {
-    let modal = this.modalCtrl.create(PlayAddPlayerPage);
+    let modal = this.modalCtrl.create(PlayAddPlayerPage,  {currentPlayers: this.players});
     modal.present();
-    /*modal.onDidDismiss(data => {
+    modal.onDidDismiss((data: Player) => {
+      console.log(data);
       if (data) {
-        let loading = this.loadingCtrl.create({
-          content: 'Creating Quiz...'
-        });
-
-        loading.present();
-
-        this.quizsProv.saveToStorage(data).then(() => {
-          loading.dismiss();
-        }).catch(() => {
-          loading.dismiss();
-          alert('Unable to create Quiz.');
-        });
+        let newPlayer: Player = this.addPlayer(data.nickname, data.avatar, data.uuid);
+        if (newPlayer) {
+          this.players.push(newPlayer);
+        }
       }
-    });*/
+    });
   }
 
   getAnsweringPlayer(uuid: string) {
