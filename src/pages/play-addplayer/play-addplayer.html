@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-navbar color="fulldark">
+    <ion-title>
+      Add Player
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    <ion-label color="primary" fixed>Nickname</ion-label>
+    <ion-input type="text" placeholder="What about Bob?" [(ngModel)]="newPlayer.nickname"></ion-input>
+  </ion-item>
+
+  <ion-slides loop="true" centeredSlides pager>
+    <ion-slide centeredSlides>
+      <img src="assets/imgs/avatars/Bunny.png">
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/imgs/avatars/Dog.png">
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/imgs/avatars/Duck_Guy.png">
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/imgs/avatars/Frankie.png">
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/imgs/avatars/Happy_Girl.png">
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/imgs/avatars/Mad_Guy.png">
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/imgs/avatars/Proog.png">
+    </ion-slide>
+    <ion-slide>
+      <img src="assets/imgs/avatars/Sintel.png">
+    </ion-slide>
+  </ion-slides>
+  
+  <p>Take an unused Buzzer, click any button to attribute the Buzzer to this player.</p>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar color="fulldark">
+    <ion-buttons end>
+      <button ion-button (click)="add()" [disabled]="!enableAddButton()">Add</button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

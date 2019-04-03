@@ -23,6 +23,7 @@ import { QuizSettingsPage } from '../pages/quiz-settings/quiz-settings';
 import { QuestionPage } from '../pages/question/question';
 
 import { PlayPage } from '../pages/play/play';
+import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { PlayPage } from '../pages/play/play';
     QuizQuestionsPage,
     QuizSettingsPage,
     QuestionPage,
-    PlayPage
+    PlayPage,
+    PlayAddPlayerPage
   ],
   imports: [
     BrowserModule,
@@ -48,7 +50,8 @@ import { PlayPage } from '../pages/play/play';
     QuizQuestionsPage,
     QuizSettingsPage,
     QuestionPage,
-    PlayPage
+    PlayPage,
+    PlayAddPlayerPage
   ],
   providers: [
     StatusBar,

@@ -1,6 +1,6 @@
 import { Component, NgZone } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Platform, AlertController, ActionSheetController, NavController, ToastController, NavParams } from 'ionic-angular';
+import { Platform, AlertController, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
@@ -22,6 +22,8 @@ import { Player } from '../../models/player';
 
 import { Buzzer } from '../../models/buzzers';
 import { BuzzersConstants } from '../../models/buzzers';
+
+import { PlayAddPlayerPage } from '../play-addplayer/play-addplayer';
 
 enum ScreenStateType {
   start,
@@ -244,6 +246,7 @@ export class PlayPage {
               private navCtrl: NavController,
               private alertCtrl: AlertController,
               private actionSheetCtrl: ActionSheetController,
+              public modalCtrl: ModalController,
               private toastCtrl: ToastController,
               private ngZone: NgZone,
               private file: File,
@@ -529,6 +532,27 @@ export class PlayPage {
     return undefined;
   }
 
+  openPlayAddPlayerPage() {
+    let modal = this.modalCtrl.create(PlayAddPlayerPage);
+    modal.present();
+    /*modal.onDidDismiss(data => {
+      if (data) {
+        let loading = this.loadingCtrl.create({
+          content: 'Creating Quiz...'
+        });
+
+        loading.present();
+
+        this.quizsProv.saveToStorage(data).then(() => {
+          loading.dismiss();
+        }).catch(() => {
+          loading.dismiss();
+          alert('Unable to create Quiz.');
+        });
+      }
+    });*/
+  }
+
   getAnsweringPlayer(uuid: string) {
     if (this.screenState === ScreenStateType.displayQuestion) {
       let player: Player = this.players.find((p) => p.uuid === uuid);
@@ -663,6 +687,12 @@ export class PlayPage {
 
       let actionSheet = this.actionSheetCtrl.create({
         buttons: [
+          {
+            text: 'Add player',
+            handler: () => {
+              this.openPlayAddPlayerPage();
+            }
+          },
           {
             text: this.pause === false ? 'Pause' : 'Play',
             icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
