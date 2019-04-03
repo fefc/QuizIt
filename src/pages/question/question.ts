@@ -229,7 +229,7 @@ export class QuestionPage {
             this.question.answers.push(this.file.cacheDirectory + filename);
             this.renderPicture(this.file.cacheDirectory, filename);
           }).catch((error) => {
-            alert(error);
+            console.log(error);
           });
         };
       }
