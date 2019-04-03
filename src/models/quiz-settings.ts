@@ -1,5 +1,5 @@
 export namespace DefaultQuizSettings {
-    export const COMMON_ANIMATION_DURATION: number = 600;
+    export const COMMON_ANIMATION_DURATION: number = 800;
     export const TIMEBAR_ANIMATION_DURATION: number = 20000;
     export const PLAYER_ANSWER_ANIMATION_DURATION: number = 300;
     export const SHOW_NEXT_DELAY: number = 4000;

@@ -114,8 +114,8 @@
   </div>
 
   <!--Question & Timebar Zone-->
-  <div class="time-bar" *ngIf="screenState === ScreenStateType.displayQuestion"
-        [@timeBarAnimation]="{value: '', params: {time: fullTimeBarAnimationDuration}}">
+  <div class="time-bar" *ngIf="displayTimeBar"
+        [@timeBarAnimation]="{value: '', params: {time: timeBarAnimationDuration}}">
   </div>
 
   <div class="question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"

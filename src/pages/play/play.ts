@@ -64,15 +64,8 @@ enum ScreenStateType {
       trigger(
       'timeBarAnimation' , [
         transition(':enter', [
-          style({opacity: 0}),
-          animate('{{time}}ms',
-            keyframes([
-              style({opacity: 0, offset: 0.029 }),
-              style({opacity: 1, offset: 0.030 }),
-              style({width: 0, offset: 1}),
-            ])
-          )
-        ], { params: { time: 20600 } })
+          animate('{{time}}ms', style({width: 0}))
+        ], { params: { time: 20000 } })
       ]),
       trigger(
       'answerAnimation' , [
@@ -196,7 +189,6 @@ export class PlayPage {
   private menuTapMessageDuration: number = 6000;
   private commonAnimationDuration: number = DefaultQuizSettings.COMMON_ANIMATION_DURATION;
   private timeBarAnimationDuration: number = DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION;
-  private fullTimeBarAnimationDuration: number = this.timeBarAnimationDuration + this.commonAnimationDuration;
   private playerAnswerAnimationDuration: number = DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION;
   private currentPictureStayDuration: number = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW); //The dividing number is the number of picture I want to see
   private showNextDelay: number = DefaultQuizSettings.SHOW_NEXT_DELAY;
@@ -210,6 +202,7 @@ export class PlayPage {
   private QuestionType = QuestionType; //for use in Angular html
 
   private screenState: ScreenStateType;
+  private displayTimeBar: boolean;
   private displayAnswers: boolean;
   private displayPictures: boolean;
   private displayPlayers: boolean;
@@ -307,7 +300,6 @@ export class PlayPage {
 
           if (this.quiz.settings.timeBarAnimationDuration !== undefined) {
             this.timeBarAnimationDuration = this.quiz.settings.timeBarAnimationDuration;
-            this.fullTimeBarAnimationDuration = this.timeBarAnimationDuration + this.commonAnimationDuration;
             this.currentPictureStayDuration = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW);
           }
 
@@ -441,9 +433,11 @@ export class PlayPage {
           }
 
           this.screenState = ScreenStateType.displayQuestion;
+          setTimeout(() => this.displayTimeBar = true, this.commonAnimationDuration);
+          
           this.displayPlayers = true;
           this.currentQuestionStartDate = Date.now();
-          setTimeout(() => this.next(), this.fullTimeBarAnimationDuration);
+          setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
 
           if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
             this.displayPictures = true;
@@ -471,6 +465,7 @@ export class PlayPage {
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
       this.screenState = ScreenStateType.displayPlayersAnswer;
+      this.displayTimeBar = false;
 
       if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture
           && this.currentPicture !== this.currentQuestions[this.currentQuestion].rightAnswer) {
@@ -790,7 +785,7 @@ export class PlayPage {
       }
     } else if (data.uri === "/answer") {
       let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
-      let remainingMillis: number = (this.fullTimeBarAnimationDuration + this.commonAnimationDuration) - (Date.now() - this.currentQuestionStartDate);
+      let remainingMillis: number = (this.timeBarAnimationDuration + this.commonAnimationDuration) - (Date.now() - this.currentQuestionStartDate);
 
       this.httpd.setRequestResponse({success: answeringPlayer ? true : false, remainingMillis: remainingMillis }).catch(() => {
         console.log("Could not setRequestResponse for /answer.");
