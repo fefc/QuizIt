@@ -218,6 +218,9 @@ export class PlayPage {
 
   private players: Array<Player>;
 
+  private displayQuestionTimer: any;
+  private switchPicturesTimer: any;
+
   private quiz: Quiz;
   private currentCategory: number;
   private currentQuestion: number;
@@ -410,6 +413,9 @@ export class PlayPage {
     else if (this.screenState === ScreenStateType.loadNextQuestion) {
       this.currentQuestion++;
 
+      this.displayQuestionTimer = undefined;
+      this.switchPicturesTimer  = undefined;
+
       for (player of this.players) {
         player.answer = -1;
       }
@@ -438,11 +444,11 @@ export class PlayPage {
 
           this.displayPlayers = true;
           this.currentQuestionStartDate = Date.now();
-          setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
+          this.displayQuestionTimer = setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
 
           if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
             this.displayPictures = true;
-            setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration + (this.commonAnimationDuration / 2));
+            this.switchPicturesTimer = setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration + (this.commonAnimationDuration / 2));
           } else {
             this.displayAnswers = true;
           }
@@ -582,7 +588,7 @@ export class PlayPage {
     }, this.commonAnimationDuration / 2);
 
     if ((this.currentPictureCounter + 1) * this.currentPictureStayDuration < this.timeBarAnimationDuration) {
-      setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration);
+      this.switchPicturesTimer = setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration);
     }
   }
 
@@ -647,7 +653,7 @@ export class PlayPage {
 
   setShowMenu() {
     if (this.showMenuCounter === 0) {
-      setTimeout(() => { this.showMenuCounter = 0; }, 600);
+      setTimeout(() => this.showMenuCounter = 0, 600);
     }
 
     this.showMenuCounter++;
@@ -841,8 +847,21 @@ export class PlayPage {
         }
 
         this.ngZone.run(() => {
-          console.log(answer);
           answeringPlayer.answer = answer;
+
+          /*if (!this.players.some((x) => x.answer === -1)) {
+            if(this.displayQuestionTimer) {
+              clearTimeout(this.displayQuestionTimer);
+              this.displayQuestionTimer = undefined;
+            }
+
+            if(this.switchPicturesTimer) {
+              clearTimeout(this.switchPicturesTimer);
+              this.switchPicturesTimer = undefined;
+            }
+
+            this.next();
+          }*/
         });
       }
     }
