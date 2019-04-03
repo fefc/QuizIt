@@ -1,6 +1,6 @@
 import { Component, NgZone } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Platform, AlertController, NavController, ToastController, NavParams } from 'ionic-angular';
+import { Platform, AlertController, ActionSheetController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
@@ -240,7 +240,8 @@ export class PlayPage {
   constructor(private platform: Platform,
               private navCtrl: NavController,
               private alertCtrl: AlertController,
-              public toastCtrl: ToastController,
+              private actionSheetCtrl: ActionSheetController,
+              private toastCtrl: ToastController,
               private ngZone: NgZone,
               private file: File,
               private httpd: Httpd,
@@ -434,7 +435,7 @@ export class PlayPage {
 
           this.screenState = ScreenStateType.displayQuestion;
           setTimeout(() => this.displayTimeBar = true, this.commonAnimationDuration);
-          
+
           this.displayPlayers = true;
           this.currentQuestionStartDate = Date.now();
           setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
@@ -645,23 +646,38 @@ export class PlayPage {
   }
 
   setShowMenu() {
-    if (this.showMenu === false) {
-      this.showMenuCounter++;
-
-      if ( this.showMenuCounter >= 2 ) {
-        this.showMenu = true;
-      }
-
+    if (this.showMenuCounter === 0) {
       setTimeout(() => { this.showMenuCounter = 0; }, 600);
     }
-  }
 
-  closeMenu() {
-    this.showMenu = false;
-  }
+    this.showMenuCounter++;
 
-  togglePause() {
-    this.pause = !this.pause;
+    if ( this.showMenuCounter >= 2 ) {
+      this.showMenuCounter = 0;
+
+      let actionSheet = this.actionSheetCtrl.create({
+        buttons: [
+          {
+            text: this.pause === false ? 'Pause' : 'Play',
+            icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
+            handler: () => {
+              this.pause = !this.pause;
+            }
+          },{
+            text: 'Exit',
+            icon: !this.platform.is('ios') ? 'square' : null,
+            handler: () => {
+              this.exit();
+            }
+          },{
+            text: 'Close',
+            icon: !this.platform.is('ios') ? 'close' : null,
+            role: 'cancel',
+          }
+        ]
+      });
+      actionSheet.present();
+    }
   }
 
   /* this will be executed when view is poped, either by exit() or by back button */
