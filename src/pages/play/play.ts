@@ -233,7 +233,7 @@ export class PlayPage {
   private currentPictures: Array<SafeUrl>;
 
   private httpdOptions: HttpdOptions = {
-            www_root: 'httpd', // relative path to app's www directory
+            www_root: 'assets/httpd', // relative path to app's www directory
             port: 8080,
             localhost_only: false };
 
@@ -676,7 +676,7 @@ export class PlayPage {
               this.exit();
             }
           },{
-            text: 'Close',
+            text: 'Close menu',
             icon: !this.platform.is('ios') ? 'close' : null,
             role: 'cancel',
           }

@@ -1,0 +1,276 @@
+* {
+  box-sizing: border-box;
+
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+          user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome and Opera */
+}
+
+input, input:before, input:after {
+    -webkit-user-select: initial;
+    -khtml-user-select: initial;
+    -moz-user-select: initial;
+    -ms-user-select: initial;
+    user-select: initial;
+   }
+
+body {
+  background-color: #222;
+}
+
+#bar {
+  left: 0;
+  top: 0;
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  flex-flow: row;
+  width: 100%;
+  background-color: #940000;
+  padding: 8px;
+  height: 56px;
+}
+
+.bar-title {
+  padding-left: 8px;
+  line-height: 40px;
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+
+  font-size: 1.4rem;
+  color: #bbb;
+}
+
+canvas {
+  height: 100%;
+
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  border-radius: 100%;
+
+}
+
+#answers {
+  position: absolute;
+  top: 54px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 4vh 2.25vw;
+  display: flex;
+  flex-direction: column;
+}
+
+#answers div {
+  flex-grow: 1;
+  margin: 3vh 0;
+  font-size: 8vh;
+  padding: 0 2vw;
+
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+
+  vertical-align: middle;
+  align-content: center;
+  color: #ccc;
+  box-shadow:
+    -0.25vw 0.25vh  0.3vw 0.3vh rgba(0, 0, 0, .3),
+    inset -0.25vw 0.25vh 0.3vw 0.3vh rgba(0, 0, 0, 0.1),
+    inset 0.25vw -0.25vh 0.3vw 0.3vh rgba(255, 255, 255, 0.1);
+  border-radius: 2vh;
+
+  transform-origin: -15vw top;
+}
+
+#zero {
+  background-color: #200691;
+  border: 0.2vh solid #200691;
+}
+
+#one {
+  background-color: #a64a00;
+  border: 0.2vh solid #a64a00;
+}
+
+#two {
+  background-color: #1f9807;
+  border: 0.2vh solid #1f9807;
+}
+
+#three {
+  background-color: #929401;
+  border: 0.2vh solid #929401;
+}
+
+.disabled {
+  background-color: #ccc !important;
+  border: 0.2vh solid #ccc !important;
+}
+
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.avatar-selector {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: auto;
+}
+
+a {
+    box-shadow:none;
+}
+
+.scale {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* aspect ration control 56.25% */
+
+  z-index:9;
+}
+
+.main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.avatar-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  border: 8px solid rgba(25, 25, 25, 0.9);
+  box-shadow:
+    -3px 3px  3px 3px rgba(0, 0, 0, .3),
+    inset -.5px .5px 3px 3px rgba(25, 25, 25, 0.9),
+    inset 3px -3px 3px 3px rgba(125, 125, 125, 0.2);
+
+  overflow: visible;
+  border-radius: 16px;
+  z-index:10;
+}
+
+.previous,
+.next {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  color:#fff;
+  background-color: #3332;
+  padding: 45% 18px;
+  border-radius: 16px 0 0 16px;
+  transition: background-color 0.6s ease;
+  cursor: pointer;
+
+  z-index:10;
+}
+
+.next {
+  right: 0;
+  border-radius: 0 16px 16px 0;
+}
+
+.previous:hover, .next:hover {
+  background-color: #3338;
+}
+
+.slides {
+  position:absolute;
+  width: 100%;
+  height: 100%;
+
+  background-color: rgba(0, 0, 0, 0.7);
+
+  overflow: hidden;
+  border-radius: 16px; /*should be same as avatar-box*/
+}
+
+.center-vertical,
+.center-horizontal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.center-horizontal {
+  flex-direction: row;
+}
+
+.slide {
+  max-width: 100%;
+  max-height: 100%;
+  flex: 0 0 auto;
+  object-fit: scale-down;
+}
+
+img {
+  -webkit-animation-name: fade;
+  -webkit-animation-duration: 1.5s;
+  animation-name: fade;
+  animation-duration: 1.5s;
+
+  z-index:9;
+}
+
+@-webkit-keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
+
+@keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
+
+
+.box {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  height:auto;
+  margin: auto;
+  padding: 8px;
+  font-size: 24px;
+  font-family: "Noto Sans";
+  text-align: center;
+  color:#FFF;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(25, 25, 25, 0.9);
+  box-shadow:
+    -3px 3px  3px 3px rgba(0, 0, 0, .3),
+    inset -.5px .5px 3px 3px rgba(25, 25, 25, 0.9),
+    inset 3px -3px 3px 3px rgba(125, 125, 125, 0.2);
+
+  overflow: visible;
+  border-radius: 12px;
+  z-index:10;
+}
+
+.box:disabled {
+  color: #959595;
+}
