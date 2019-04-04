@@ -37,12 +37,12 @@
         }
     }"
     (@playerPositionAnimation.done) = "saveActualYTranslation($event, i)">
-      <button *ngIf="screenState === ScreenStateType.playersJoining" ion-button icon-only class="remove-button" (click)="removePlayer(player,i)">
+      <button *ngIf="screenState === ScreenStateType.playersJoining" ion-button icon-only class="remove-button" (click)="removePlayer(player, i)">
         <ion-icon name="remove-circle"></ion-icon>
       </button>
-      <div class="info" [ngStyle]="{'margin-right': '' + getAvatarWidth() + 'px'}">
-        <div class="nickname" [ngStyle]="{'font-size': '' + getNicknameFontSize() + 'px'}">{{player.nickname}}</div>
-        <div class="nickname" [ngStyle]="{'font-size': '' + getPointsFontSize() + 'px'}" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.points}}</div>
+      <div class="info" [ngStyle]="getAvatarWidth()">
+        <div class="nickname" [ngStyle]="getNicknameFontSize()">{{player.nickname}}</div>
+        <div class="nickname" [ngStyle]="getPointsFontSize()" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.points}}</div>
       </div>
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1"

@@ -272,7 +272,7 @@ export class PlayPage {
 
     this.players = [];
 
-    /*this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
+    this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
                     {uuid: "1", nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: -1},
                     {uuid: "2", nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: -1},
                     {uuid: "3", nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: -1},
@@ -280,7 +280,7 @@ export class PlayPage {
                     {uuid: "5", nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: -1},
                     {uuid: "6", nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: -1},
                     {uuid: "7", nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: -1},];
-                    */
+
 
     this.quiz = params.data.quiz;
 
@@ -618,8 +618,10 @@ export class PlayPage {
   }
 
   saveActualYTranslation(e, i) {
+    if (this.players[i]) {
       e.element.setAttribute('style',
         "transform: translateY(" + (this.players[i].actualPosition - this.players[i].initialPosition)  * this.getPlayerHeight() +"px)");
+    }
   }
 
   getPlayerHeight() {
@@ -652,17 +654,17 @@ export class PlayPage {
 
   getAvatarWidth() {
     let avatar = <HTMLElement> document.querySelector(".avatar");
-    return avatar.offsetWidth;
+    return {'margin-right': avatar.offsetWidth + 'px'};
   }
 
   getNicknameFontSize() {
     let avatar = <HTMLElement> document.querySelector(".avatar");
-    return avatar.offsetWidth / 3.5;
+    return {'font-size': (avatar.offsetWidth / 3.5) + 'px'};
   }
 
   getPointsFontSize() {
     let avatar = <HTMLElement> document.querySelector(".avatar");
-    return avatar.offsetWidth / 5.0;
+    return {'font-size': (avatar.offsetWidth / 5.0) + 'px'};
   }
 
   setShowNext() {
