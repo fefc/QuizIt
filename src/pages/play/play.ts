@@ -641,6 +641,12 @@ export class PlayPage {
     this.showMenuCounter = 0;
     if (index > -1) {
        this.players.splice(index, 1);
+
+       for(let i = index; i < this.players.length; i++) {
+         this.players[i].initialPosition = i;
+         this.players[i].actualPosition = i;
+         this.players[i].previousPosition = i;
+       }
     }
   }
 
