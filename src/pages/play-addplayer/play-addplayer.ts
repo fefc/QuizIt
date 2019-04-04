@@ -22,19 +22,14 @@ export class PlayAddPlayerPage {
                                     'Mad_Guy.png',
                                     'Proog.png',
                                     'Sintel.png'];
-  private newPlayer: Player = {
-    uuid: '',
-    nickname: '',
-    avatar: 'Bunny.png',
-    initialPosition: -1,
-    actualPosition: -1,
-    previousPosition: -1,
-    answer: -1
-  };
+
+  private uuid: string = '';
+  private nickname: string =  '';
+  private avatar: string = 'Bunny.png';
 
   private currentPlayers: Array<Player>;
 
-  private loading: LoadingController;
+  private loading:  any;
   private remoteButtonsRequestsSubscription: Subscription;
 
   @ViewChild(Slides) slides: Slides;
@@ -52,8 +47,8 @@ export class PlayAddPlayerPage {
 
   enableAddButton() {
     let enable: boolean = false;
-    if (this.newPlayer.nickname.length > 2 && this.newPlayer.avatar) {
-      if (!this.currentPlayers.some((x) => x.nickname === this.newPlayer.nickname || x.avatar === this.newPlayer.avatar)) {
+    if (this.nickname.length > 2 && this.avatar) {
+      if (!this.currentPlayers.some((x) => x.nickname === this.nickname || x.avatar === this.avatar)) {
         enable = true;
       }
     }
@@ -61,13 +56,13 @@ export class PlayAddPlayerPage {
   }
 
   slideChanged() {
-    this.newPlayer.avatar = this.avatars[this.slides.getActiveIndex()];
+    this.avatar = this.avatars[this.slides.getActiveIndex()];
   }
 
 
   add() {
     if (this.enableAddButton()) {
-      this.newPlayer.uuid = '';
+      this.uuid = '';
 
       this.loading = this.loadingCtrl.create({
         spinner: 'dots',
@@ -79,8 +74,8 @@ export class PlayAddPlayerPage {
         if (this.remoteButtonsRequestsSubscription) {
           this.remoteButtonsRequestsSubscription.unsubscribe();
 
-          if (this.newPlayer.uuid.length > 0) {
-            this.viewCtrl.dismiss(this.newPlayer);
+          if (this.uuid.length > 0) {
+            this.viewCtrl.dismiss({uuid: this.uuid, nickname: this.nickname, avatar: this.avatar});
           } else {
             let alert = this.alertCtrl.create({
               title: 'Could not attribute Buzzer',
@@ -106,7 +101,7 @@ export class PlayAddPlayerPage {
 
     if (buzzer) {
       if (!this.currentPlayers.some((x) => x.uuid === buzzer.uuid)) {
-        this.newPlayer.uuid = buzzer.uuid;
+        this.uuid = buzzer.uuid;
         this.loading.dismiss();
       }
     }

@@ -379,6 +379,7 @@ export class PlayPage {
   next() {
     var player: Player;
     this.showNext = false;
+    this.showMenuCounter = 0;
 
     if (this.screenState === ScreenStateType.playersJoining) {
       this.currentCategory = -1;
@@ -459,7 +460,7 @@ export class PlayPage {
         }).catch(() => {
           console.log("Something went wrong when reading pictures.");
 
-          this.screenState = ScreenStateType.loadNextCategory;
+          this.screenState = ScreenStateType.loadNextQuestion;
           if (this.currentCategory + 1 < this.quiz.categorys.length) {
             this.displayPlayers = false;
           }
@@ -542,7 +543,7 @@ export class PlayPage {
   openPlayAddPlayerPage() {
     let modal = this.modalCtrl.create(PlayAddPlayerPage,  {currentPlayers: this.players});
     modal.present();
-    modal.onDidDismiss((data: Player) => {
+    modal.onDidDismiss((data) => {
       console.log(data);
       if (data) {
         let newPlayer: Player = this.addPlayer(data.nickname, data.avatar, data.uuid);
@@ -635,6 +636,7 @@ export class PlayPage {
   }
 
   removePlayer(player: Player, index: number) {
+    this.showMenuCounter = 0;
     if (index > -1) {
        this.players.splice(index, 1);
     }
@@ -672,6 +674,7 @@ export class PlayPage {
   }
 
   exit() {
+    this.showMenuCounter = 0;
     this.navCtrl.pop();
   }
 
