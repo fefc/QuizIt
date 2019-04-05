@@ -658,33 +658,60 @@ export class PlayPage {
       this.showMenuCounter = 0;
 
       let actionSheet = this.actionSheetCtrl.create({
-        buttons: [
-          {
-            text: 'Add player',
-            handler: () => {
-              this.openPlayAddPlayerPage();
-            }
-          },
-          {
-            text: this.pause === false ? 'Pause' : 'Play',
-            icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
-            handler: () => {
-              this.pause = !this.pause;
-            }
-          },{
-            text: 'Exit',
-            icon: !this.platform.is('ios') ? 'square' : null,
-            handler: () => {
-              this.exit();
-            }
-          },{
-            text: 'Close menu',
-            icon: !this.platform.is('ios') ? 'close' : null,
-            role: 'cancel',
-          }
-        ]
+        buttons: this.getMenuButtons()
       });
       actionSheet.present();
+    }
+  }
+
+  getMenuButtons() {
+    if (this.screenState === ScreenStateType.playersJoining && this.platform.is('core')) {
+      return [
+        {
+          text: 'Add player',
+          icon: !this.platform.is('ios') ? 'person-add' : null,
+          handler: () => {
+            this.openPlayAddPlayerPage();
+          }
+        },
+        {
+          text: this.pause === false ? 'Pause' : 'Play',
+          icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
+          handler: () => {
+            this.pause = !this.pause;
+          }
+        },{
+          text: 'Exit',
+          icon: !this.platform.is('ios') ? 'square' : null,
+          handler: () => {
+            this.exit();
+          }
+        },{
+          text: 'Close menu',
+          icon: !this.platform.is('ios') ? 'close' : null,
+          role: 'cancel',
+        }
+      ];
+    } else {
+      return [
+        {
+          text: this.pause === false ? 'Pause' : 'Play',
+          icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
+          handler: () => {
+            this.pause = !this.pause;
+          }
+        },{
+          text: 'Exit',
+          icon: !this.platform.is('ios') ? 'square' : null,
+          handler: () => {
+            this.exit();
+          }
+        },{
+          text: 'Close menu',
+          icon: !this.platform.is('ios') ? 'close' : null,
+          role: 'cancel',
+        }
+      ];
     }
   }
 
