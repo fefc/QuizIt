@@ -1,17 +1,24 @@
 <ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/backgrounds/' + backgroundImage + ')'}" (tap)="setShowMenu($event)">
 
   <!--General Texts and title Zone-->
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info wifi">
+  <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info wifi">
     Wifi: {{currentWifi}}
   </div>
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info webpage">
+  <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info webpage">
     http://{{currentIp}}:8080
   </div>
 
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
+  <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
     The quiz will start shortly...<br><br>
     Play now by connecting to the Wifi above<br>
     and follow the instructions on the webpage.<br><br>
+    {{startMessage}}
+  </div>
+
+  <div *ngIf="screenState === ScreenStateType.playersJoining && !platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
+    The quiz will start shortly...<br><br>
+    Add a player by bouble clicking the screen twice<br>
+    and follow the instructions under Add Player.<br><br>
     {{startMessage}}
   </div>
 
