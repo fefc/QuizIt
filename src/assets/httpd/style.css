@@ -1,116 +1,111 @@
 * {
   box-sizing: border-box;
 
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-   -khtml-user-select: none; /* Konqueror HTML */
-     -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* Internet Explorer/Edge */
-          user-select: none; /* Non-prefixed version, currently
-                                supported by Chrome and Opera */
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
 }
 
 input, input:before, input:after {
     -webkit-user-select: initial;
-    -khtml-user-select: initial;
-    -moz-user-select: initial;
-    -ms-user-select: initial;
-    user-select: initial;
-   }
+     -khtml-user-select: initial;
+       -moz-user-select: initial;
+        -ms-user-select: initial;
+            user-select: initial;
+}
+
+input {
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+}
 
 body {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
   background-color: #222;
 }
 
-#bar {
-  left: 0;
-  top: 0;
-  position: absolute;
-  z-index: 10;
-  display: flex;
-  flex-flow: row;
+#controller {
+  height: 100%;
   width: 100%;
-  background-color: #940000;
-  padding: 8px;
-  height: 56px;
+  display: flex;
+  flex-flow: column;
 }
 
-.bar-title {
+#bar {
+  height: 56px;
+  padding: 8px;
+  display: flex;
+  flex-flow: row;
+  background-color: #940000;
+  z-index: 10;
+}
+
+.bar-nickname {
   padding-left: 8px;
   line-height: 40px;
   font-family: "Roboto", "Helvetica Neue", sans-serif;
-
   font-size: 1.4rem;
   color: #bbb;
 }
 
-canvas {
+.bar-avatar {
   height: 100%;
-
+  border-radius: 100%;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-
-  border-radius: 100%;
-
+  background-image: url('imgs/Dog.png');
 }
 
 #answers {
-  position: absolute;
-  top: 54px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: 4vh 2.25vw;
+  flex-grow: 1;
+  margin: 4vh 4vh 0 4vh;
   display: flex;
   flex-direction: column;
 }
 
 #answers div {
   flex-grow: 1;
-  margin: 3vh 0;
-  font-size: 8vh;
-  padding: 0 2vw;
-
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-
-  vertical-align: middle;
-  align-content: center;
-  color: #ccc;
+  margin: 0 0 4vh;
   box-shadow:
     -0.25vw 0.25vh  0.3vw 0.3vh rgba(0, 0, 0, .3),
     inset -0.25vw 0.25vh 0.3vw 0.3vh rgba(0, 0, 0, 0.1),
     inset 0.25vw -0.25vh 0.3vw 0.3vh rgba(255, 255, 255, 0.1);
   border-radius: 2vh;
-
-  transform-origin: -15vw top;
 }
 
 #zero {
   background-color: #200691;
-  border: 0.2vh solid #200691;
+  border: 0.4vh solid #200691;
 }
 
 #one {
   background-color: #a64a00;
-  border: 0.2vh solid #a64a00;
+  border: 0.4vh solid #a64a00;
 }
 
 #two {
   background-color: #1f9807;
-  border: 0.2vh solid #1f9807;
+  border: 0.4vh solid #1f9807;
 }
 
 #three {
   background-color: #929401;
-  border: 0.2vh solid #929401;
+  border: 0.4vh solid #929401;
+}
+
+#buzzer {
+  background-color: #c00;
+  border: 0.4vh solid #c00;
 }
 
 .disabled {
-  background-color: #ccc !important;
-  border: 0.2vh solid #ccc !important;
+  background-color: #444 !important;
+  border: 0.4vh solid #444 !important;
 }
 
 .container {

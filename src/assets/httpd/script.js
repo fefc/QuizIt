@@ -1,4 +1,6 @@
 var playerUuid;
+var nickname;
+var avatar;
 
 jQuery(function($) {
   $('#nickname').on('input', function() {
@@ -11,27 +13,18 @@ jQuery(function($) {
 
   $('#join-quiz').click(function(e) {
       e.preventDefault();
+      nickname = $('#nickname').val();
+      avatar = $('#avatar-selector-0').data('current-avatar') + '.png';
 
-      let nickname = $('#nickname').val();
-      let avatar = $('#avatar-selector-0').data('current-avatar') + ".png";
-
-      console.log(avatar);
-
-      $.post("/addPlayer", {nickname: nickname, avatar: avatar}, function(data, status){
-        console.log(data);
-
+      $.post('/addPlayer', {nickname: nickname, avatar: avatar}, function(data, status){
         if (data.uuid) {
           playerUuid = data.uuid;
 
-          jQuery('<canvas/>', {style: "background-image: url('imgs/" + avatar + "')"}).prop({width: 1, height: 1}).appendTo('#bar');
+          $('#bar-avatar').css('background-image', "url('imgs/" + avatar + "')");
+          $('#bar-nickname').html(nickname);
 
-          jQuery('<div/>', {
-              class: 'bar-title',
-              html: nickname
-          }).appendTo('#bar');
-
-          $('#player-config').css('display', 'none');
-          $('#player-controller').css('display', 'block');
+          $('#player').css('display', 'none');
+          $('#controller').css('display', 'flex');
         }
       }).fail(function(response) {
         console.log(response.responseText);
@@ -45,7 +38,7 @@ jQuery(function($) {
   });
 
   function sendAnswer(answer) {
-    $.post("/answer", {uuid: playerUuid, answer: answer}, function(data, status){
+    $.post('/answer', {uuid: playerUuid, answer: answer}, function(data, status){
       if (data.success) {
         $('#answers').children('div').each(function(index) {
           if (index != answer) {

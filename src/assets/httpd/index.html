@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   </head>
   <body>
-    <div id="player-config" class="container">
+    <div id="player" class="container">
       <input id="nickname" class="box" type="text" placeholder="Nickname" autocomplete="off" minlength="3" maxlength="16">
         <div id="avatar-selector-0" class="avatar-selector">
           <div class="scale">
@@ -38,14 +38,17 @@
         <button id="join-quiz" class="box" disabled>Join Quiz</button>
     </div>
 
-    <div id="player-controller" style="display:none;">
-      <div id="bar" >
+    <div id="controller" style="display:none;">
+      <div id="bar">
+        <canvas class="bar-avatar" height="1" width="1"></canvas>
+        <div class="bar-nickname">Nickname</div>
       </div>
       <div id="answers">
         <div id="zero"></div>
         <div id="one"></div>
         <div id="two"></div>
         <div id="three"></div>
+        <div id="buzzer" style="display: none;"></div>
       </div>
     </div>
   </body>
