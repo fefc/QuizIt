@@ -392,7 +392,7 @@ export class PlayPage {
 
   addPlayer(nickname: string, avatar: string, uuid?: string) {
     if (this.screenState === ScreenStateType.playersJoining) {
-      if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
+      if (this.players.findIndex((p) => p.nickname === nickname || p.avatar === avatar) === -1) {
         let newPlayer: Player;
         if (uuid === undefined) {
           uuid = this.uuidv4();
@@ -861,6 +861,29 @@ export class PlayPage {
 
         this.setPlayerAnswer(answeringPlayer, data.answer);
       }
+    } else if (data.uri === "/getNextQuestionType") {
+      /*let nextQuestionType: QuestionType;
+      let remainingMillis: number = (this.timeBarAnimationDuration + this.commonAnimationDuration) - (Date.now() - this.currentQuestionStartDate);
+
+      if (this.currentQuestions[this.currentQuestion + 1]) {
+        nextQuestionType = this.currentQuestions[this.currentQuestion + 1].type;
+      } else {
+        let nextCategoryQuestion: Array<Question> = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory + 1]);
+        if (nextCategoryQuestion) {
+          if (this.currentQuestions[0]) {
+            nextQuestionType = this.currentQuestions[0].type;
+          }
+          else {
+            nextQuestionType = undefined;
+          }
+        } else {
+          nextQuestionType = undefined;
+        }
+      }
+
+      this.httpd.setRequestResponse({uuid: nextQuestionType, remainingMillis: remainingMillis}).catch(() => {
+        console.log("Could not setRequestResponse for /getNextQuestionType.");
+      });*/
     } else {
       this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
         console.log("Could not setRequestResponse for some useless case.");
