@@ -223,7 +223,7 @@ export class QuestionPage {
         var reader = new FileReader();
         reader.readAsArrayBuffer(file);
         reader.onload = (e: any) => {
-          var filename: string = this.uuidv4() + file.name.split('.').pop();
+          var filename: string = this.uuidv4() + '.' + file.name.split('.').pop();
 
           this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
             this.question.answers.push(this.file.cacheDirectory + filename);
