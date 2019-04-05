@@ -6,7 +6,7 @@ export namespace BuzzersConstants {
                                             {uuid: "4", keys: ["u", "v", "w", "x", "y"]},
                                             {uuid: "5", keys: ["0", "1", "2", "3", "4"]},
                                             {uuid: "6", keys: ["5", "6", "7", "8", "9"]},
-                                            {uuid: "7", keys: [",", ".", ":", "?", "!"]}]; // the last key is the buzzer for pictures
+                                            {uuid: "7", keys: [",", ".", "/", "\\", "-"]}]; // the last key is the buzzer for pictures
 }
 
 export interface Buzzer {
