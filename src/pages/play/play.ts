@@ -13,7 +13,6 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
 declare var WifiWizard2: any;
 
 import { Quiz } from '../../models/quiz';
-import { QuizSettings } from '../../models/quiz-settings';
 import { DefaultQuizSettings } from '../../models/quiz-settings';
 import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
@@ -270,9 +269,24 @@ export class PlayPage {
     this.currentWifi = '';
     this.currentIp = '';
 
+    //To avoid warings on ionic build
+    this.startMessage = this.startMessage;
+    this.endMessage = this.endMessage;
+
+    this.displayAnswers = this.displayAnswers;
+    this.displayPictures = this.displayPictures;
+    this.displayPlayers = this.displayPlayers;
+
+    this.showNext = this.showNext;
+    this.showMenu = this.showMenu;
+    this.showExit = this.showExit;
+
+    this.currentWifi = this.currentWifi;
+    this.currentIp = this.currentIp;
+
     this.players = [];
 
-    this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
+    /*this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
                     {uuid: "1", nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: -1},
                     {uuid: "2", nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: -1},
                     {uuid: "3", nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: -1},
@@ -280,7 +294,7 @@ export class PlayPage {
                     {uuid: "5", nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: -1},
                     {uuid: "6", nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: -1},
                     {uuid: "7", nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: -1},];
-
+    */
 
     this.quiz = params.data.quiz;
 
@@ -371,8 +385,54 @@ export class PlayPage {
 
         toast.present();
 
-        setTimeout(() => this.setShowNext(), this.menuTapMessageDuration);
+        setTimeout(() => this.showNext = true, this.menuTapMessageDuration);
       }
+    }
+  }
+
+  addPlayer(nickname: string, avatar: string, uuid?: string) {
+    if (this.screenState === ScreenStateType.playersJoining) {
+      if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
+        let newPlayer: Player;
+        if (uuid === undefined) {
+          uuid = this.uuidv4();
+
+          while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
+            uuid = this.uuidv4();
+          }
+        } else {
+          if (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
+            return undefined;
+          }
+        }
+
+        newPlayer = {
+          uuid: uuid,
+          nickname: nickname,
+          avatar: avatar,
+          initialPosition: this.players.length,
+          previousPosition: this.players.length,
+          actualPosition: this.players.length,
+          answer: -1
+        };
+
+        return newPlayer;
+      }
+    }
+
+    return undefined;
+  }
+
+  removePlayer(player: Player, index: number) {
+    this.showMenuCounter = 0;
+    if (index > -1) {
+       this.players.splice(index, 1);
+
+       for(let i = index; i < this.players.length; i++) {
+         this.players[i].initialPosition = i;
+         this.players[i].actualPosition = i;
+         this.players[i].previousPosition = i;
+       }
     }
   }
 
@@ -405,7 +465,7 @@ export class PlayPage {
       }
       else {
         this.screenState = ScreenStateType.end;
-        setTimeout(() => this.setShowExit(), this.showNextDelay);
+        setTimeout(() => this.showExit = true, this.showNextDelay);
       }
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
@@ -503,80 +563,7 @@ export class PlayPage {
     if (this.autoPlay) {
       setTimeout(() => this.next(), this.showNextDelay + this.commonAnimationDuration);
     } else {
-      setTimeout(() => this.setShowNext(), this.showNextDelay);
-    }
-  }
-
-  addPlayer(nickname: string, avatar: string, uuid?: string) {
-    if (this.screenState === ScreenStateType.playersJoining) {
-      if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
-        let newPlayer: Player;
-        if (uuid === undefined) {
-          uuid = this.uuidv4();
-
-          while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
-            uuid = this.uuidv4();
-          }
-        } else {
-          if (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
-            return undefined;
-          }
-        }
-
-        newPlayer = {
-          uuid: uuid,
-          nickname: nickname,
-          avatar: avatar,
-          initialPosition: this.players.length,
-          previousPosition: this.players.length,
-          actualPosition: this.players.length,
-          answer: -1
-        };
-
-        return newPlayer;
-      }
-    }
-
-    return undefined;
-  }
-
-  openPlayAddPlayerPage() {
-    let modal = this.modalCtrl.create(PlayAddPlayerPage,  {currentPlayers: this.players});
-    modal.present();
-    modal.onDidDismiss((data) => {
-      console.log(data);
-      if (data) {
-        let newPlayer: Player = this.addPlayer(data.nickname, data.avatar, data.uuid);
-        if (newPlayer) {
-          this.players.push(newPlayer);
-        }
-      }
-    });
-  }
-
-  getAnsweringPlayer(uuid: string) {
-    if (this.screenState === ScreenStateType.displayQuestion) {
-      let player: Player = this.players.find((p) => p.uuid === uuid);
-
-      if (player) {
-        if (player.answer === -1) {
-          return player;
-        }
-      }
-    }
-
-    return undefined;
-  }
-
-  checkIfRightRemoteButtonUsed(button: number) {
-    if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
-      if (button >= 4) {
-        return true;
-      }
-    } else {
-      if (button > -1 && button < this.currentQuestions[this.currentQuestion].answers.length) {
-        return true;
-      }
+      setTimeout(() => this.showNext = true, this.showNextDelay);
     }
   }
 
@@ -612,16 +599,17 @@ export class PlayPage {
 
     }, this.commonAnimationDuration / 2);
 
-    if ((this.currentPictureCounter + 1) * this.currentPictureStayDuration < this.timeBarAnimationDuration) {
+    if (this.screenState === ScreenStateType.displayQuestion) {
       this.switchPicturesTimer = setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration);
     }
   }
 
-  saveActualYTranslation(e, i) {
-    if (this.players[i]) {
-      e.element.setAttribute('style',
-        "transform: translateY(" + (this.players[i].actualPosition - this.players[i].initialPosition)  * this.getPlayerHeight() +"px)");
-    }
+  getQuestionsFromCategory(category: Category) {
+    return this.quiz.questions.filter((question) => question.category.name === category.name);
+  }
+
+  getPicturePath(question: Question, answerIndex: number) {
+    return this.quiz.uuid + '/' + question.uuid + '/' + question.answers[answerIndex];
   }
 
   getPlayerHeight() {
@@ -637,25 +625,11 @@ export class PlayPage {
     return (player.previousPosition - player.initialPosition) * this.getPlayerHeight();
   }
 
-  removePlayer(player: Player, index: number) {
-    this.showMenuCounter = 0;
-    if (index > -1) {
-       this.players.splice(index, 1);
-
-       for(let i = index; i < this.players.length; i++) {
-         this.players[i].initialPosition = i;
-         this.players[i].actualPosition = i;
-         this.players[i].previousPosition = i;
-       }
+  saveActualYTranslation(e, i) {
+    if (this.players[i]) {
+      e.element.setAttribute('style',
+        "transform: translateY(" + (this.players[i].actualPosition - this.players[i].initialPosition)  * this.getPlayerHeight() +"px)");
     }
-  }
-
-  getQuestionsFromCategory(category: Category) {
-    return this.quiz.questions.filter((question) => question.category.name === category.name);
-  }
-
-  getPicturePath(question: Question, answerIndex: number) {
-    return this.quiz.uuid + '/' + question.uuid + '/' + question.answers[answerIndex];
   }
 
   getAvatarWidth() {
@@ -671,19 +645,6 @@ export class PlayPage {
   getPointsFontSize() {
     let avatar = <HTMLElement> document.querySelector(".avatar");
     return {'font-size': (avatar.offsetWidth / 5.0) + 'px'};
-  }
-
-  setShowNext() {
-    this.showNext = true;
-  }
-
-  setShowExit() {
-    this.showExit = true;
-  }
-
-  exit() {
-    this.showMenuCounter = 0;
-    this.navCtrl.pop();
   }
 
   setShowMenu() {
@@ -724,28 +685,6 @@ export class PlayPage {
         ]
       });
       actionSheet.present();
-    }
-  }
-
-  /* this will be executed when view is poped, either by exit() or by back button */
-  ionViewWillUnload() {
-    this.remoteButtonsRequestsSubscription.unsubscribe();
-
-    if (this.platform.is('android')) {
-      /* disable httpd */
-      this.httpdSubscription.unsubscribe();
-
-      /* Unlock screen orientation */
-      this.screenOrientation.unlock();
-
-      /* Exit immersiveMode */
-      this.androidFullScreen.isSupported().then(() => {
-          this.androidFullScreen.showSystemUI().catch((err) => {
-            console.log("Could not disable immersiveMode: " + err);
-          });
-      }).catch((err) => {
-        console.log("AndroidFullScreen is not supported: " + err);
-      });
     }
   }
 
@@ -833,6 +772,66 @@ export class PlayPage {
     });
   }
 
+  openPlayAddPlayerPage() {
+    let modal = this.modalCtrl.create(PlayAddPlayerPage,  {currentPlayers: this.players});
+    modal.present();
+    modal.onDidDismiss((data) => {
+      console.log(data);
+      if (data) {
+        let newPlayer: Player = this.addPlayer(data.nickname, data.avatar, data.uuid);
+        if (newPlayer) {
+          this.players.push(newPlayer);
+        }
+      }
+    });
+  }
+
+  getAnsweringPlayer(uuid: string) {
+    if (this.screenState === ScreenStateType.displayQuestion) {
+      let player: Player = this.players.find((p) => p.uuid === uuid);
+
+      if (player) {
+        if (player.answer === -1) {
+          return player;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  setPlayerAnswer(player: Player, answer: number) {
+    this.ngZone.run(() => {
+      player.answer = answer;
+
+      if (!this.players.some((x) => x.answer === -1)) {
+        if(this.displayQuestionTimer) {
+          clearTimeout(this.displayQuestionTimer);
+          this.displayQuestionTimer = undefined;
+        }
+
+        if(this.switchPicturesTimer) {
+          clearTimeout(this.switchPicturesTimer);
+          this.switchPicturesTimer = undefined;
+        }
+
+        this.next();
+      }
+    });
+  }
+
+  checkIfRightRemoteButtonUsed(button: number) {
+    if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+      if (button >= 4) {
+        return true;
+      }
+    } else {
+      if (button > -1 && button < this.currentQuestions[this.currentQuestion].answers.length) {
+        return true;
+      }
+    }
+  }
+
   handleHttpdEvent(data: any) {
     if (data.uri === "/addPlayer") {
       let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
@@ -855,15 +854,12 @@ export class PlayPage {
       });
 
       if (answeringPlayer && this.checkIfRightRemoteButtonUsed(data.answer)) {
-
         if (data.answer >= 4) {
           //This is buzzer
           data.answer = this.currentPicture;
         }
 
-        this.ngZone.run(() => {
-          answeringPlayer.answer = Number(data.answer);
-        });
+        this.setPlayerAnswer(answeringPlayer, data.answer);
       }
     } else {
       this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
@@ -887,24 +883,35 @@ export class PlayPage {
           answer = this.currentPicture;
         }
 
-        this.ngZone.run(() => {
-          answeringPlayer.answer = answer;
-
-          /*if (!this.players.some((x) => x.answer === -1)) {
-            if(this.displayQuestionTimer) {
-              clearTimeout(this.displayQuestionTimer);
-              this.displayQuestionTimer = undefined;
-            }
-
-            if(this.switchPicturesTimer) {
-              clearTimeout(this.switchPicturesTimer);
-              this.switchPicturesTimer = undefined;
-            }
-
-            this.next();
-          }*/
-        });
+        this.setPlayerAnswer(answeringPlayer, answer);
       }
+    }
+  }
+
+  exit() {
+    this.showMenuCounter = 0;
+    this.navCtrl.pop();
+  }
+
+  /* this will be executed when view is poped, either by exit() or by back button */
+  ionViewWillUnload() {
+    this.remoteButtonsRequestsSubscription.unsubscribe();
+
+    if (this.platform.is('android')) {
+      /* disable httpd */
+      this.httpdSubscription.unsubscribe();
+
+      /* Unlock screen orientation */
+      this.screenOrientation.unlock();
+
+      /* Exit immersiveMode */
+      this.androidFullScreen.isSupported().then(() => {
+          this.androidFullScreen.showSystemUI().catch((err) => {
+            console.log("Could not disable immersiveMode: " + err);
+          });
+      }).catch((err) => {
+        console.log("AndroidFullScreen is not supported: " + err);
+      });
     }
   }
 
