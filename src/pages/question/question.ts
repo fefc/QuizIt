@@ -8,6 +8,9 @@ import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 
+const MAX_PICTURE_WIDTH: number = 1920;
+const MAX_PICTURE_HEIGHT: number = 1080;
+
 @Component({
   selector: 'page-question',
   templateUrl: 'question.html'
@@ -191,7 +194,7 @@ export class QuestionPage {
 
   //https://stackoverflow.com/a/52970316
   openMobileImagePicker() {
-    this.imagePicker.getPictures({maximumImagesCount: this.maxPictures - this.question.answers.length, width:1920, height: 1080}).then((results) => {
+    this.imagePicker.getPictures({maximumImagesCount: this.maxPictures - this.question.answers.length, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
       for (var i = 0; i < results.length; i++) {
         this.question.answers.push(decodeURIComponent(results[i]));
         this.renderPicture(this.file.cacheDirectory, results[i].replace(this.file.cacheDirectory, ''));
@@ -202,7 +205,7 @@ export class QuestionPage {
   }
 
   replacePictureMobile(val: number) {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:1920, height: 1080}).then((results) => {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
       if (results.length === 1) {
         this.question.answers[val] = decodeURIComponent(results[0]);
         this.renderPicture(this.file.cacheDirectory, results[0].replace(this.file.cacheDirectory, ''), val);
@@ -219,18 +222,43 @@ export class QuestionPage {
       alert("to many images");
     } else {
       for (let file of files) {
-
         var reader = new FileReader();
-        reader.readAsArrayBuffer(file);
+        reader.readAsDataURL(file);
         reader.onload = (e: any) => {
-          var filename: string = this.uuidv4() + '.' + file.name.split('.').pop();
+          //First resize the image
+          //https://zocada.com/compress-resize-images-javascript-browser/
+          let img = new Image();
+          img.src = e.target.result;
+          img.onload = (pic: any) => {
+            let canvas = document.createElement('canvas');
 
-          this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
-            this.question.answers.push(this.file.cacheDirectory + filename);
-            this.renderPicture(this.file.cacheDirectory, filename);
-          }).catch((error) => {
-            console.log(error);
-          });
+            if ((img.height / MAX_PICTURE_HEIGHT) > (img.width / MAX_PICTURE_WIDTH)) {
+              canvas.width = img.width / (img.height / MAX_PICTURE_HEIGHT)
+              canvas.height = MAX_PICTURE_HEIGHT;
+            } else {
+              canvas.width = MAX_PICTURE_WIDTH
+              canvas.height = img.height / (img.width / MAX_PICTURE_WIDTH) ;
+            }
+
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            ctx.canvas.toBlob((blob) => {
+              //Now we can copy this to the storage cacheDirectory
+              var resizedReader = new FileReader();
+              resizedReader.readAsArrayBuffer(blob);
+              resizedReader.onload = (resizedE: any) => {
+
+                var filename: string = this.uuidv4() + '.' + file.name.split('.').pop();
+
+                this.file.writeFile(this.file.cacheDirectory, filename, resizedE.target.result, { replace: true }).then(() => {
+                  this.question.answers.push(this.file.cacheDirectory + filename);
+                  this.renderPicture(this.file.cacheDirectory, filename);
+                }).catch((error) => {
+                  console.log(error);
+                });
+              };
+            }, 'image/jpeg', 1);
+          };
         };
       }
     }
