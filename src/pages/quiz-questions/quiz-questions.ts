@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, ModalController, LoadingController, AlertController, NavParams } from 'ionic-angular';
+import { NavController, ModalController, LoadingController, AlertController, NavParams, reorderArray } from 'ionic-angular';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -89,6 +89,26 @@ export class QuizQuestionsPage {
       ]
     });
     renameAlert.present();
+  }
+
+  reorderQuestions(indexes:any, category: Category) {
+    let realFrom: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.from]);
+    let realTo: number = indexes.from < indexes.to ? realFrom + indexes.to : realFrom - (indexes.from -indexes.to);
+
+    this.quiz.questions = reorderArray(this.quiz.questions, {from: realFrom, to: realTo});
+
+    let loading = this.loadingCtrl.create({
+      content: 'Saving changes...'
+    });
+
+    loading.present();
+
+    this.quizsProv.saveToStorage(this.quiz).then(() => {
+      loading.dismiss();
+    }).catch(() => {
+      loading.dismiss();
+      alert('Unable to save Quiz.');
+    });
   }
 
   openQuestionPage(question: Question) {
