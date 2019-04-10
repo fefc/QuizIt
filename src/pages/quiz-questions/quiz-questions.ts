@@ -21,6 +21,8 @@ export class QuizQuestionsPage {
 
   private quiz: Quiz;
 
+  private showReorderCategorys: boolean;
+
   constructor(
     public navCtrl: NavController,
     public modalCtrl: ModalController,
@@ -29,6 +31,7 @@ export class QuizQuestionsPage {
     private quizsProv: QuizsProvider,
     params: NavParams) {
       this.quiz = params.data.quiz;
+      this.showReorderCategorys = false;
   }
 
   renameCategory(category: Category) {
@@ -91,6 +94,23 @@ export class QuizQuestionsPage {
       ]
     });
     renameAlert.present();
+  }
+
+  reorderCategorys(indexes:any) {
+    this.quiz.categorys = reorderArray(this.quiz.categorys, indexes);
+
+    let loading = this.loadingCtrl.create({
+      content: 'Saving changes...'
+    });
+
+    loading.present();
+
+    this.quizsProv.saveToStorage(this.quiz).then(() => {
+      loading.dismiss();
+    }).catch(() => {
+      loading.dismiss();
+      alert('Unable to save Quiz.');
+    });
   }
 
   reorderQuestions(indexes:any, category: Category) {
