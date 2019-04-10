@@ -3,7 +3,7 @@ import { NavController, ModalController, LoadingController, AlertController, Nav
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
-//import { QuestionType } from '../../models/question';
+import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 
 import { QuizsProvider } from '../../providers/quizs/quizs';
@@ -17,7 +17,9 @@ import { PlayPage } from '../play/play';
   templateUrl: 'quiz-questions.html'
 })
 export class QuizQuestionsPage {
-  quiz: Quiz;
+  private QuestionType = QuestionType; //for use in Angular html
+
+  private quiz: Quiz;
 
   constructor(
     public navCtrl: NavController,

@@ -22,7 +22,9 @@
         <button ion-button icon-only item-end (click)="renameCategory(category)"><ion-icon name="create"></ion-icon></button>
       </ion-item-divider>
       <ion-item-group reorder="true" (ionItemReorder)="reorderQuestions($event, category)">
-        <ion-item *ngFor="let question of getQuestionsFromCategory(category)" (tap)="openQuestionPage(question)">{{ question.question }}</ion-item>
+        <ion-item *ngFor="let question of getQuestionsFromCategory(category)" (tap)="openQuestionPage(question)">
+          <ion-icon [name]="question.type === QuestionType.rightPicture ? 'images' : 'list'" item-start></ion-icon>
+          {{ question.question }}</ion-item>
       </ion-item-group>
     </ion-item-group>
   </ion-list>
