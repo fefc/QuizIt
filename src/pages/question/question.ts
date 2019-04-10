@@ -232,14 +232,19 @@ export class QuestionPage {
           img.onload = (pic: any) => {
             let canvas = document.createElement('canvas');
 
-            if ((img.height / MAX_PICTURE_HEIGHT) > (img.width / MAX_PICTURE_WIDTH)) {
-              canvas.width = img.width / (img.height / MAX_PICTURE_HEIGHT)
-              canvas.height = MAX_PICTURE_HEIGHT;
+            if (img.height > MAX_PICTURE_HEIGHT || img.width > MAX_PICTURE_WIDTH) {
+              if ((img.height / MAX_PICTURE_HEIGHT) > (img.width / MAX_PICTURE_WIDTH)) {
+                canvas.width = img.width / (img.height / MAX_PICTURE_HEIGHT)
+                canvas.height = MAX_PICTURE_HEIGHT;
+              } else {
+                canvas.width = MAX_PICTURE_WIDTH
+                canvas.height = img.height / (img.width / MAX_PICTURE_WIDTH) ;
+              }
             } else {
-              canvas.width = MAX_PICTURE_WIDTH
-              canvas.height = img.height / (img.width / MAX_PICTURE_WIDTH) ;
+              canvas.width = img.width;
+              canvas.height = img.height;
             }
-
+            
             let ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             ctx.canvas.toBlob((blob) => {
