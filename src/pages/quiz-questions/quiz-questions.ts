@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, ModalController, LoadingController, AlertController, NavParams, reorderArray } from 'ionic-angular';
+//import { File } from '@ionic-native/file';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -28,6 +29,7 @@ export class QuizQuestionsPage {
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
+    //private file: File,
     private quizsProv: QuizsProvider,
     params: NavParams) {
       this.quiz = params.data.quiz;
@@ -220,5 +222,20 @@ export class QuizQuestionsPage {
 
   startQuiz() {
     this.navCtrl.push(PlayPage, {quiz: this.quiz});
+  }
+
+  export() {
+    this.quizsProv.export(this.quiz).then((data: string) => {
+      alert("apparently zipping worked!");
+      alert(data);
+      /*this.file.readAsDataURL(this.file.cacheDirectory, data).then((data) => {
+        console.log(data);
+        window.location.href = "data:application/zip;" + data;
+      }).catch((error) => {
+        console.log(error);
+      });*/
+    }).catch((err) => {
+      alert(err);
+    })
   }
 }

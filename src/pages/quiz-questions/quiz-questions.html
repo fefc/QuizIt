@@ -4,6 +4,9 @@
       {{quiz.title}}
     </ion-title>
     <ion-buttons end>
+      <button ion-button icon-only (click)="export()">
+        <ion-icon name="send"></ion-icon>
+      </button>
       <button ion-button icon-only (click)="showReorderCategorys = !showReorderCategorys">
         <ion-icon name="git-compare"></ion-icon>
       </button>

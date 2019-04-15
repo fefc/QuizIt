@@ -2,6 +2,8 @@ import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
 import { File } from '@ionic-native/file';
 
+declare var JJzip: any;
+
 import { Quiz } from '../../models/quiz';
 import { Question } from '../../models/question';
 import { QuestionType } from '../../models/question';
@@ -286,4 +288,30 @@ export class QuizsProvider {
     });
   }
 
+  export(quiz: Quiz) {
+    return new Promise((resolve, reject) => {
+      this.file.writeFile(this.file.dataDirectory, quiz.uuid + '/database.json', JSON.stringify(quiz), { replace: true }).then(() => {
+        JJzip.zip(this.file.dataDirectory + quiz.uuid, {target: this.file.cacheDirectory, name: quiz.uuid}, (data) => {
+          this.file.removeFile(this.file.dataDirectory, quiz.uuid + '/database.json').then(() => {
+            if(data.success) {
+              resolve(this.file.cacheDirectory + quiz.uuid + '.zip');
+            } else {
+              reject('Something when wrong by zipping');
+            }
+          }).catch((error) => {
+            reject("Something went wrong by deleting database file.");
+          });
+
+        }, (error) => {
+          this.file.removeFile(this.file.dataDirectory, quiz.uuid + '/database.json').then(() => {
+            reject('Something when wrong by zipping');
+          }).catch((error) => {
+            reject("Something went wrong by deleting database file.");
+          });
+        });
+      }).catch((error) => {
+        reject("Something went wrong by writing database file.");
+      });
+    });
+  }
 }
