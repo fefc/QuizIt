@@ -3,6 +3,11 @@
     <ion-title>
       QuizIt
     </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="import()">
+        <ion-icon name="folder-open"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
   <ion-navbar *ngIf="selectedQuizs > 0">
     <ion-title>

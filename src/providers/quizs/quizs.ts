@@ -316,6 +316,8 @@ export class QuizsProvider {
   }
 
   unzip() {
-    
+    return new Promise((resolve, reject) => {
+
+    });
   }
 }

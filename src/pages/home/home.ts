@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController, ModalController, LoadingController } from 'ionic-angular';
+import { Platform, NavController, ModalController, LoadingController } from 'ionic-angular';
+import { FileChooser } from '@ionic-native/file-chooser';
+import { FilePath } from '@ionic-native/file-path';
+import { File } from '@ionic-native/file';
 
 import { Quiz } from '../../models/quiz';
 
@@ -16,9 +19,13 @@ export class HomePage {
   private selectedQuizs: number;
 
   constructor(
+    private platform: Platform,
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
+    private fileChooser: FileChooser,
+    private filePath: FilePath,
+    private file: File,
     private quizsProv: QuizsProvider) {
 
       this.selectedQuizs = 0;
@@ -72,5 +79,32 @@ export class HomePage {
       this.selectedQuizs = 0;
       alert('Unable to delete selected quizs.');
     });
+  }
+
+  import() {
+    if(this.platform.is('android')) {
+      this.fileChooser.open().then((uri) => {
+        alert(uri);
+        this.filePath.resolveNativePath(uri).then((filePath) => {
+          alert(filePath);
+          console.log(filePath);
+
+          this.file.resolveLocalFilesystemUrl(filePath).then((data) => {
+            alert(data);
+          }).catch((error) => {
+            alert(error);
+          });
+
+        }).catch((err) => {
+          console.log(err);
+        });
+
+
+      }).catch((e) => {
+        console.log(e);
+      });
+    } else {
+      alert("Import is not supported on the platform yet.");
+    }
   }
 }
