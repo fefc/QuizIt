@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Platform, NavController, ModalController, LoadingController, AlertController, NavParams, reorderArray } from 'ionic-angular';
 import { File } from '@ionic-native/file';
-import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 
 import { Quiz } from '../../models/quiz';
@@ -33,7 +32,6 @@ export class QuizQuestionsPage {
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private file: File,
-    private transfer: FileTransfer,
     private androidPermissions: AndroidPermissions,
     private quizsProv: QuizsProvider,
     params: NavParams) {
@@ -281,15 +279,12 @@ export class QuizQuestionsPage {
     })
   }
 
-  //https://stackoverflow.com/questions/49051139/saving-file-to-downloads-directory-using-ionic-3
   exportFileToAndroidDownload(data) {
     return new Promise((resolve, reject) => {
-      var fileTransfer: FileTransferObject = this.transfer.create();
-
-      fileTransfer.download(data.cordovaFilePath + data.filePath, this.file.externalRootDirectory + '/Download/' + data.filePath).then((entry) => {
+      this.file.moveFile(data.cordovaFilePath,  data.filePath, this.file.externalRootDirectory, data.filePath).then(() => {
         let message = this.alertCtrl.create({
           title: 'Exported quiz to',
-          message: entry.toURL(),
+          message: this.file.externalRootDirectory + data.filePath,
           buttons: [
             {
               text: 'Ok',
@@ -297,11 +292,13 @@ export class QuizQuestionsPage {
             }
           ]
         });
+        
         message.present();
+
         resolve();
-      }, (error) => {
+      }).catch(() => {
         reject("Something went wrong while export the quiz.");
-      });
+      })
     });
 
 

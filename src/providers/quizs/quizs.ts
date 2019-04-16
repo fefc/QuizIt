@@ -314,4 +314,8 @@ export class QuizsProvider {
       });
     });
   }
+
+  unzip() {
+    
+  }
 }
