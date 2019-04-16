@@ -10,6 +10,8 @@ import { File } from '@ionic-native/file';
 import { Httpd } from '@ionic-native/httpd';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
+import { FileTransfer } from '@ionic-native/file-transfer';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
 
 import { MyApp } from './app.component';
 
@@ -61,6 +63,8 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     Httpd,
     AndroidFullScreen,
     ScreenOrientation,
+    FileTransfer,
+    AndroidPermissions,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     QuizsProvider
   ]

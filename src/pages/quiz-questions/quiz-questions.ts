@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController, ModalController, LoadingController, AlertController, NavParams, reorderArray } from 'ionic-angular';
-//import { File } from '@ionic-native/file';
+import { Platform, NavController, ModalController, LoadingController, AlertController, NavParams, reorderArray } from 'ionic-angular';
+import { File } from '@ionic-native/file';
+import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -25,11 +27,14 @@ export class QuizQuestionsPage {
   private showReorderCategorys: boolean;
 
   constructor(
+    private platform: Platform,
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    //private file: File,
+    private file: File,
+    private transfer: FileTransfer,
+    private androidPermissions: AndroidPermissions,
     private quizsProv: QuizsProvider,
     params: NavParams) {
       this.quiz = params.data.quiz;
@@ -225,17 +230,80 @@ export class QuizQuestionsPage {
   }
 
   export() {
-    this.quizsProv.export(this.quiz).then((data: string) => {
-      alert("apparently zipping worked!");
-      alert(data);
-      /*this.file.readAsDataURL(this.file.cacheDirectory, data).then((data) => {
-        console.log(data);
-        window.location.href = "data:application/zip;" + data;
-      }).catch((error) => {
-        console.log(error);
-      });*/
+    let loading = this.loadingCtrl.create({
+      content: 'Exporting...'
+    });
+
+    loading.present();
+
+    this.quizsProv.zip(this.quiz).then((data: any) => {
+      if (this.platform.is('core')) {
+        this.file.readAsDataURL(data.cordovaFilePath, data.filePath).then((data) => {
+          var toto = window.location.href = "data:application/zip;" + data;
+          loading.dismiss();
+          alert("Be a bit more patient, a download popup should show up.");
+        }).catch((error) => {
+          loading.dismiss();
+          alert("Something went wrong while exporting the quiz.");
+        });
+
+      } else if (this.platform.is('android')) {
+        this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+          .then(status => {
+            if (status.hasPermission) {
+              this.exportFileToAndroidDownload(data).then((url) => {
+                loading.dismiss();
+              }).catch((error) => {
+                loading.dismiss();
+                alert(error);
+              });
+            }
+            else {
+              this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+                .then(status => {
+                  if(status.hasPermission) {
+                    this.exportFileToAndroidDownload(data).then((url) => {
+                      loading.dismiss();
+                    }).catch((error) => {
+                      loading.dismiss();
+                      alert(error);
+                    });
+                  }
+                });
+            }
+          });
+      } else {
+        loading.dismiss();
+        alert("Export function is not supported.");
+      }
     }).catch((err) => {
       alert(err);
     })
+  }
+
+  //https://stackoverflow.com/questions/49051139/saving-file-to-downloads-directory-using-ionic-3
+  exportFileToAndroidDownload(data) {
+    return new Promise((resolve, reject) => {
+      var fileTransfer: FileTransferObject = this.transfer.create();
+
+      fileTransfer.download(data.cordovaFilePath + data.filePath, this.file.externalRootDirectory + '/Download/' + data.filePath).then((entry) => {
+        let message = this.alertCtrl.create({
+          title: 'Exported quiz to',
+          message: entry.toURL(),
+          buttons: [
+            {
+              text: 'Ok',
+              role: 'ok',
+            }
+          ]
+        });
+        message.present();
+        resolve();
+      }, (error) => {
+        reject("Something went wrong while export the quiz.");
+      });
+    });
+
+
   }
 }
