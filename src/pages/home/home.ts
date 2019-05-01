@@ -84,22 +84,29 @@ export class HomePage {
   import() {
     if(this.platform.is('android')) {
       this.fileChooser.open().then((uri) => {
-        alert(uri);
-        this.filePath.resolveNativePath(uri).then((filePath) => {
-          alert(filePath);
-          console.log(filePath);
+        this.filePath.resolveNativePath(uri).then((nativePath) => {
+          var relativePath: string = nativePath.replace(this.file.externalRootDirectory, ''); //TODO this is buggy and only allows zip from internal root storage
+          var fileName: string = nativePath.split("/").pop();
+          this.file.copyFile(this.file.externalRootDirectory, relativePath, this.file.cacheDirectory, fileName).then(() => {
+            let loading = this.loadingCtrl.create({
+              content: 'Importing Quiz...'
+            });
 
-          this.file.resolveLocalFilesystemUrl(filePath).then((data) => {
-            alert(data);
+            loading.present();
+
+            this.quizsProv.unzip(this.file.cacheDirectory, fileName).then(() => {
+              loading.dismiss();
+            }).catch((error) => {
+              loading.dismiss();
+              alert(error);
+            });
           }).catch((error) => {
             alert(error);
-          });
+          })
 
         }).catch((err) => {
           console.log(err);
         });
-
-
       }).catch((e) => {
         console.log(e);
       });

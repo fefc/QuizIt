@@ -315,9 +315,130 @@ export class QuizsProvider {
     });
   }
 
-  unzip() {
+  unzip(cordovaFilePath: string, filePath: string) {
     return new Promise((resolve, reject) => {
-
+      this.file.checkDir(this.file.cacheDirectory, 'import').then(() => {
+        this.file.removeRecursively(this.file.cacheDirectory, 'import').then(() => {
+          this.unzipImportedQuizAndImport(cordovaFilePath, filePath).then((data) => {
+            resolve(data);
+          }).catch((error) => {
+            reject(error);
+          });
+        }).catch(() => {
+          reject('Could not delete Import dir.');
+        });
+      }).catch(() => {
+        this.unzipImportedQuizAndImport(cordovaFilePath, filePath).then((data) => {
+          resolve(data);
+        }).catch((error) => {
+          reject(error);
+        });
+      });
     });
   }
+
+  unzipImportedQuizAndImport(cordovaFilePath: string, filePath: string) {
+    return new Promise((resolve, reject) => {
+      JJzip.unzip(cordovaFilePath + filePath, {target: this.file.cacheDirectory + 'import'}, (data) => {
+        if (data.success) {
+          this.file.listDir(this.file.cacheDirectory, 'import').then((entries) => {
+            //Import dir should have been created just now so there should be only on dir
+            if (entries.length === 1) {
+              //Lets try to find the database.json file, open it and check integrity
+              let quizPath: string = entries[0].fullPath;
+
+              // .substring(1) is needed to remove the first /
+              while(quizPath.charAt(0) === '/') {
+                quizPath = quizPath.substring(1);
+              }
+
+              this.file.checkFile(this.file.cacheDirectory, quizPath + 'database.json').then(() => {
+                this.file.readAsText(this.file.cacheDirectory, quizPath + 'database.json').then((jsonQuiz) => {
+                  let importQuiz: Quiz = JSON.parse(jsonQuiz);
+                  let promises = [];
+
+                  //Make sure the attachements are included in the zip
+                  for (let question of importQuiz.questions.filter((q) => q.type === QuestionType.rightPicture)) {
+                    for (let i = 0; i < question.answers.length ; i++) {
+                      promises.push(this.file.checkFile(this.file.cacheDirectory, quizPath + question.uuid + '/' + question.answers[i]));
+                      //Set answer to full path, that will allow us to use copyAttachementsToDataDirectory method
+                      question.answers[i] = this.file.cacheDirectory + quizPath + question.uuid + '/' + question.answers[i];
+                    }
+                  }
+
+                  Promise.all(promises).then((results: Array<boolean>) => {
+                    //Everything is okey, so we can copy the dir
+                    if (this.quizs.findIndex((q) => q.uuid === importQuiz.uuid) === -1) {
+                      //Move attachements
+                      var movePromises = [];
+
+                      for (let question of importQuiz.questions.filter((q) => q.type === QuestionType.rightPicture)) {
+                        movePromises.push(this.copyAttachementsToDataDirectory(importQuiz.uuid, question.uuid, question.answers));
+                      }
+
+                      Promise.all(movePromises).then((results: Array<AttachementsResult>) => {
+                        let questionIndex: number;
+
+                        //Update answers so that they contain only fileName and not fullPath
+                        if (results) {
+                          for (let result of results) {
+                            questionIndex = importQuiz.questions.findIndex((q) => q.uuid === result.questionUuid);
+
+                            if (questionIndex !== -1) {
+                              for (let fileName of result.fileNames) {
+                                let answerIndex: number = importQuiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
+
+                                importQuiz.questions[questionIndex].answers[answerIndex] = fileName;
+                              }
+                            }
+                          }
+                        }
+
+                        this.quizs.push(importQuiz);
+
+                        this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+                          //Before we are done, lets delete all the mess we have done
+                          this.file.removeRecursively(this.file.cacheDirectory, 'import').then(() => {
+                            this.file.removeFile(cordovaFilePath, filePath).then(() => {
+                              resolve();
+                            }).catch(() => {
+                              reject('Failed to remove zip file from cache.');
+                            });
+                          }).catch(() => {
+                            reject('Failed to remove import dir.');
+                          })
+                          resolve();
+                        }).catch(() => {
+                          reject('Could not save quizs to storage.');
+                        });
+                      }).catch(() => {
+                        reject('Could not save attachements.');
+                      });
+                    } else {
+                      reject('The quiz already exists in your database.');
+                    }
+                    }).catch(() => {
+                      reject('Some attachements seem to be messing.');
+                    });
+                }).catch(() => {
+                  reject('Could not read database.json file.');
+                });
+              }).catch(()  => {
+                reject('Could not find database.json file.');
+              });
+            } else {
+              reject('No files have been unzippped.');
+            }
+          }).catch(() => {
+            reject('Could not list dir import dir.');
+          });
+        } else {
+          reject('Something went wrong unzipping 1');
+        }
+      }, (error) => {
+        reject('Something went wrong unzipping 2');
+      });
+    });
+  }
+
 }
