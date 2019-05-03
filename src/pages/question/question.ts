@@ -244,7 +244,7 @@ export class QuestionPage {
               canvas.width = img.width;
               canvas.height = img.height;
             }
-            
+
             let ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             ctx.canvas.toBlob((blob) => {
@@ -270,15 +270,14 @@ export class QuestionPage {
   }
 
   getBrowserReplaceImage() {
-    console.log("ok", this.replacePictureIndex);
     let file: any = this.fileInputReplace.nativeElement.files[0];
-    console.log(file);
     var reader = new FileReader();
     reader.readAsArrayBuffer(file);
     reader.onload = (e: any) => {
       var filename: string = this.uuidv4() + file.name.split('.').pop();
 
       this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
+        //TODO resize pictures before!
         this.question.answers[this.replacePictureIndex] = this.file.cacheDirectory + filename;
         this.renderPicture(this.file.cacheDirectory, filename, this.replacePictureIndex);
       }).catch((error) => {

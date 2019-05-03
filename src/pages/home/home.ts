@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Platform, NavController, ModalController, LoadingController } from 'ionic-angular';
 import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
@@ -17,6 +17,8 @@ import { QuizQuestionsPage } from '../quiz-questions/quiz-questions';
 })
 export class HomePage {
   private selectedQuizs: number;
+
+  @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
 
   constructor(
     private platform: Platform,
@@ -110,8 +112,33 @@ export class HomePage {
       }).catch((e) => {
         console.log(e);
       });
+    } else if (this.platform.is('core')) {
+        this.fileInput.nativeElement.click();
     } else {
       alert("Import is not supported on the platform yet.");
     }
+  }
+
+  importBrowser() {
+    let file: any = this.fileInput.nativeElement.files[0];
+
+    console.log(file);
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = (e: any) => {
+      var fileName: string = file.name;
+
+      this.file.writeFile(this.file.cacheDirectory, fileName, e.target.result, { replace: true }).then(() => {
+        alert("written file to cache, can be unzipped now");
+
+        this.quizsProv.unzip(this.file.cacheDirectory, fileName).then(() => {
+        }).catch((error) => {
+          alert(error);
+        });
+
+      }).catch((error) => {
+        alert(error);
+      });
+    };
   }
 }

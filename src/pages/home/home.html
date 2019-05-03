@@ -8,6 +8,9 @@
         <ion-icon name="folder-open"></ion-icon>
       </button>
     </ion-buttons>
+    <div ng-controller="myCtrl">
+      <input #fileInput type="file" style="display: none" (change)="importBrowser()" accept="application/zip"/>
+    </div>
   </ion-navbar>
   <ion-navbar *ngIf="selectedQuizs > 0">
     <ion-title>
