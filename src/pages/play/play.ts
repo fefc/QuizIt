@@ -358,7 +358,7 @@ export class PlayPage {
           this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
 
           /* Get Wifi infos if possible */
-          this.getWifiInfos();
+          //this.getWifiInfos(); //TODO doesnt work anymore
 
           /* Setup httpd stuff */
           this.remoteButtonsRequestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => this.handleHttpdEvent(data), (error) => {
@@ -722,8 +722,7 @@ export class PlayPage {
         /* Once wifi is done, lets find ip address of the device over wifi and configure the welcome message */
         WifiWizard2.getWifiIP().then((ip) => {
           this.currentIp = ip;
-        })
-        .catch((error) => {
+        }).catch((error) => {
           this.currentIp  = "unknown";
 
           let alert = this.alertCtrl.create({
