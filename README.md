@@ -7,12 +7,12 @@ The initial purpose of the app was to share some good memories with you friend t
 ### Create a quiz
 To set up a new quiz it's simple, give it a title, add some questions, either a question with 4 text answers or a question with a bunch of pictures where you have to choose which picture is the right answer.
 
-https://vimeo.com/fefc/review/331227359/53279b421f
+https://vimeo.com/331227359
 
 ### Play it
 Once you quiz is ready, just play it! At the beginning of the game your friends will be able to join by connecting their smartphones on the same wifi and open the indicated website in a web browser.
 
-https://vimeo.com/fefc/review/331227396/1dae68394c
+https://vimeo.com/331227396
 
 If you are running the app in a web browser then you will need Sony Buzz Buzzers to play.
 
