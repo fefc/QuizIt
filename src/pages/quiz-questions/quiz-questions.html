@@ -23,7 +23,7 @@
       </ion-item-divider>
       <ion-item-group *ngIf="!showReorderCategorys" reorder="true" (ionItemReorder)="reorderQuestions($event, category)">
         <ion-item *ngFor="let question of getQuestionsFromCategory(category)" (tap)="openQuestionPage(question)">
-          <ion-icon [name]="question.type === QuestionType.rightPicture ? 'images' : 'list'" item-start></ion-icon>
+          <ion-icon [name]="getIconForQuestion(question.type)" item-start></ion-icon>
           {{ question.question }}</ion-item>
       </ion-item-group>
     </ion-item-group>

@@ -240,4 +240,16 @@ export class QuizQuestionsPage {
   startQuiz() {
     this.navCtrl.push(PlayPage, {quiz: this.quiz});
   }
+
+  getIconForQuestion(type: QuestionType) {
+    if (type === QuestionType.classic) {
+      return 'list';
+    } else if (type === QuestionType.stopwatch) {
+      return 'stopwatch';
+    } else if (type === QuestionType.rightPicture) {
+      return 'images';
+    } else {
+      return 'close';
+    }
+  }
 }

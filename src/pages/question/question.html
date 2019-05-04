@@ -28,13 +28,13 @@
       <ion-label fixed>Type</ion-label>
       <ion-select [(ngModel)]="question.type" interface="popover" (ionChange)="typeChange($event)">
         <ion-option [value]="QuestionType.classic">Classic</ion-option>
-        <ion-option [value]="QuestionType.time">Time</ion-option>
+        <ion-option [value]="QuestionType.stopwatch">Stopwatch</ion-option>
         <ion-option [value]="QuestionType.rightPicture">Right picture</ion-option>
         <!--<ion-option value="3">Video</ion-option>
         <ion-option value="4">Pictures</ion-option>-->
       </ion-select>
     </ion-item>
-    <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.time">
+    <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
     <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
       <ion-label fixed>Answer {{i}}</ion-label>
       <ion-input type="text" placeholder="I let the dog out" [(ngModel)]="question.answers[i]"></ion-input>

@@ -2,7 +2,7 @@ import { Category } from './category';
 
 export enum QuestionType {
   classic = 0,
-  time = 1,
+  stopwatch = 1,
   rightPicture = 2,
   video = 3,
   pictures = 4
