@@ -28,7 +28,12 @@
   <ion-list>
     <ion-item *ngFor="let quiz of quizsProv.quizs" (tap)="openQuizQuestionsPage(quiz)" (press)="selectQuiz(quiz)">
         <ion-checkbox *ngIf="quiz.selected" checked="true" (click)="selectQuiz(quiz)"></ion-checkbox>
-        <ion-label>{{ quiz.title }}</ion-label>
+        <h2>{{ quiz.title }}</h2>
+        <p>
+          <ion-badge color="fulldark"><ion-icon name="list"></ion-icon> {{ getQuestionTypeCount(quiz, QuestionType.classic) }}</ion-badge>
+          <ion-badge color="fulldark"><ion-icon name="stopwatch"></ion-icon> {{ getQuestionTypeCount(quiz, QuestionType.time) }}</ion-badge>
+          <ion-badge color="fulldark"><ion-icon name="images"></ion-icon> {{ getQuestionTypeCount(quiz, QuestionType.rightPicture) }}</ion-badge>
+        </p>
       </ion-item>
   </ion-list>
 

@@ -5,6 +5,7 @@ import { FilePath } from '@ionic-native/file-path';
 import { File } from '@ionic-native/file';
 
 import { Quiz } from '../../models/quiz';
+import { QuestionType } from '../../models/question';
 
 import { QuizsProvider } from '../../providers/quizs/quizs';
 
@@ -18,6 +19,8 @@ import { QuizQuestionsPage } from '../quiz-questions/quiz-questions';
 })
 
 export class HomePage {
+  private QuestionType = QuestionType; //for use in Angular html
+
   private selectedQuizs: number;
 
   @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
@@ -77,6 +80,10 @@ export class HomePage {
     if (this.selectedQuizs === 0) {
       this.navCtrl.push(QuizQuestionsPage, {quiz: quiz});
     }
+  }
+
+  getQuestionTypeCount(quiz: Quiz, type: QuestionType) {
+    return quiz.questions.filter((question) => question.type === type).length;
   }
 
   selectQuiz(quiz: Quiz) {
