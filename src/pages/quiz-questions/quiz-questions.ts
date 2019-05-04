@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
-import { Platform, NavController, ModalController, LoadingController, AlertController, PopoverController, NavParams, reorderArray } from 'ionic-angular';
-import { File } from '@ionic-native/file';
-import { AndroidPermissions } from '@ionic-native/android-permissions';
+import { NavController, ModalController, LoadingController, AlertController, PopoverController, NavParams, reorderArray } from 'ionic-angular';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -27,14 +25,11 @@ export class QuizQuestionsPage {
   private showReorderCategorys: boolean;
 
   constructor(
-    private platform: Platform,
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private popoverCtrl: PopoverController,
-    private file: File,
-    private androidPermissions: AndroidPermissions,
     private quizsProv: QuizsProvider,
     params: NavParams) {
       this.quiz = params.data.quiz;
@@ -52,8 +47,6 @@ export class QuizQuestionsPage {
         } else if (data.index === 1) {
           this.showReorderCategorys = !this.showReorderCategorys;
         } else if (data.index === 2) {
-          this.export();
-        } else if (data.index === 3) {
           this.openQuizSettingsPage();
         }
       }
@@ -246,82 +239,5 @@ export class QuizQuestionsPage {
 
   startQuiz() {
     this.navCtrl.push(PlayPage, {quiz: this.quiz});
-  }
-
-  export() {
-    let loading = this.loadingCtrl.create({
-      content: 'Exporting...'
-    });
-
-    loading.present();
-
-    this.quizsProv.zip(this.quiz).then((data: any) => {
-      if (this.platform.is('core')) {
-        this.file.readAsDataURL(data.cordovaFilePath, data.filePath).then((data) => {
-          var toto = window.location.href = "data:application/zip;" + data;
-          loading.dismiss();
-          alert("Be a bit more patient, a download popup should show up.");
-        }).catch((error) => {
-          loading.dismiss();
-          alert("Something went wrong while exporting the quiz.");
-        });
-
-      } else if (this.platform.is('android')) {
-        this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
-          .then(status => {
-            if (status.hasPermission) {
-              this.exportFileToAndroidDownload(data).then((url) => {
-                loading.dismiss();
-              }).catch((error) => {
-                loading.dismiss();
-                alert(error);
-              });
-            }
-            else {
-              this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
-                .then(status => {
-                  if(status.hasPermission) {
-                    this.exportFileToAndroidDownload(data).then((url) => {
-                      loading.dismiss();
-                    }).catch((error) => {
-                      loading.dismiss();
-                      alert(error);
-                    });
-                  }
-                });
-            }
-          });
-      } else {
-        loading.dismiss();
-        alert("Export function is not supported.");
-      }
-    }).catch((err) => {
-      alert(err);
-    })
-  }
-
-  exportFileToAndroidDownload(data) {
-    return new Promise((resolve, reject) => {
-      this.file.moveFile(data.cordovaFilePath,  data.filePath, this.file.externalRootDirectory, data.filePath).then(() => {
-        let message = this.alertCtrl.create({
-          title: 'Exported quiz to',
-          message: this.file.externalRootDirectory + data.filePath,
-          buttons: [
-            {
-              text: 'Ok',
-              role: 'ok',
-            }
-          ]
-        });
-
-        message.present();
-
-        resolve();
-      }).catch(() => {
-        reject("Something went wrong while export the quiz.");
-      })
-    });
-
-
   }
 }

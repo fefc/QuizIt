@@ -1,5 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Platform, NavController, ModalController, LoadingController, PopoverController } from 'ionic-angular';
+import { Platform, NavController, ModalController, AlertController, LoadingController, PopoverController } from 'ionic-angular';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
 import { File } from '@ionic-native/file';
@@ -30,7 +31,9 @@ export class HomePage {
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
     private popoverCtrl: PopoverController,
+    private androidPermissions: AndroidPermissions,
     private fileChooser: FileChooser,
     private filePath: FilePath,
     private file: File,
@@ -105,6 +108,85 @@ export class HomePage {
       }
       this.selectedQuizs = 0;
       alert('Unable to delete selected quizs.');
+    });
+  }
+
+  export() {
+    let quiz: Quiz = this.quizsProv.quizs.find((q) => q.selected);
+    quiz.selected = false;
+    this.selectedQuizs -= 1;
+
+    let loading = this.loadingCtrl.create({
+      content: 'Exporting...'
+    });
+
+    loading.present();
+
+    this.quizsProv.zip(quiz).then((data: any) => {
+      if (this.platform.is('core')) {
+        this.file.readAsDataURL(data.cordovaFilePath, data.filePath).then((data) => {
+          window.location.href = "data:application/zip;" + data;
+          loading.dismiss();
+          alert("Be a bit more patient, a download popup should show up.");
+        }).catch((error) => {
+          loading.dismiss();
+          alert("Something went wrong while exporting the quiz.");
+        });
+
+      } else if (this.platform.is('android')) {
+        this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+          .then(status => {
+            if (status.hasPermission) {
+              this.exportFileToAndroidDownload(data).then((url) => {
+                loading.dismiss();
+              }).catch((error) => {
+                loading.dismiss();
+                alert(error);
+              });
+            }
+            else {
+              this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+                .then(status => {
+                  if(status.hasPermission) {
+                    this.exportFileToAndroidDownload(data).then((url) => {
+                      loading.dismiss();
+                    }).catch((error) => {
+                      loading.dismiss();
+                      alert(error);
+                    });
+                  }
+                });
+            }
+          });
+      } else {
+        loading.dismiss();
+        alert("Export function is not supported.");
+      }
+    }).catch((err) => {
+      alert(err);
+    })
+  }
+
+  exportFileToAndroidDownload(data) {
+    return new Promise((resolve, reject) => {
+      this.file.moveFile(data.cordovaFilePath,  data.filePath, this.file.externalRootDirectory, data.filePath).then(() => {
+        let message = this.alertCtrl.create({
+          title: 'Exported quiz to',
+          message: this.file.externalRootDirectory + data.filePath,
+          buttons: [
+            {
+              text: 'Ok',
+              role: 'ok',
+            }
+          ]
+        });
+
+        message.present();
+
+        resolve();
+      }).catch(() => {
+        reject("Something went wrong while export the quiz.");
+      })
     });
   }
 

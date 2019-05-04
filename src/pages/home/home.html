@@ -17,6 +17,9 @@
       {{selectedQuizs}} Selected
     </ion-title>
     <ion-buttons end>
+      <button *ngIf="selectedQuizs === 1" ion-button icon-only (click)="export()">
+        <ion-icon name="download"></ion-icon>
+      </button>
       <button ion-button icon-only (click)="deleteSelected()">
         <ion-icon name="trash"></ion-icon>
       </button>
