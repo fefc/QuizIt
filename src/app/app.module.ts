@@ -19,6 +19,7 @@ import { MyApp } from './app.component';
 import { QuizsProvider } from '../providers/quizs/quizs';
 
 import { HomePage } from '../pages/home/home';
+import { HomeMenu } from '../pages/home/menu';
 import { QuizNewPage } from '../pages/quiz-new/quiz-new';
 import { QuizQuestionsPage } from '../pages/quiz-questions/quiz-questions';
 import { QuizSettingsPage } from '../pages/quiz-settings/quiz-settings';
@@ -32,6 +33,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
   declarations: [
     MyApp,
     HomePage,
+    HomeMenu,
     QuizNewPage,
     QuizQuestionsPage,
     QuizSettingsPage,
@@ -49,6 +51,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
   entryComponents: [
     MyApp,
     HomePage,
+    HomeMenu,
     QuizNewPage,
     QuizQuestionsPage,
     QuizSettingsPage,

@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Platform, NavController, ModalController, LoadingController } from 'ionic-angular';
+import { Platform, NavController, ModalController, LoadingController, PopoverController } from 'ionic-angular';
 import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
 import { File } from '@ionic-native/file';
@@ -8,6 +8,7 @@ import { Quiz } from '../../models/quiz';
 
 import { QuizsProvider } from '../../providers/quizs/quizs';
 
+import { HomeMenu } from './menu';
 import { QuizNewPage } from '../quiz-new/quiz-new';
 import { QuizQuestionsPage } from '../quiz-questions/quiz-questions';
 
@@ -15,6 +16,7 @@ import { QuizQuestionsPage } from '../quiz-questions/quiz-questions';
   selector: 'page-home',
   templateUrl: 'home.html'
 })
+
 export class HomePage {
   private selectedQuizs: number;
 
@@ -25,12 +27,29 @@ export class HomePage {
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
+    private popoverCtrl: PopoverController,
     private fileChooser: FileChooser,
     private filePath: FilePath,
     private file: File,
     private quizsProv: QuizsProvider) {
 
       this.selectedQuizs = 0;
+  }
+
+  openMenu(event) {
+    let popover = this.popoverCtrl.create(HomeMenu);
+    popover.present(({ev: event}));
+
+    popover.onDidDismiss((data) => {
+      console.log(data);
+      if (data) {
+        if (data.index === 0) {
+          this.openQuizNewPage();
+        } else if (data.index === 1) {
+          setTimeout(() => this.import(), 0); //Wired trick to make it work in browser
+        }
+      }
+    });
   }
 
   openQuizNewPage() {
@@ -113,6 +132,7 @@ export class HomePage {
         console.log(e);
       });
     } else if (this.platform.is('core')) {
+        alert('click input');
         this.fileInput.nativeElement.click();
     } else {
       alert("Import is not supported on the platform yet.");
