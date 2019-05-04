@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Platform, NavController, ModalController, LoadingController, AlertController, NavParams, reorderArray } from 'ionic-angular';
+import { Platform, NavController, ModalController, LoadingController, AlertController, PopoverController, NavParams, reorderArray } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 
@@ -10,6 +10,7 @@ import { Question } from '../../models/question';
 
 import { QuizsProvider } from '../../providers/quizs/quizs';
 
+import { QuizQuestionsMenu } from './menu';
 import { QuizSettingsPage } from '../quiz-settings/quiz-settings';
 import { QuestionPage } from '../question/question';
 import { PlayPage } from '../play/play';
@@ -31,12 +32,32 @@ export class QuizQuestionsPage {
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
+    private popoverCtrl: PopoverController,
     private file: File,
     private androidPermissions: AndroidPermissions,
     private quizsProv: QuizsProvider,
     params: NavParams) {
       this.quiz = params.data.quiz;
       this.showReorderCategorys = false;
+  }
+
+  openMenu(event) {
+    let popover = this.popoverCtrl.create(QuizQuestionsMenu);
+    popover.present(({ev: event}));
+
+    popover.onDidDismiss((data) => {
+      if (data) {
+        if (data.index === 0) {
+          this.openNewQuestionPage();
+        } else if (data.index === 1) {
+          this.showReorderCategorys = !this.showReorderCategorys;
+        } else if (data.index === 2) {
+          this.export();
+        } else if (data.index === 3) {
+          this.openQuizSettingsPage();
+        }
+      }
+    });
   }
 
   renameCategory(category: Category) {
@@ -292,7 +313,7 @@ export class QuizQuestionsPage {
             }
           ]
         });
-        
+
         message.present();
 
         resolve();

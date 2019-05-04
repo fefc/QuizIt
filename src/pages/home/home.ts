@@ -44,7 +44,6 @@ export class HomePage {
     popover.present(({ev: event}));
 
     popover.onDidDismiss((data) => {
-      console.log(data);
       if (data) {
         if (data.index === 0) {
           this.openQuizNewPage();
