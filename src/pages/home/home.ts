@@ -132,7 +132,6 @@ export class HomePage {
         console.log(e);
       });
     } else if (this.platform.is('core')) {
-        alert('click input');
         this.fileInput.nativeElement.click();
     } else {
       alert("Import is not supported on the platform yet.");
