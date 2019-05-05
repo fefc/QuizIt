@@ -38,7 +38,7 @@
           <ion-badge color="fulldark"><ion-icon name="images"></ion-icon> {{ getQuestionTypeCount(quiz, QuestionType.rightPicture) }}</ion-badge>
         </p>
         <ion-buttons item-end *ngIf="selectedQuizs === 0">
-          <button ion-button icon-only (click)="startQuiz(quiz);$event.stopPropagation();">
+          <button color="fulldark" ion-button icon-only (click)="startQuiz(quiz);$event.stopPropagation();">
             <ion-icon name="play"></ion-icon>
           </button>
         </ion-buttons>

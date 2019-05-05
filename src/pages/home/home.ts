@@ -82,6 +82,8 @@ export class HomePage {
   openQuizQuestionsPage(quiz: Quiz) {
     if (this.selectedQuizs === 0) {
       this.navCtrl.push(QuizQuestionsPage, {quiz: quiz});
+    } else {
+      this.selectQuiz(quiz);
     }
   }
 
