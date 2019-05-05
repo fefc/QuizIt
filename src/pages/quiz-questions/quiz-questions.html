@@ -1,9 +1,9 @@
 <ion-header>
-  <ion-navbar *ngIf="showReorderCategorys === false">
+  <ion-navbar>
     <ion-title>
-      {{quiz.title}}
+      {{showReorderCategorys === false ? quiz.title : 'Reorder categories'}}
     </ion-title>
-    <ion-buttons end>
+    <ion-buttons end *ngIf="showReorderCategorys === false">
       <button ion-button icon-only (click)="startQuiz()">
         <ion-icon name="play"></ion-icon>
       </button>
@@ -11,12 +11,7 @@
         <ion-icon name="more"></ion-icon>
       </button>
     </ion-buttons>
-  </ion-navbar>
-  <ion-navbar *ngIf="showReorderCategorys === true">
-    <ion-title>
-      Reorder categories
-    </ion-title>
-    <ion-buttons end>
+    <ion-buttons end *ngIf="showReorderCategorys === true">
       <button ion-button (click)="showReorderCategorys = false">
         Done
       </button>
