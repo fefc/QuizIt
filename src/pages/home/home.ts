@@ -102,7 +102,9 @@ export class HomePage {
     }
     else {
       quiz.selected = false;
-      this.selectedQuizs -= 1;
+      if (this.selectedQuizs > 0) {
+        this.selectedQuizs -= 1;
+      }
     }
   }
 
