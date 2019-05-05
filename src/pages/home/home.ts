@@ -13,6 +13,7 @@ import { QuizsProvider } from '../../providers/quizs/quizs';
 import { HomeMenu } from './menu';
 import { QuizNewPage } from '../quiz-new/quiz-new';
 import { QuizQuestionsPage } from '../quiz-questions/quiz-questions';
+import { PlayPage } from '../play/play';
 
 @Component({
   selector: 'page-home',
@@ -86,6 +87,10 @@ export class HomePage {
 
   getQuestionTypeCount(quiz: Quiz, type: QuestionType) {
     return quiz.questions.filter((question) => question.type === type).length;
+  }
+
+  startQuiz(quiz: Quiz) {
+    this.navCtrl.push(PlayPage, {quiz: quiz});
   }
 
   selectQuiz(quiz: Quiz) {

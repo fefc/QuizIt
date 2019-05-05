@@ -29,7 +29,7 @@
 
 <ion-content>
   <ion-list>
-    <ion-item *ngFor="let quiz of quizsProv.quizs" (tap)="openQuizQuestionsPage(quiz)" (press)="selectQuiz(quiz)">
+    <ion-item *ngFor="let quiz of quizsProv.quizs" (click)="openQuizQuestionsPage(quiz)" (press)="selectQuiz(quiz)">
         <ion-checkbox *ngIf="quiz.selected" checked="true" (click)="selectQuiz(quiz)"></ion-checkbox>
         <h2>{{ quiz.title }}</h2>
         <p>
@@ -37,6 +37,11 @@
           <ion-badge color="fulldark"><ion-icon name="stopwatch"></ion-icon> {{ getQuestionTypeCount(quiz, QuestionType.stopwatch) }}</ion-badge>
           <ion-badge color="fulldark"><ion-icon name="images"></ion-icon> {{ getQuestionTypeCount(quiz, QuestionType.rightPicture) }}</ion-badge>
         </p>
+        <ion-buttons item-end *ngIf="selectedQuizs === 0">
+          <button ion-button icon-only (click)="startQuiz(quiz);$event.stopPropagation();">
+            <ion-icon name="play"></ion-icon>
+          </button>
+        </ion-buttons>
       </ion-item>
   </ion-list>
 
