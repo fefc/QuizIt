@@ -802,7 +802,6 @@ export class PlayPage {
     let modal = this.modalCtrl.create(PlayAddPlayerPage,  {currentPlayers: this.players});
     modal.present();
     modal.onDidDismiss((data) => {
-      console.log(data);
       if (data) {
         let newPlayer: Player = this.addPlayer(data.nickname, data.avatar, data.uuid);
         if (newPlayer) {
@@ -918,7 +917,6 @@ export class PlayPage {
   }
 
   handleKeyboardEvent(event: any) {
-    console.log(event);
     var buzzer: Buzzer = BuzzersConstants.KEYSETS.find((x) => x.keys.indexOf(event.key) > -1);
     let answeringPlayer: Player;
     var answer: number;

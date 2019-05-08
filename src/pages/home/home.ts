@@ -88,7 +88,6 @@ export class HomePage {
     if (this.selectedQuizs === 0) {
       this.navCtrl.push(QuizQuestionsPage, {quiz: quiz});
     } else {
-      console.log("e")
       this.selectQuiz(quiz);
     }
   }
@@ -102,7 +101,6 @@ export class HomePage {
   }
 
   selectQuiz(quiz: Quiz) {
-    console.log("fired");
     if (!quiz.selected) {
       quiz.selected = true;
       this.selectedQuizs += 1;
