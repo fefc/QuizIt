@@ -75,7 +75,7 @@ export class QuizQuestionsPage {
         if (data.index === 0) {
           this.renameCategory(category);
         } else if (data.index === 1) {
-          //Delete
+          this.deleteCategoryWithDialog(category);
         }
       }
     });
@@ -157,6 +157,66 @@ export class QuizQuestionsPage {
 
   reorderCategorys(indexes:any) {
     this.quiz.categorys = reorderArray(this.quiz.categorys, indexes);
+
+    let loading = this.loadingCtrl.create({
+      content: 'Saving changes...'
+    });
+
+    loading.present();
+
+    this.quizsProv.saveToStorage(this.quiz).then(() => {
+      loading.dismiss();
+    }).catch(() => {
+      loading.dismiss();
+      alert('Unable to save Quiz.');
+    });
+  }
+
+  deleteCategoryWithDialog(category: Category) {
+    if (this.quiz.categorys.length > 1) {
+      if (this.quiz.questions.filter((q) => q.category.name === category.name).length > 0) {
+        let deleteAlert = this.alertCtrl.create({
+          title: 'Delete category',
+          message: 'Deleting the category will also delete all contained questions.',
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+            },
+            {
+              text: 'Delete',
+              handler: () => {
+                this.deleteCategory(category);
+              }
+            }
+          ]
+        });
+
+        deleteAlert.present();
+      } else {
+        this.deleteCategory(category);
+      }
+    } else {
+      let deleteAlert = this.alertCtrl.create({
+        title: 'Delete category',
+        message: 'It is impossible to delete the only exsisting category.',
+        buttons: [
+          {
+            text: 'Ok',
+            role: 'ok',
+          }
+        ]
+      });
+
+      deleteAlert.present();
+    }
+  }
+
+  deleteCategory(category: Category) {
+    let index = this.quiz.categorys.findIndex((c) => c.name === category.name);
+
+    this.quiz.questions = this.quiz.questions.filter((q) => q.category.name !== category.name);
+    this.quiz.categorys.splice(index, 1);
 
     let loading = this.loadingCtrl.create({
       content: 'Saving changes...'
