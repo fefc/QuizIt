@@ -79,10 +79,16 @@ export class HomePage {
     });
   }
 
-  openQuizQuestionsPage(quiz: Quiz) {
+  openQuizQuestionsPage(event: Event, quiz: Quiz) {
+    //Workaround for stopPropagation on tap events
+    //https://github.com/ionic-team/ionic/issues/12569#issuecomment-426269026
+    if (event && (<HTMLElement>event.target).matches('[data-stop-propagation], [data-stop-propagation] *')) {
+      return;
+    }
     if (this.selectedQuizs === 0) {
       this.navCtrl.push(QuizQuestionsPage, {quiz: quiz});
     } else {
+      console.log("e")
       this.selectQuiz(quiz);
     }
   }
@@ -96,6 +102,7 @@ export class HomePage {
   }
 
   selectQuiz(quiz: Quiz) {
+    console.log("fired");
     if (!quiz.selected) {
       quiz.selected = true;
       this.selectedQuizs += 1;
