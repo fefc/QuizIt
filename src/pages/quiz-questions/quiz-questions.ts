@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { NavController, ModalController, LoadingController, AlertController, PopoverController, NavParams, reorderArray } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { NavController, ModalController, LoadingController, AlertController, PopoverController, NavParams, Navbar, reorderArray } from 'ionic-angular';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -20,9 +20,13 @@ import { PlayPage } from '../play/play';
 export class QuizQuestionsPage {
   private QuestionType = QuestionType; //for use in Angular html
 
+  @ViewChild(Navbar) navBar: Navbar;
+
   private quiz: Quiz;
 
   private showReorderCategorys: boolean;
+
+  private selectedQuestions: number;
 
   constructor(
     public navCtrl: NavController,
@@ -34,7 +38,15 @@ export class QuizQuestionsPage {
     params: NavParams) {
       this.quiz = params.data.quiz;
       this.showReorderCategorys = false;
+      this.selectedQuestions = 0;
   }
+
+  ionViewDidLoad() {
+    this.navBar.backButtonClick = () => {
+      this.backButtonAction();
+    }
+  }
+
 
   openMenu(event) {
     let popover = this.popoverCtrl.create(QuizQuestionsMenu);
@@ -51,6 +63,18 @@ export class QuizQuestionsPage {
         }
       }
     });
+  }
+
+  backButtonAction(){
+    if (this.showReorderCategorys) {
+      this.showReorderCategorys = false;
+    } else if(this.selectedQuestions > 0) {
+      for (let question of this.quiz.questions.filter((q) => q.selected)) {
+        this.selectQuestion(question);
+      }
+    } else {
+      this.navCtrl.pop();
+    }
   }
 
   renameCategory(category: Category) {
@@ -152,14 +176,49 @@ export class QuizQuestionsPage {
     });
   }
 
-  openQuestionPage(question: Question) {
-    let modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys, question: question});
-    modal.present();
-    modal.onDidDismiss(data => {
-      if (data) {
-        this.saveChanges(data.question);
+  selectQuestion(question: Question) {
+    if (!question.selected) {
+      question.selected = true;
+      this.selectedQuestions += 1;
+    }
+    else {
+      question.selected = false;
+      if (this.selectedQuestions > 0) {
+        this.selectedQuestions -= 1;
       }
+    }
+  }
+
+  deleteSelected() {
+    this.quiz.questions = this.quiz.questions.filter((q) => q.selected !== true);
+    this.selectedQuestions = 0;
+
+    let loading = this.loadingCtrl.create({
+      content: 'Saving changes...'
     });
+
+    loading.present();
+
+    this.quizsProv.saveToStorage(this.quiz).then(() => {
+      loading.dismiss();
+    }).catch(() => {
+      loading.dismiss();
+      alert('Unable to save Quiz.');
+    });
+  }
+
+  openQuestionPage(question: Question) {
+    if (this.selectedQuestions === 0) {
+      let modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys, question: question});
+      modal.present();
+      modal.onDidDismiss(data => {
+        if (data) {
+          this.saveChanges(data.question);
+        }
+      });
+    } else {
+      this.selectQuestion(question);
+    }
   }
 
   openNewQuestionPage() {

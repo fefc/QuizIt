@@ -1,9 +1,9 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      {{showReorderCategorys === false ? quiz.title : 'Reorder categories'}}
+      {{showReorderCategorys === false ? (selectedQuestions === 0 ? quiz.title : selectedQuestions + ' Selected') : 'Reorder categories'}}
     </ion-title>
-    <ion-buttons end *ngIf="showReorderCategorys === false">
+    <ion-buttons end *ngIf="showReorderCategorys === false && selectedQuestions === 0">
       <button ion-button icon-only (click)="startQuiz()">
         <ion-icon name="play"></ion-icon>
       </button>
@@ -11,9 +11,14 @@
         <ion-icon name="more"></ion-icon>
       </button>
     </ion-buttons>
-    <ion-buttons end *ngIf="showReorderCategorys === true">
+    <ion-buttons end *ngIf="showReorderCategorys === true && selectedQuestions === 0">
       <button ion-button (click)="showReorderCategorys = false">
         Done
+      </button>
+    </ion-buttons>
+    <ion-buttons end *ngIf="selectedQuestions > 0">
+      <button ion-button icon-only (click)="deleteSelected()">
+        <ion-icon name="trash"></ion-icon>
       </button>
     </ion-buttons>
   </ion-navbar>
@@ -23,12 +28,17 @@
   <ion-list [reorder]="showReorderCategorys" (ionItemReorder)="reorderCategorys($event)">
     <ion-item-group *ngFor="let category of quiz.categorys">
       <ion-item-divider>
-        <ion-label>{{ category.name }}</ion-label>
-        <button *ngIf="!showReorderCategorys" ion-button icon-only item-end (click)="renameCategory(category)"><ion-icon name="create"></ion-icon></button>
+        <ion-item-sliding>
+          <ion-item>{{ category.name }}</ion-item>
+          <ion-item-options slide="left">
+            <button *ngIf="!showReorderCategorys" ion-button icon-only item-end (click)="renameCategory(category)"><ion-icon name="create"></ion-icon></button>
+          </ion-item-options>
+        </ion-item-sliding>
       </ion-item-divider>
-      <ion-item-group *ngIf="!showReorderCategorys" reorder="true" (ionItemReorder)="reorderQuestions($event, category)">
-        <ion-item *ngFor="let question of getQuestionsFromCategory(category)" (tap)="openQuestionPage(question)">
+      <ion-item-group *ngIf="!showReorderCategorys" [reorder]="selectedQuestions === 0" (ionItemReorder)="reorderQuestions($event, category)">
+        <ion-item tappable *ngFor="let question of getQuestionsFromCategory(category)" (tap)="openQuestionPage(question)" (press)="selectQuestion(question)">
           <ion-icon [name]="getIconForQuestion(question.type)" item-start></ion-icon>
+          <ion-icon *ngIf="question.selected" name="checkbox" color="primary" item-end></ion-icon>
           {{ question.question }}</ion-item>
       </ion-item-group>
     </ion-item-group>
