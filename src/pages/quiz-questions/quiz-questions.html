@@ -28,12 +28,12 @@
   <ion-list [reorder]="showReorderCategorys" (ionItemReorder)="reorderCategorys($event)">
     <ion-item-group *ngFor="let category of quiz.categorys">
       <ion-item-divider>
-        <ion-item-sliding>
-          <ion-item>{{ category.name }}</ion-item>
-          <ion-item-options slide="left">
-            <button *ngIf="!showReorderCategorys" ion-button icon-only item-end (click)="renameCategory(category)"><ion-icon name="create"></ion-icon></button>
-          </ion-item-options>
-        </ion-item-sliding>
+        <ion-label>{{ category.name }}</ion-label>
+        <ion-buttons item-end *ngIf="!showReorderCategorys">
+          <button color="fulldark" ion-button icon-only (tap)="openMenuCategory($event, category)">
+            <ion-icon name="more"></ion-icon>
+          </button>
+        </ion-buttons>
       </ion-item-divider>
       <ion-item-group *ngIf="!showReorderCategorys" [reorder]="selectedQuestions === 0" (ionItemReorder)="reorderQuestions($event, category)">
         <ion-item tappable *ngFor="let question of getQuestionsFromCategory(category)" (tap)="openQuestionPage(question)" (press)="selectQuestion(question)">

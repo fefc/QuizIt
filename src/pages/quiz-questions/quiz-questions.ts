@@ -9,6 +9,7 @@ import { Question } from '../../models/question';
 import { QuizsProvider } from '../../providers/quizs/quizs';
 
 import { QuizQuestionsMenu } from './menu';
+import { QuizQuestionsMenuCategory } from './menu-category';
 import { QuizSettingsPage } from '../quiz-settings/quiz-settings';
 import { QuestionPage } from '../question/question';
 import { PlayPage } from '../play/play';
@@ -60,6 +61,21 @@ export class QuizQuestionsPage {
           this.showReorderCategorys = !this.showReorderCategorys;
         } else if (data.index === 2) {
           this.openQuizSettingsPage();
+        }
+      }
+    });
+  }
+
+  openMenuCategory(event: Event, category: Category) {
+    let popover = this.popoverCtrl.create(QuizQuestionsMenuCategory);
+    popover.present(({ev: event}));
+
+    popover.onDidDismiss((data) => {
+      if (data) {
+        if (data.index === 0) {
+          this.renameCategory(category);
+        } else if (data.index === 1) {
+          //Delete
         }
       }
     });

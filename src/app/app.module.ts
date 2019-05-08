@@ -23,6 +23,8 @@ import { HomeMenu } from '../pages/home/menu';
 import { QuizNewPage } from '../pages/quiz-new/quiz-new';
 import { QuizQuestionsPage } from '../pages/quiz-questions/quiz-questions';
 import { QuizQuestionsMenu } from '../pages/quiz-questions/menu';
+import { QuizQuestionsMenuCategory } from '../pages/quiz-questions/menu-category';
+
 import { QuizSettingsPage } from '../pages/quiz-settings/quiz-settings';
 
 import { QuestionPage } from '../pages/question/question';
@@ -38,6 +40,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     QuizNewPage,
     QuizQuestionsPage,
     QuizQuestionsMenu,
+    QuizQuestionsMenuCategory,
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
@@ -57,6 +60,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     QuizNewPage,
     QuizQuestionsPage,
     QuizQuestionsMenu,
+    QuizQuestionsMenuCategory,
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
