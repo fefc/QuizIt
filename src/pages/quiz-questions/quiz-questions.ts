@@ -274,7 +274,7 @@ export class QuizQuestionsPage {
 
 
   openQuizSettingsPage() {
-    let modal = this.modalCtrl.create(QuizSettingsPage, {settings: this.quiz.settings});
+    let modal = this.modalCtrl.create(QuizSettingsPage, {title: this.quiz.title, settings: this.quiz.settings});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {
@@ -284,6 +284,7 @@ export class QuizQuestionsPage {
 
         loading.present();
 
+        this.quiz.title = data.title;
         this.quiz.settings = data.settings;
 
         this.quizsProv.saveToStorage(this.quiz).then(() => {

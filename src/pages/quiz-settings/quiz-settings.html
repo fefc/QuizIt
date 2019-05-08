@@ -24,6 +24,10 @@
         <ion-label>Basic</ion-label>
       </ion-item-divider>-->
       <ion-item>
+      <ion-label>Title</ion-label>
+        <ion-input type="text" placeholder="Title of the quiz" [(ngModel)]="title"></ion-input>
+      </ion-item>
+      <ion-item>
         <ion-label>Auto play</ion-label>
         <ion-toggle slot="end" [(ngModel)]="settings.autoPlay"></ion-toggle>
       </ion-item>

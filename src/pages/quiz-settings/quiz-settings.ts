@@ -9,6 +9,7 @@ import { DefaultQuizSettings } from '../../models/quiz-settings';
   templateUrl: 'quiz-settings.html'
 })
 export class QuizSettingsPage {
+  private title: string;
   private settings: QuizSettings;
   private showAdvancedCounter: number;
 
@@ -16,6 +17,12 @@ export class QuizSettingsPage {
               public toastCtrl: ToastController,
               params: NavParams) {
     this.showAdvancedCounter = 0;
+
+    if (params.data.title) {
+      this.title = JSON.parse(JSON.stringify(params.data.title));
+    } else {
+      this.title = '';
+    }
 
     if (params.data.settings) {
       //lets make deep copies, so that we don't modfiy anything before user confirmation
@@ -63,6 +70,11 @@ export class QuizSettingsPage {
 
   enableSaveButton() {
     let enable: boolean = true;
+
+    if (this.title.length < 3) {
+      enable = false;
+    }
+
     if (this.settings.commonAnimationDuration < 1 || this.settings.commonAnimationDuration > DefaultQuizSettings.COMMON_ANIMATION_DURATION * 4) {
       enable = false;
     }
@@ -126,7 +138,7 @@ export class QuizSettingsPage {
         newSettings.backgroundImage = this.settings.backgroundImage;
       }
 
-      this.viewCtrl.dismiss({settings: newSettings});
+      this.viewCtrl.dismiss({title: this.title, settings: newSettings});
     }
   }
 
