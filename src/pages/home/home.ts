@@ -115,6 +115,13 @@ export class HomePage {
     }
   }
 
+  deselectAll() {
+    for (let selectedQuiz of this.quizsProv.quizs) {
+      selectedQuiz.selected = null;
+    }
+    this.selectedQuizs = 0;
+  }
+
   deleteSelected() {
     this.quizsProv.deleteSelectedFromStorage().then(() => {
       this.selectedQuizs = 0;

@@ -8,7 +8,12 @@
         <ion-icon name="more"></ion-icon>
       </button>
     </ion-buttons>
-    <ion-buttons end *ngIf="selectedQuizs > 0">
+    <ion-buttons left *ngIf="selectedQuizs > 0">
+      <button ion-button icon-only class="custom-arrow-back" (click)="deselectAll()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-buttons right *ngIf="selectedQuizs > 0">
       <button *ngIf="selectedQuizs === 1" ion-button icon-only (click)="export()">
         <ion-icon name="download"></ion-icon>
       </button>
