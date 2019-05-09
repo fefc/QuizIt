@@ -1,6 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { ViewController, AlertController, LoadingController, NavParams } from 'ionic-angular';
-import { Slides } from 'ionic-angular';
+import { ViewController, AlertController, LoadingController, NavParams, Slides } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from "rxjs/Subscription";
 import 'rxjs/add/observable/fromEvent';
