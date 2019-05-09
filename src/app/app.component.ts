@@ -21,7 +21,7 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
 
       //Shitty workaround
-      splashScreen.hide();
+      //splashScreen.hide();
 
       this.quizsProv.loadFromStorage().then(() => {
         //statusBar.styleDefault();

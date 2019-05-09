@@ -30,14 +30,23 @@ export class QuizsProvider {
 
   loadFromStorage() {
     return new Promise((resolve, reject) => {
-      this.storage.get('quizs').then(data => {
-        if (data) {
-          this.quizs = JSON.parse(data);
+      this.storage.keys().then(keys => {
+        if (keys.indexOf('quizs') > -1) {
+          this.storage.get('quizs').then(data => {
+            if (data) {
+              this.quizs = JSON.parse(data);
+              resolve();
+            }
+          }).catch(() => {
+            reject();
+          });
+        } else {
           resolve();
         }
       }).catch(() => {
         reject();
       });
+
     });
   }
 
