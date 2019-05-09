@@ -56,7 +56,8 @@ export class QuizsProvider {
           title: quiz.title,
           creationDate: quiz.creationDate,
           categorys: quiz.categorys,
-          questions: quiz.questions
+          questions: quiz.questions,
+          settings: quiz.settings
         }
 
         this.quizs.push(newQuiz);

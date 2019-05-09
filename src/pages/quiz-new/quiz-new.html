@@ -12,12 +12,16 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
     <ion-item>
     <ion-label color="primary" fixed>Title</ion-label>
-      <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="newQuiz.title"></ion-input>
+      <ion-input type="text" placeholder="What is your quiz about?" [(ngModel)]="newQuiz.title"></ion-input>
     </ion-item>
-  </ion-list>
+
+    <ion-slides centeredSlides pager (ionSlideDidChange)="slideChanged()">
+      <ion-slide *ngFor="let background of backgrounds">
+        <img data-src="assets/imgs/backgrounds/{{background}}">
+      </ion-slide>
+    </ion-slides>
 </ion-content>
 
 <ion-footer>

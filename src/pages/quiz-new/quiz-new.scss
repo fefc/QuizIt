@@ -1,3 +1,15 @@
 page-quiz-new {
-  
+  .scroll-content {
+      overflow-y: hidden !important;
+      display: flex;
+      flex-flow: column;
+  }
+
+  ion-slides {
+    height: 100%;
+  }
+
+  .swiper-slide img {
+    border-radius: 10px;
+  }
 }
