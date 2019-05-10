@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Platform, ViewController, AlertController, NavParams } from 'ionic-angular';
+import { Platform, ViewController, AlertController, NavParams, Slides } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
 
@@ -30,6 +30,7 @@ export class QuestionPage {
 
   private pictures: Array<SafeUrl>;
 
+  @ViewChild(Slides) slides: Slides;
   @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
   @ViewChild('fileInputReplace') fileInputReplace: ElementRef; //Picture selector for browser
 
@@ -292,6 +293,14 @@ export class QuestionPage {
     }
     this.question.answers.splice(val, 1);
     this.pictures.splice(val, 1);
+
+    val = val - 1;
+
+    if (val >= 0 && val < this.question.answers.length) {
+      this.slides.slideTo(val);
+    }
+
+    this.slides.update();
   }
 
   enableSaveButton() {
@@ -337,10 +346,12 @@ export class QuestionPage {
   renderPicture(directory: string, fileName: string, position?: number) {
     this.file.readAsDataURL(directory, fileName).then((picture) => {
       if (position >= 0) {
-        this.pictures[position] = this.sanitizer.bypassSecurityTrustUrl(picture);
+        this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
       } else {
-        this.pictures.push(this.sanitizer.bypassSecurityTrustUrl(picture));
+        this.pictures.push(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
       }
+
+      this.slides.update();
     }).catch((error) => {
       console.log("Something went wrong when reading pictures.");
     });

@@ -1,44 +1,39 @@
 page-question {
 
-  .picture-gallery {
-    margin: 10px;
-
-    .picture-container {
-      background-color: #000;
-      position: relative;
-      width: 100%;
-      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  .scroll-content {
+      overflow-y: hidden !important;
       display: flex;
-      flex-direction: row;
-      overflow: hidden;
-      border-radius: 10px;
+      flex-flow: column;
+  }
 
-      img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        height: 100%;
-        margin: auto;
-        flex: 1;
+  .list-md {
+    margin: 0;
+  }
 
-        z-index:9;
-      }
+  ion-slide {
+    canvas {
+      width: 100%;
+      height: 100%;
 
-      .checkmark {
-        position: absolute;
-        top: 0;
-        right: 0;
-        font-size: 40px;
-        margin: 19px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
 
-        z-index:10;
-      }
+    .checkmark {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 40px;
+      margin: 19px;
 
-      ion-fab {
-        z-index: 10;
-      }
+      z-index:10;
+    }
+
+    ion-fab {
+      z-index: 10;
     }
   }
+
+
 }
