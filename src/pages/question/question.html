@@ -15,7 +15,7 @@
   <ion-list>
     <ion-item>
       <ion-label color="primary" fixed>Question</ion-label>
-      <ion-input type="text" placeholder="Who let the dog out?" [(ngModel)]="question.question"></ion-input>
+      <ion-input type="text" placeholder="This is your question" [(ngModel)]="question.question"></ion-input>
     </ion-item>
     <ion-item>
       <ion-label fixed>Category</ion-label>
@@ -36,8 +36,8 @@
     </ion-item>
     <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
     <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-      <ion-label fixed>Answer {{i}}</ion-label>
-      <ion-input type="text" placeholder="I let the dog out" [(ngModel)]="question.answers[i]"></ion-input>
+      <ion-label fixed>Answer {{answerNumber[i]}}</ion-label>
+      <ion-input type="text" placeholder="An answer" [(ngModel)]="question.answers[i]"></ion-input>
     </ion-item>
     <ion-item>
       <ion-label fixed>Right answer</ion-label>

@@ -17,6 +17,7 @@ const MAX_PICTURE_HEIGHT: number = 1080;
 })
 
 export class QuestionPage {
+  private answerNumber: Array<string> = ['one', 'two', 'three', 'four'];
   private maxPictures: number = 5;
   private QuestionType = QuestionType; //for use in Angluar html
   private title: string;
