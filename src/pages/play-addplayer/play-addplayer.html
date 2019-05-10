@@ -19,7 +19,7 @@
 
   <ion-slides centeredSlides pager (ionSlideDidChange)="slideChanged()">
     <ion-slide *ngFor="let avatar of avatars">
-      <img data-src="assets/imgs/avatars/{{avatar}}">
+      <canvas [style.background-image]="'url(assets/imgs/avatars/' + avatar + ')'"></canvas>
     </ion-slide>
   </ion-slides>
 </ion-content>

@@ -19,7 +19,7 @@
 
     <ion-slides centeredSlides pager (ionSlideDidChange)="slideChanged()">
       <ion-slide *ngFor="let background of backgrounds">
-        <img data-src="assets/imgs/backgrounds/{{background}}">
+        <canvas [style.background-image]="'url(assets/imgs/backgrounds/' + background + ')'"></canvas>
       </ion-slide>
     </ion-slides>
 </ion-content>

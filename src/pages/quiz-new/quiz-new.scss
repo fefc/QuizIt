@@ -5,11 +5,14 @@ page-quiz-new {
       flex-flow: column;
   }
 
-  ion-slides {
-    height: 100%;
-  }
+  ion-slide {
+    canvas {
+      width: 100%;
+      height: 100%;
 
-  .swiper-slide img {
-    border-radius: 10px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
   }
 }
