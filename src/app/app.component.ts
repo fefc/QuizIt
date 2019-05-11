@@ -25,7 +25,7 @@ export class MyApp {
       //Eventually lock screen orientation on some devices
       if (platform.is('android')) {
         //width is dependent on screen orientation
-        if (platform.width() < 800 || platform.height() < 800) {
+        if (Math.min(platform.width(), platform.height()) < 600) {
           this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
         }
       }
