@@ -952,6 +952,11 @@ export class PlayPage {
       /* Unlock screen orientation */
       this.screenOrientation.unlock();
 
+      //width is dependent on screen orientation
+      if (platform.width() < 800 || platform.height() < 800) {
+        this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
+      }
+
       /* Exit immersiveMode */
       this.androidFullScreen.isSupported().then(() => {
           this.androidFullScreen.showSystemUI().catch((err) => {
