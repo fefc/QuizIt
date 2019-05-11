@@ -358,7 +358,7 @@ export class PlayPage {
           this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
 
           /* Get Wifi infos if possible */
-          //this.getWifiInfos(); //TODO doesnt work anymore
+          this.getWifiInfos();
 
           /* Setup httpd stuff */
           this.remoteButtonsRequestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => this.handleHttpdEvent(data), (error) => {
