@@ -953,7 +953,7 @@ export class PlayPage {
       this.screenOrientation.unlock();
 
       //width is dependent on screen orientation
-      if (Math.min(this.platform.width(), this.platform.height()) < 600) {
+      if (Math.min(this.platform.width(), this.platform.height()) < 500) {
         this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
       }
 
