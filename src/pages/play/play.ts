@@ -599,7 +599,7 @@ export class PlayPage {
 
     }, this.commonAnimationDuration / 2);
 
-    if (this.screenState === ScreenStateType.displayQuestion) {
+    if (this.screenState === ScreenStateType.displayQuestion && ((this.currentPictureCounter + 1) * this.currentPictureStayDuration) < this.timeBarAnimationDuration) {
       this.switchPicturesTimer = setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration);
     }
   }
