@@ -10,30 +10,38 @@ page-question {
     margin: 0;
   }
 
-  ion-slide {
-    canvas {
-      width: 100%;
-      height: 100%;
+  ion-slides {
+    height: auto;
+    flex: 1;
 
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
+    ion-slide {
+      .slide-zoom {
+        height: 100%;
+      }
 
-    .checkmark {
-      position: absolute;
-      top: 0;
-      right: 0;
-      font-size: 40px;
-      margin: 19px;
+      canvas {
+        width: 100%;
+        height: 100%;
 
-      z-index:10;
-    }
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
 
-    ion-fab {
-      z-index: 10;
+      .checkmark {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 40px;
+        margin: 19px;
+
+        z-index:10;
+      }
+
+      ion-fab {
+        z-index: 10;
+      }
     }
   }
-
 
 }
