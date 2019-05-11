@@ -224,68 +224,76 @@ export class QuestionPage {
       alert("to many images");
     } else {
       for (let file of files) {
-        var reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e: any) => {
-          //First resize the image
-          //https://zocada.com/compress-resize-images-javascript-browser/
-          let img = new Image();
-          img.src = e.target.result;
-          img.onload = (pic: any) => {
-            let canvas = document.createElement('canvas');
+        this.resizeBrowserImage(file).then((e: any) => {
+          var filename: string = this.uuidv4() + '.jpg';
 
-            if (img.height > MAX_PICTURE_HEIGHT || img.width > MAX_PICTURE_WIDTH) {
-              if ((img.height / MAX_PICTURE_HEIGHT) > (img.width / MAX_PICTURE_WIDTH)) {
-                canvas.width = img.width / (img.height / MAX_PICTURE_HEIGHT)
-                canvas.height = MAX_PICTURE_HEIGHT;
-              } else {
-                canvas.width = MAX_PICTURE_WIDTH
-                canvas.height = img.height / (img.width / MAX_PICTURE_WIDTH) ;
-              }
-            } else {
-              canvas.width = img.width;
-              canvas.height = img.height;
-            }
-
-            let ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            ctx.canvas.toBlob((blob) => {
-              //Now we can copy this to the storage cacheDirectory
-              var resizedReader = new FileReader();
-              resizedReader.readAsArrayBuffer(blob);
-              resizedReader.onload = (resizedE: any) => {
-
-                var filename: string = this.uuidv4() + '.' + file.name.split('.').pop();
-
-                this.file.writeFile(this.file.cacheDirectory, filename, resizedE.target.result, { replace: true }).then(() => {
-                  this.question.answers.push(this.file.cacheDirectory + filename);
-                  this.renderPicture(this.file.cacheDirectory, filename);
-                }).catch((error) => {
-                  console.log(error);
-                });
-              };
-            }, 'image/jpeg', 1);
-          };
-        };
+          this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
+            this.question.answers.push(this.file.cacheDirectory + filename);
+            this.renderPicture(this.file.cacheDirectory, filename);
+          }).catch((error) => {
+            alert(error);
+          });
+        }).catch(() => {
+          alert('Could not resize image');
+        });
       }
     }
   }
 
   getBrowserReplaceImage() {
     let file: any = this.fileInputReplace.nativeElement.files[0];
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = (e: any) => {
-      var filename: string = this.uuidv4() + file.name.split('.').pop();
+
+    this.resizeBrowserImage(file).then((e: any) => {
+      var filename: string = this.uuidv4() + '.jpg';
 
       this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
-        //TODO resize pictures before!
         this.question.answers[this.replacePictureIndex] = this.file.cacheDirectory + filename;
         this.renderPicture(this.file.cacheDirectory, filename, this.replacePictureIndex);
       }).catch((error) => {
         alert(error);
       });
-    };
+    }).catch(() => {
+      alert('Could not resize image');
+    });
+  }
+
+  resizeBrowserImage(file: any) {
+    return new Promise((resolve, reject) => {
+      var reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e: any) => {
+        //First resize the image
+        //https://zocada.com/compress-resize-images-javascript-browser/
+        let img = new Image();
+        img.src = e.target.result;
+        img.onload = (pic: any) => {
+          let canvas = document.createElement('canvas');
+
+          if (img.height > MAX_PICTURE_HEIGHT || img.width > MAX_PICTURE_WIDTH) {
+            if ((img.height / MAX_PICTURE_HEIGHT) > (img.width / MAX_PICTURE_WIDTH)) {
+              canvas.width = img.width / (img.height / MAX_PICTURE_HEIGHT)
+              canvas.height = MAX_PICTURE_HEIGHT;
+            } else {
+              canvas.width = MAX_PICTURE_WIDTH
+              canvas.height = img.height / (img.width / MAX_PICTURE_WIDTH) ;
+            }
+          } else {
+            canvas.width = img.width;
+            canvas.height = img.height;
+          }
+
+          let ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          ctx.canvas.toBlob((blob) => {
+            var resizedReader = new FileReader();
+            resizedReader.readAsArrayBuffer(blob);
+            resizedReader.onload = (resizedE: any) => {
+              resolve(resizedE);
+            };
+          }, 'image/jpeg', 1);
+        };
+      };
+    });
   }
 
   deletePicture(val: number) {
