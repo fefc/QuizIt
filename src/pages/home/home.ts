@@ -69,9 +69,9 @@ export class HomePage {
 
         loading.present();
 
-        this.quizsProv.saveToStorage(data).then(() => {
+        this.quizsProv.saveToStorage(data).then((newQuiz: Quiz) => {
           loading.dismiss();
-          this.openQuizQuestionsPage(null, data);
+          this.openQuizQuestionsPage(null, newQuiz);
         }).catch(() => {
           loading.dismiss();
           alert('Unable to create Quiz.');

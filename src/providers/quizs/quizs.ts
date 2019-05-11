@@ -71,8 +71,8 @@ export class QuizsProvider {
 
         this.quizs.push(newQuiz);
         this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-          quiz = newQuiz;
-          resolve();
+          quiz = this.quizs[this.quizs.length - 1];
+          resolve(newQuiz);
         }).catch(() => {
           this.quizs.pop();
           reject('Could not save quizs to storage.');
