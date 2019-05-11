@@ -953,9 +953,10 @@ export class PlayPage {
       this.screenOrientation.unlock();
 
       //width is dependent on screen orientation
-      if (Math.min(this.platform.width(), this.platform.height()) < 500) {
-        this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
-      }
+      //if (Math.min(this.platform.width(), this.platform.height()) < 800) {
+      //There is a bug with ImagePicker so force portrait anytime for now
+      this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
+      //}
 
       /* Exit immersiveMode */
       this.androidFullScreen.isSupported().then(() => {

@@ -25,9 +25,10 @@ export class MyApp {
       //Eventually lock screen orientation on some devices
       if (platform.is('android')) {
         //width is dependent on screen orientation
-        if (Math.min(platform.width(), platform.height()) < 500) {
-          this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
-        }
+        //if (Math.min(platform.width(), platform.height()) < 800) {
+        //There is a bug with ImagePicker so force portrait anytime for now
+        this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
+        //}
       }
 
       this.quizsProv.loadFromStorage().then(() => {
