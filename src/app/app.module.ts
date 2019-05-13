@@ -13,6 +13,7 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
+import { Insomnia } from '@ionic-native/insomnia';
 
 import { MyApp } from './app.component';
 
@@ -77,6 +78,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     AndroidPermissions,
     FileChooser,
     FilePath,
+    Insomnia,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     QuizsProvider
   ]

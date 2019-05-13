@@ -9,6 +9,7 @@ import 'rxjs/add/observable/fromEvent';
 import { Subscription } from "rxjs/Subscription";
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
+import { Insomnia } from '@ionic-native/insomnia';
 
 declare var WifiWizard2: any;
 
@@ -253,6 +254,7 @@ export class PlayPage {
               private androidFullScreen: AndroidFullScreen,
               private screenOrientation: ScreenOrientation,
               private sanitizer:DomSanitizer,
+              private insomnia: Insomnia,
               params: NavParams) {
 
     this.screenState = ScreenStateType.start;
@@ -377,6 +379,12 @@ export class PlayPage {
 
         this.screenState = ScreenStateType.playersJoining;
         this.displayPlayers = true;
+
+        this.insomnia.keepAwake().then(() => {
+          console.log("Device will be keept awake");
+        }).catch(() => {
+          console.log("Could not set keepAwake.");
+        });
 
         let toast = this.toastCtrl.create({
           message: 'Click screen twice to open menu',
@@ -939,6 +947,12 @@ export class PlayPage {
 
   /* this will be executed when view is poped, either by exit() or by back button */
   ionViewWillUnload() {
+    this.insomnia.allowSleepAgain().then(() => {
+      console.log("Device can go sleep again.");
+    }).catch(() => {
+      console.log("Device could not be allowed to sleep again.");
+    });
+
     this.remoteButtonsRequestsSubscription.unsubscribe();
 
     if (this.platform.is('android')) {
