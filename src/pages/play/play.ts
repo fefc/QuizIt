@@ -872,11 +872,11 @@ export class PlayPage {
       }
     } else if (data.uri === "/answer") {
       let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
-      let remainingMillis: number = (this.timeBarAnimationDuration + this.commonAnimationDuration) - (Date.now() - this.currentQuestionStartDate);
-
-      this.httpd.setRequestResponse({success: answeringPlayer ? true : false, remainingMillis: remainingMillis }).catch(() => {
+      this.httpd.setRequestResponse({success: answeringPlayer ? true : false}).catch(() => {
         console.log("Could not setRequestResponse for /answer.");
       });
+
+      data.answer = +data.answer; //Explicit cast cause httpd is giving us strings only
 
       if (answeringPlayer && this.checkIfRightRemoteButtonUsed(data.answer)) {
         if (data.answer >= 4) {
@@ -886,29 +886,25 @@ export class PlayPage {
 
         this.setPlayerAnswer(answeringPlayer, data.answer);
       }
-    } else if (data.uri === "/getNextQuestionType") {
-      /*let nextQuestionType: QuestionType;
-      let remainingMillis: number = (this.timeBarAnimationDuration + this.commonAnimationDuration) - (Date.now() - this.currentQuestionStartDate);
+    } else if (data.uri === "/questionType") {
+      let player: Player = this.players.find((p) => p.uuid === data.uuid);
 
-      if (this.currentQuestions[this.currentQuestion + 1]) {
-        nextQuestionType = this.currentQuestions[this.currentQuestion + 1].type;
-      } else {
-        let nextCategoryQuestion: Array<Question> = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory + 1]);
-        if (nextCategoryQuestion) {
-          if (this.currentQuestions[0]) {
-            nextQuestionType = this.currentQuestions[0].type;
-          }
-          else {
-            nextQuestionType = undefined;
-          }
+      if (player) {
+        if (this.currentQuestions[this.currentQuestion]) {
+          this.httpd.setRequestResponse({uuid: this.currentQuestions[this.currentQuestion].uuid,
+                                         type: this.currentQuestions[this.currentQuestion].type}).catch(() => {
+            console.log("Could not setRequestResponse for /getNextQuestionType.");
+          });
         } else {
-          nextQuestionType = undefined;
+          this.httpd.setRequestResponse({end: true}).catch(() => {
+            console.log("Could not setRequestResponse for /getNextQuestionType.");
+          });
         }
+      } else {
+        this.httpd.setRequestResponse({msg: "Why do you want this information?"}).catch(() => {
+          console.log("Could not setRequestResponse for /getNextQuestionType.");
+        });
       }
-
-      this.httpd.setRequestResponse({uuid: nextQuestionType, remainingMillis: remainingMillis}).catch(() => {
-        console.log("Could not setRequestResponse for /getNextQuestionType.");
-      });*/
     } else {
       this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
         console.log("Could not setRequestResponse for some useless case.");

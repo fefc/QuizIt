@@ -44,7 +44,7 @@ body {
   z-index: 10;
 }
 
-.bar-nickname {
+#controller-nickname {
   padding-left: 8px;
   line-height: 40px;
   font-family: "Roboto", "Helvetica Neue", sans-serif;
@@ -52,7 +52,7 @@ body {
   color: #bbb;
 }
 
-.bar-avatar {
+#controller-avatar {
   height: 100%;
   border-radius: 100%;
   background-size: contain;
@@ -108,7 +108,7 @@ body {
   border: 0.4vh solid #444 !important;
 }
 
-.container {
+#player {
   position: absolute;
   top: 0;
   left: 0;
@@ -123,7 +123,7 @@ body {
   width: 100%;
 }
 
-.avatar-selector {
+#avatar-selector-0 {
   position: relative;
   width: 100%;
   max-width: 300px;
@@ -243,7 +243,7 @@ img {
 }
 
 
-.box {
+#nickname, #join-quiz {
   position: relative;
   width: 100%;
   max-width: 300px;
@@ -266,6 +266,6 @@ img {
   z-index:10;
 }
 
-.box:disabled {
+#nickname:disabled {
   color: #959595;
 }

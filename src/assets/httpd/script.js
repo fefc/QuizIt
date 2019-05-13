@@ -2,6 +2,11 @@ var playerUuid;
 var nickname;
 var avatar;
 
+var currentQuestionUuid;
+var currentQuestionType;
+var answered;
+var checkQuestionType;
+
 jQuery(function($) {
   $('#nickname').on('input', function() {
     if ($(this).val().length > 2 && $(this).val().length < 17) {
@@ -20,8 +25,14 @@ jQuery(function($) {
         if (data.uuid) {
           playerUuid = data.uuid;
 
-          $('#bar-avatar').css('background-image', "url('imgs/" + avatar + "')");
-          $('#bar-nickname').html(nickname);
+          currentQuestionUuid = "";
+          currentQuestionType = 0;
+          answered = false;
+
+          //checkQuestionType = setInterval(questionType, 1000);
+
+          $('#controller-avatar').css('background-image', "url('imgs/" + avatar + "')");
+          $('#controller-nickname').html(nickname);
 
           $('#player').css('display', 'none');
           $('#controller').css('display', 'flex');
@@ -38,20 +49,70 @@ jQuery(function($) {
   });
 
   function sendAnswer(answer) {
-    $.post('/answer', {uuid: playerUuid, answer: answer}, function(data, status){
-      if (data.success) {
-        $('#answers').children('div').each(function(index) {
-          if (index != answer) {
-            $(this).addClass('disabled');
+    if (answered == false) {
+      $.post('/answer', {uuid: playerUuid, answer: answer}, function(data, status){
+        console.log(data);
+        if (data.success) {
+          answered = true;
+
+          if (currentQuestionType == 2) {
+            $('#answers').children('div').each(function(index) {
+                $(this).addClass('disabled');
+            });
+          } else {
+            $('#answers').children('div').each(function(index) {
+              if (index != answer) {
+                $(this).addClass('disabled');
+              }
+            });
           }
+        }
+      }).fail(function(response) {
+        console.log(response.responseText);
+      });
+    }
+  }
+
+  function questionType() {
+    $.post('/questionType', {uuid: playerUuid}, function(data, status){
+      console.log(data);
+      if (!data.end) {
+        if (data.uuid) {
+          if (data.uuid != currentQuestionUuid) {
+            currentQuestionUuid = data.uuid;
+            currentQuestionType = data.type;
+            answered = false;
+
+            if (currentQuestionType == 2) {
+              //its a buzzer question
+              $('#answers').children('div').each(function(index) {
+                $(this).removeClass('disabled');
+                if (index != 4) {
+                  $(this).css('display', 'none');
+                } else {
+                  $(this).css('display', 'block');
+                }
+              });
+            } else {
+              $('#answers').children('div').each(function(index) {
+                $(this).removeClass('disabled');
+                if (index != 4) {
+                  $(this).css('display', 'block');
+                } else {
+                  $(this).css('display', 'none');
+                }
+              });
+            }
+          }
+        }
+      } else {
+        clearInterval(checkQuestionType);
+        $('#answers').children('div').each(function(index) {
+          $(this).css('display', 'none');
         });
-        setTimeout(() => {
-          $('#answers').children('div').each(function() {
-            $(this).removeClass('disabled');
-          });
-        }, data.remainingMillis);
       }
     }).fail(function(response) {
+      clearInterval(checkQuestionType);
       console.log(response.responseText);
     });
   }

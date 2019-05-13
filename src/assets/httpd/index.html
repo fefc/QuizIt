@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="script.js"></script>
     <script type="text/javascript" src="slideshow.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   </head>
   <body>
-    <div id="player" class="container">
-      <input id="nickname" class="box" type="text" placeholder="Nickname" autocomplete="off" minlength="3" maxlength="16">
-        <div id="avatar-selector-0" class="avatar-selector">
+    <div id="player">
+      <input id="nickname" type="text" placeholder="Your nickname" autocomplete="off" minlength="3" maxlength="16">
+        <div id="avatar-selector-0">
           <div class="scale">
             <div class="main">
               <div class="avatar-box"></div>
@@ -29,25 +30,25 @@
       		        </div>
               </div>
             </div>
-            <a class="previous" onclick="plusSlides('avatar-selector-0', -1)">&#10094;</a>
-            <a class="next" onclick="plusSlides('avatar-selector-0', 1)">&#10095;</a>
+            <a class="previous">&#10094;</a>
+            <a class="next">&#10095;</a>
           </div>
         </div>
         <br>
         <br><br><br>
-        <button id="join-quiz" class="box" disabled>Join Quiz</button>
+        <button id="join-quiz" disabled>Join Quiz</button>
     </div>
 
     <div id="controller" style="display:none;">
       <div id="bar">
-        <canvas class="bar-avatar" height="1" width="1"></canvas>
-        <div class="bar-nickname">Nickname</div>
+        <canvas id="controller-avatar" height="1" width="1"></canvas>
+        <div id="controller-nickname">Nickname</div>
       </div>
       <div id="answers">
-        <div id="zero"></div>
-        <div id="one"></div>
-        <div id="two"></div>
-        <div id="three"></div>
+        <div id="zero" style="display: none;"></div>
+        <div id="one" style="display: none;"></div>
+        <div id="two" style="display: none;"></div>
+        <div id="three" style="display: none;"></div>
         <div id="buzzer" style="display: none;"></div>
       </div>
     </div>
