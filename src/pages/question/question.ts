@@ -3,6 +3,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, AlertController, NavParams, Slides } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
+import { AndroidPermissions } from '@ionic-native/android-permissions';
 
 import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
@@ -43,6 +44,7 @@ export class QuestionPage {
               private file: File,
               private imagePicker: ImagePicker,
               private sanitizer:DomSanitizer,
+              private androidPermissions: AndroidPermissions,
               params: NavParams) {
     //avoid ionic warnings
     this.title = this.title;
@@ -171,7 +173,19 @@ export class QuestionPage {
 
   openImagePicker() {
     if (this.platform.is('android')) {
-      this.openMobileImagePicker();
+      this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+      .then(status => {
+        if (status.hasPermission) {
+          this.openMobileImagePicker();
+        } else {
+          this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+          .then(status => {
+            if(status.hasPermission) {
+              this.openMobileImagePicker();
+            }
+          });
+        }
+      });
     } else {
       this.openBrowserImagePicker();
     }
@@ -183,7 +197,19 @@ export class QuestionPage {
 
   replacePicture(val: number) {
     if (this.platform.is('android')) {
-      this.replacePictureMobile(val);
+      this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+      .then(status => {
+        if (status.hasPermission) {
+          this.replacePictureMobile(val);
+        } else {
+          this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+          .then(status => {
+            if(status.hasPermission) {
+              this.replacePictureMobile(val);
+            }
+          });
+        }
+      });
     } else {
       this.replacePictureBrowser(val);
     }
