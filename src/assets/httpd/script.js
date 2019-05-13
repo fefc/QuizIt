@@ -29,11 +29,7 @@ jQuery(function($) {
           currentQuestionType = 0;
           answered = false;
 
-<<<<<<< HEAD
           checkQuestionType = setInterval(questionType, 1000);
-=======
-          //checkQuestionType = setInterval(questionType, 1000);
->>>>>>> 406ce4488182607cfab5e778c1f9238d65db295e
 
           $('#controller-avatar').css('background-image', "url('imgs/" + avatar + "')");
           $('#controller-nickname').html(nickname);
