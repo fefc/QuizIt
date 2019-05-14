@@ -869,7 +869,7 @@ export class PlayPage {
     if (data.uri === "/addPlayer") {
       let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
 
-      this.httpd.setRequestResponse({uuid: newPlayer ? newPlayer.uuid : undefined }).catch(() => {
+      this.httpd.setRequestResponse([{requestId: +data.requestId}, {uuid: newPlayer ? newPlayer.uuid : undefined }]).catch(() => {
         console.log("Could not setRequestResponse for /addPlayer.");
       });
 
@@ -880,7 +880,7 @@ export class PlayPage {
       }
     } else if (data.uri === "/answer") {
       let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
-      this.httpd.setRequestResponse({success: answeringPlayer ? true : false}).catch(() => {
+      this.httpd.setRequestResponse([{requestId: +data.requestId}, {success: answeringPlayer ? true : false}]).catch(() => {
         console.log("Could not setRequestResponse for /answer.");
       });
 
@@ -899,22 +899,22 @@ export class PlayPage {
 
       if (player) {
         if (this.currentQuestions[this.currentQuestion]) {
-          this.httpd.setRequestResponse({uuid: this.currentQuestions[this.currentQuestion].uuid,
-                                         type: this.currentQuestions[this.currentQuestion].type}).catch(() => {
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {uuid: this.currentQuestions[this.currentQuestion].uuid,
+                                         type: this.currentQuestions[this.currentQuestion].type}]).catch(() => {
             console.log("Could not setRequestResponse for /getNextQuestionType.");
           });
         } else {
-          this.httpd.setRequestResponse({end: true}).catch(() => {
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {end: true}]).catch(() => {
             console.log("Could not setRequestResponse for /getNextQuestionType.");
           });
         }
       } else {
-        this.httpd.setRequestResponse({msg: "Why do you want this information?"}).catch(() => {
+        this.httpd.setRequestResponse([{requestId: +data.requestId}, {msg: "Why do you want this information?"}]).catch(() => {
           console.log("Could not setRequestResponse for /getNextQuestionType.");
         });
       }
     } else {
-      this.httpd.setRequestResponse({msg: "I don't know what you're looking for."}).catch(() => {
+      this.httpd.setRequestResponse([{requestId: +data.requestId}, {msg: "I don't know what you're looking for."}]).catch(() => {
         console.log("Could not setRequestResponse for some useless case.");
       });
     }

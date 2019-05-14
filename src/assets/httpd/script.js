@@ -29,7 +29,7 @@ jQuery(function($) {
           currentQuestionType = 0;
           answered = false;
 
-          checkQuestionType = setInterval(questionType, 1000);
+          checkQuestionType = setInterval(questionType, 250);
 
           $('#controller-avatar').css('background-image', "url('imgs/" + avatar + "')");
           $('#controller-nickname').html(nickname);
