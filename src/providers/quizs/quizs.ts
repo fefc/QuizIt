@@ -298,31 +298,51 @@ export class QuizsProvider {
     });
   }
 
-  zip(quiz: Quiz) {
+  createQuizDir(quizUuid: string) {
     return new Promise((resolve, reject) => {
-      this.file.writeFile(this.file.dataDirectory, quiz.uuid + '/database.json', JSON.stringify(quiz), { replace: true }).then(() => {
-        JJzip.zip(this.file.dataDirectory + quiz.uuid, {target: this.file.cacheDirectory, name: quiz.uuid}, (data) => {
-          this.file.removeFile(this.file.dataDirectory, quiz.uuid + '/database.json').then(() => {
-            if(data.success) {
-              resolve({cordovaFilePath: this.file.cacheDirectory, filePath: quiz.uuid + '.zip'});
-            } else {
-              reject('Something when wrong by zipping');
-            }
-          }).catch((error) => {
-            reject("Something went wrong by deleting database file.");
-          });
-
-        }, (error) => {
-          this.file.removeFile(this.file.dataDirectory, quiz.uuid + '/database.json').then(() => {
-            reject('Something when wrong by zipping');
-          }).catch((error) => {
-            reject("Something went wrong by deleting database file.");
-          });
+      //check Quiz Dir
+      this.file.checkDir(this.file.dataDirectory, quizUuid).then(() => {
+        resolve();
+      }).catch(() => {
+        //If non existent, create question dir
+        this.file.createDir(this.file.dataDirectory, quizUuid, false).then(() => {
+          resolve();
+        }).catch(() => {
+          reject('Could not create quiz directory.');
         });
-      }).catch((error) => {
-        reject("Something went wrong by writing database file.");
       });
     });
+  }
+
+  zip(quiz: Quiz) {
+    return new Promise((resolve, reject) => {
+      this.createQuizDir(quiz.uuid).then(() => {
+        this.file.writeFile(this.file.dataDirectory, quiz.uuid + '/database.json', JSON.stringify(quiz), { replace: true }).then(() => {
+          JJzip.zip(this.file.dataDirectory + quiz.uuid, {target: this.file.cacheDirectory, name: quiz.uuid}, (data) => {
+            this.file.removeFile(this.file.dataDirectory, quiz.uuid + '/database.json').then(() => {
+              if(data.success) {
+                resolve({cordovaFilePath: this.file.cacheDirectory, filePath: quiz.uuid + '.zip'});
+              } else {
+                reject('Something when wrong by zipping');
+              }
+            }).catch((error) => {
+              reject("Something went wrong by deleting database file.");
+            });
+
+          }, (error) => {
+            this.file.removeFile(this.file.dataDirectory, quiz.uuid + '/database.json').then(() => {
+              reject('Something when wrong by zipping');
+            }).catch((error) => {
+              reject("Something went wrong by deleting database file.");
+            });
+          });
+        }).catch((error) => {
+          reject("Something went wrong by writing database file.");
+        });
+      });
+      }).catch((e) => {
+        reject(e);
+      })
   }
 
   unzip(cordovaFilePath: string, filePath: string) {
