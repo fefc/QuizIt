@@ -339,10 +339,10 @@ export class QuizsProvider {
         }).catch((error) => {
           reject("Something went wrong by writing database file.");
         });
-      });
       }).catch((e) => {
         reject(e);
-      })
+      });
+    });
   }
 
   unzip(cordovaFilePath: string, filePath: string) {
