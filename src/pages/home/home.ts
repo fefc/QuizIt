@@ -122,13 +122,22 @@ export class HomePage {
   }
 
   deleteSelected() {
+    let deleting = this.loadingCtrl.create({
+      content: 'Deleting Quiz...'
+    });
+
+    deleting.present();
+
     this.quizsProv.deleteSelectedFromStorage().then(() => {
       this.selectedQuizs = 0;
+      deleting.dismiss();
+
     }).catch(() => {
       for (let selectedQuiz of this.quizsProv.quizs) {
         selectedQuiz.selected = false;
       }
       this.selectedQuizs = 0;
+      deleting.dismiss();
       alert('Unable to delete selected quizs.');
     });
   }
