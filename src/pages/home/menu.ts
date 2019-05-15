@@ -10,7 +10,7 @@ import { ViewController } from 'ionic-angular';
     <ion-list>
       <button ion-item (click)="close(0)">New quiz</button>
       <button ion-item (click)="close(1)">Import quiz</button>
-      <button ion-item (click)="close(2)">Settings</button>
+      <!--<button ion-item (click)="close(2)">Settings</button>-->
     </ion-list>
   `
 })
