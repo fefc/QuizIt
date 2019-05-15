@@ -239,8 +239,8 @@ export class QuizsProvider {
         });
       }).catch(() => {
         //If non existent, create question dir
-        this.file.createDir(this.file.dataDirectory, quizUuid, false).then(() => {
-          this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, false).then(() => {
+        this.file.createDir(this.file.dataDirectory, quizUuid, true).then(() => {
+          this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, true).then(() => {
             resolve();
           }).catch(() => {
             reject('Could not create question directory.');
