@@ -75,11 +75,11 @@ export class QuestionPage {
       this.question = JSON.parse(JSON.stringify(params.data.question));
 
       this.attachementDir = params.data.quizUuid + '/' + this.question.uuid + '/';
-      this.pictures = [];
+      this.pictures = new Array<SafeUrl>(this.question.answers.length);
 
       if (this.question.type == QuestionType.rightPicture) {
         for (let i: number = 0; i < this.question.answers.length; i++) {
-          this.renderPicture(this.file.dataDirectory, this.attachementDir + this.question.answers[i]);
+          this.renderPicture(this.file.dataDirectory, this.attachementDir + this.question.answers[i], i);
         }
       }
 
@@ -229,7 +229,8 @@ export class QuestionPage {
       for (var i = 0; i < results.length; i++) {
         decodedURI = decodeURIComponent(results[i]);
         this.question.answers.push(decodedURI);
-        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''));
+        this.pictures.push(undefined);
+        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), this.pictures.length - 1);
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -262,7 +263,8 @@ export class QuestionPage {
 
           this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
             this.question.answers.push(this.file.cacheDirectory + filename);
-            this.renderPicture(this.file.cacheDirectory, filename);
+            this.pictures.push(undefined);
+            this.renderPicture(this.file.cacheDirectory, filename, this.pictures.length - 1);
           }).catch((error) => {
             alert(error);
           });
@@ -385,14 +387,9 @@ export class QuestionPage {
     this.viewCtrl.dismiss();
   }
 
-  renderPicture(directory: string, fileName: string, position?: number) {
+  renderPicture(directory: string, fileName: string, position: number) {
     this.file.readAsDataURL(directory, fileName).then((picture) => {
-      if (position >= 0) {
-        this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
-      } else {
-        this.pictures.push(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
-      }
-
+      this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
       this.slides.update();
     }).catch((error) => {
       console.log("Something went wrong when reading pictures.", error);

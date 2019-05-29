@@ -50,7 +50,8 @@
 
   <ion-slides *ngIf="question.type === QuestionType.rightPicture" centeredSlides pager>
     <ion-slide *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-      <canvas [style.background-image]="pictures[i]"></canvas>
+      <ion-spinner *ngIf="!pictures[i]" name="dots" color="primary"></ion-spinner>
+      <canvas *ngIf="pictures[i]" [style.background-image]="pictures[i]"></canvas>
       <ion-icon *ngIf="i === question.rightAnswer" name="checkmark-circle-outline" color="primary" class="checkmark"></ion-icon>
       <ion-fab left bottom>
         <button ion-fab mini><ion-icon name="image"></ion-icon></button>
