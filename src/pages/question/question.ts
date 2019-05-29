@@ -223,9 +223,13 @@ export class QuestionPage {
   //https://stackoverflow.com/a/52970316
   openMobileImagePicker() {
     this.imagePicker.getPictures({maximumImagesCount: this.maxPictures - this.question.answers.length, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
+      let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
+      let decodedURI: string = '';
+
       for (var i = 0; i < results.length; i++) {
-        this.question.answers.push(decodeURIComponent(results[i]));
-        this.renderPicture(this.file.cacheDirectory, results[i].replace(this.file.cacheDirectory, ''));
+        decodedURI = decodeURIComponent(results[i]);
+        this.question.answers.push(decodedURI);
+        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''));
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -235,8 +239,11 @@ export class QuestionPage {
   replacePictureMobile(val: number) {
     this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
       if (results.length === 1) {
-        this.question.answers[val] = decodeURIComponent(results[0]);
-        this.renderPicture(this.file.cacheDirectory, results[0].replace(this.file.cacheDirectory, ''), val);
+        let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
+        let decodedURI: string = decodeURIComponent(results[0]);
+
+        this.question.answers[val] = decodedURI;
+        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), val);
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -388,7 +395,7 @@ export class QuestionPage {
 
       this.slides.update();
     }).catch((error) => {
-      console.log("Something went wrong when reading pictures.");
+      console.log("Something went wrong when reading pictures.", error);
     });
   }
 
