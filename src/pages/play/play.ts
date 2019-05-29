@@ -228,8 +228,6 @@ export class PlayPage {
   private currentQuestion: number;
   private currentQuestions: Array<Question>;
 
-  private currentQuestionStartDate: number;
-
   private currentPicture: number;
   private currentPictureCounter: number;
   private currentPictures: Array<SafeUrl>;
@@ -516,7 +514,6 @@ export class PlayPage {
           setTimeout(() => this.displayTimeBar = true, this.commonAnimationDuration);
 
           this.displayPlayers = true;
-          this.currentQuestionStartDate = Date.now();
           this.displayQuestionTimer = setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
 
           if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
