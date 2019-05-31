@@ -566,10 +566,11 @@ export class PlayPage {
   }
 
   handleNextStep() {
-    if (this.autoPlay) {
+    if (this.autoPlay && !this.pause) {
       setTimeout(() => this.next(), this.showNextDelay + this.commonAnimationDuration);
     } else {
       setTimeout(() => this.showNext = true, this.showNextDelay);
+      this.pause = false;
     }
   }
 
@@ -681,7 +682,7 @@ export class PlayPage {
           }
         },
         {
-          text: this.pause === false ? 'Pause' : 'Play',
+          text: this.pause === false ? 'Pause (after this)' : 'Play',
           icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
           handler: () => {
             this.pause = !this.pause;
@@ -701,7 +702,7 @@ export class PlayPage {
     } else {
       return [
         {
-          text: this.pause === false ? 'Pause' : 'Play',
+          text: this.pause === false ? 'Pause (after this)' : 'Play',
           icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
           handler: () => {
             this.pause = !this.pause;
