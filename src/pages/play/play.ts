@@ -66,7 +66,8 @@ enum ScreenStateType {
       trigger(
       'timeBarAnimation' , [
         transition(':enter', [
-          animate('{{time}}ms', style({width: 0}))
+          style({transform: 'scaleX(1)', transformOrigin: 'left'}),
+          animate('{{time}}ms', style({transform: 'scaleX(0)'}))
         ], { params: { time: 20000 } })
       ]),
       trigger(
