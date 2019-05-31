@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      {{selectedQuizs === 0 ? 'QuizIt' : selectedQuizs + ' Selected'}}
+      {{selectedQuizs === 0 ? 'QuizPad' : selectedQuizs + ' Selected'}}
     </ion-title>
     <ion-buttons end *ngIf="selectedQuizs === 0">
       <button ion-button icon-only (click)="openMenu($event)">

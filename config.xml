@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.fefc.quizit" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>QuizIt</name>
+<widget id="eu.fefc.quizpad" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>QuizPad</name>
     <description>An app to Quiz with real people</description>
-    <author email="felchantrel@gmail.com" href="https://github.com/fefc">fefc</author>
+    <author email="fefc.dev@gmail.com" href="https://fefc.eu">fefc</author>
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
