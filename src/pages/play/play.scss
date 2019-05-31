@@ -229,10 +229,10 @@ $fullDark: rgba(0, 0, 0, 0.9);
     margin: 4vh 2.25vw;
     background-color: $dark;
     border: 0.3vh solid rgba(25, 25, 25, 0.9);
-    box-shadow:
-      -0.25vw 0.25vh  0.4vw 0.4vh rgba(0, 0, 0, .3),
-      inset -0.25vw 0.25vh 0.4vw 0.4vh rgba(25, 25, 25, 0.9),
-      inset 0.25vw -0.25vh 0.4vw 0.4vh rgba(125, 125, 125, 0.2);
+    //box-shadow:
+    //  -0.25vw 0.25vh  0.4vw 0.4vh rgba(0, 0, 0, .3),
+    //  inset -0.25vw 0.25vh 0.4vw 0.4vh rgba(25, 25, 25, 0.9),
+    //  inset 0.25vw -0.25vh 0.4vw 0.4vh rgba(125, 125, 125, 0.2);
     border-radius: 2vh;
 
     canvas {
