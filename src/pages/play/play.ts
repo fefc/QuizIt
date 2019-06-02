@@ -904,18 +904,28 @@ export class PlayPage {
 
         this.setPlayerAnswer(answeringPlayer, data.answer);
       }
-    } else if (data.uri === "/questionType") {
+    } else if (data.uri === "/gameState") {
       let player: Player = this.players.find((p) => p.uuid === data.uuid);
 
       if (player) {
-        if (this.currentQuestions[this.currentQuestion]) {
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {uuid: this.currentQuestions[this.currentQuestion].uuid,
-                                         type: this.currentQuestions[this.currentQuestion].type}]).catch(() => {
-            console.log("Could not setRequestResponse for /getNextQuestionType.");
+        if (this.screenState == ScreenStateType.playersJoining) {
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 0}]).catch(() => {
+            console.log("Could not setRequestResponse for /gameState.");
+          });
+        } else if (this.screenState === ScreenStateType.displayQuestion) {
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 1,
+                                                                        uuid: this.currentQuestions[this.currentQuestion].uuid,
+                                                                        type: this.currentQuestions[this.currentQuestion].type}]).catch(() => {
+            console.log("Could not setRequestResponse for /gameState.");
+          });
+        } else if (this.screenState === ScreenStateType.end) {
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 2}]).catch(() => {
+            console.log("Could not setRequestResponse for /gameState.");
           });
         } else {
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {end: true}]).catch(() => {
-            console.log("Could not setRequestResponse for /getNextQuestionType.");
+          //something is loading
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 3}]).catch(() => {
+            console.log("Could not setRequestResponse for /gameState.");
           });
         }
       } else {

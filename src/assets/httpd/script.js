@@ -29,13 +29,15 @@ jQuery(function($) {
           currentQuestionType = 0;
           answered = false;
 
-          checkQuestionType = setInterval(questionType, 250);
+          checkQuestionType = setInterval(gameState, 300);
 
           $('#controller-avatar').css('background-image', "url('imgs/" + avatar + "')");
           $('#controller-nickname').html(nickname);
 
           $('#player').css('display', 'none');
           $('#controller').css('display', 'flex');
+        } else {
+          alert("Is your nickname or avatar already used?");
         }
       }).fail(function(response) {
         console.log(response.responseText);
@@ -73,43 +75,54 @@ jQuery(function($) {
     }
   }
 
-  function questionType() {
-    $.post('/questionType', {uuid: playerUuid}, function(data, status){
-      console.log(data);
-      if (!data.end) {
-        if (data.uuid) {
-          if (data.uuid != currentQuestionUuid) {
-            currentQuestionUuid = data.uuid;
-            currentQuestionType = data.type;
-            answered = false;
+  function gameState() {
+    $.post('/gameState', {uuid: playerUuid}, function(data, status){
+      if (data.gameState === 0) {
+        $('#answers').css('display', 'none');
+        $('#texts').css('display', 'flex');
+        $('#texts').html("The game will start soon...");
 
-            if (currentQuestionType == 2) {
-              //its a buzzer question
-              $('#answers').children('div').each(function(index) {
-                $(this).removeClass('disabled');
-                if (index != 4) {
-                  $(this).css('display', 'none');
-                } else {
-                  $(this).css('display', 'block');
-                }
-              });
-            } else {
-              $('#answers').children('div').each(function(index) {
-                $(this).removeClass('disabled');
-                if (index != 4) {
-                  $(this).css('display', 'block');
-                } else {
-                  $(this).css('display', 'none');
-                }
-              });
-            }
+      } else if (data.gameState === 1) {
+        $('#answers').css('display', 'flex');
+        $('#texts').css('display', 'none');
+
+        if (data.uuid != currentQuestionUuid) {
+          currentQuestionUuid = data.uuid;
+          currentQuestionType = data.type;
+          answered = false;
+
+          if (currentQuestionType == 2) {
+            //its a buzzer question
+            $('#answers').children('div').each(function(index) {
+              $(this).removeClass('disabled');
+              if (index != 4) {
+                $(this).css('display', 'none');
+              } else {
+                $(this).css('display', 'block');
+              }
+            });
+          } else {
+            $('#answers').children('div').each(function(index) {
+              $(this).removeClass('disabled');
+              if (index != 4) {
+                $(this).css('display', 'block');
+              } else {
+                $(this).css('display', 'none');
+              }
+            });
           }
         }
-      } else {
+      } else if (data.gameState === 2) {
         clearInterval(checkQuestionType);
-        $('#answers').children('div').each(function(index) {
-          $(this).css('display', 'none');
-        });
+
+        $('#answers').css('display', 'none');
+        $('#texts').css('display', 'flex');
+        $('#texts').html("Game is finished!");
+
+      } else if (data.gameState === 3) {
+        $('#answers').css('display', 'none');
+        $('#texts').css('display', 'flex');
+        $('#texts').html("Loading...");
       }
     }).fail(function(response) {
       clearInterval(checkQuestionType);
