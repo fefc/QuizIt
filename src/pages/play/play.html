@@ -29,7 +29,7 @@
   <div class="title" *ngIf="screenState === ScreenStateType.displayTitle || screenState === ScreenStateType.displayCategoryTitle"
         [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}">
     <div *ngIf="screenState === ScreenStateType.displayTitle">{{quiz.title}}</div>
-    <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{quiz.categorys[currentCategory].name}}</div>
+    <div *ngIf="screenState === ScreenStateType.displayCategoryTitle">{{this.currentCategories[currentCategory].name}}</div>
   </div>
 
   <!--Player Avatar, nickname & points Zone-->

@@ -226,6 +226,7 @@ export class PlayPage {
 
   private quiz: Quiz;
   private currentCategory: number;
+  private currentCategories: Array<Category>;
   private currentQuestion: number;
   private currentQuestions: Array<Question>;
 
@@ -303,13 +304,23 @@ export class PlayPage {
       this.navCtrl.pop();
     }
     else {
-      if (this.quiz.categorys.length < 1 || this.quiz.questions.length < 1) {
+      this.currentCategory = 0;
+      this.currentCategories = [];
+
+      //We only take the non empty categories
+      for (let category of this.quiz.categorys) {
+        if (this.getQuestionsFromCategory(category).length > 0) {
+          this.currentCategories.push(category);
+        }
+      }
+
+      if (this.currentCategories.length === 0) {
         this.navCtrl.pop();
       }
       else {
-        this.currentCategory = 0;
+
         this.currentQuestion = 0;
-        this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
+        this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
 
         this.currentPicture = 0;
         this.currentPictureCounter = 0;
@@ -466,7 +477,7 @@ export class PlayPage {
     else if (this.screenState === ScreenStateType.loadNextCategory) {
       this.currentCategory++;
 
-      if (this.currentCategory < this.quiz.categorys.length) {
+      if (this.currentCategory < this.currentCategories.length) {
         this.screenState = ScreenStateType.displayCategoryTitle;
         this.handleNextStep();
       }
@@ -477,7 +488,7 @@ export class PlayPage {
     }
     else if (this.screenState === ScreenStateType.displayCategoryTitle) {
       this.currentQuestion = -1;
-      this.currentQuestions = this.getQuestionsFromCategory(this.quiz.categorys[this.currentCategory]);
+      this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
 
       this.screenState = ScreenStateType.loadNextQuestion;
       this.next();
@@ -527,7 +538,7 @@ export class PlayPage {
           console.log("Something went wrong when reading pictures.");
 
           this.screenState = ScreenStateType.loadNextQuestion;
-          if (this.currentCategory + 1 < this.quiz.categorys.length) {
+          if (this.currentCategory + 1 < this.currentCategories.length) {
             this.displayPlayers = false;
           }
           setTimeout(() => this.next(), this.commonAnimationDuration);
@@ -535,7 +546,7 @@ export class PlayPage {
       }
       else {
         this.screenState = ScreenStateType.loadNextCategory;
-        if (this.currentCategory + 1 < this.quiz.categorys.length) {
+        if (this.currentCategory + 1 < this.currentCategories.length) {
           this.displayPlayers = false;
         }
         setTimeout(() => this.next(), this.commonAnimationDuration);
