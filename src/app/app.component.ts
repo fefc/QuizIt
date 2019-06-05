@@ -9,10 +9,10 @@ import { QuizsProvider } from '../providers/quizs/quizs';
 import { HomePage } from '../pages/home/home';
 
 @Component({
-  templateUrl: 'app.html',
+  templateUrl: 'app.component.html',
   providers: [QuizsProvider]
 })
-export class MyApp {
+export class AppComponent {
   rootPage:any = HomePage;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,

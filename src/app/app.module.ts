@@ -15,7 +15,7 @@ import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
 import { Insomnia } from '@ionic-native/insomnia';
 
-import { MyApp } from './app.component';
+import { AppComponent } from './app.component';
 
 import { QuizsProvider } from '../providers/quizs/quizs';
 
@@ -35,7 +35,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 
 @NgModule({
   declarations: [
-    MyApp,
+    AppComponent,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -50,12 +50,11 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    IonicModule.forRoot(MyApp),
+    IonicModule.forRoot(AppComponent),
     IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp,
     HomePage,
     HomeMenu,
     QuizNewPage,
