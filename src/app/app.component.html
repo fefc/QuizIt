@@ -1,15 +1,45 @@
 <ion-menu [content]="content" id="menu1">
-  <ion-header>
-    <ion-toolbar color="secondary">
-      <ion-title>Menu 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
   <ion-content>
+    <ion-item class="user-info">
+      <ion-avatar>
+        <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y">
+      </ion-avatar>
+        <div class="card-title">First Last</div>
+        <div class="card-subtitle">Nickname</div>
+        <ion-icon name="create" item-start></ion-icon>
+
+    </ion-item>
+
+
     <ion-list>
-      <button ion-item menuClose="menu1" detail-none>
+      <ion-item-group>
+        <ion-item>
+          <ion-icon name="quiz-it-icon" item-start></ion-icon>
+          Quizzes
+        </ion-item>
+        <ion-item>
+          <ion-icon name="game-controller-b" item-start></ion-icon>
+          Join a game
+        </ion-item>
+      </ion-item-group>
+      <ion-item-group>
+        <ion-item-divider color="light">App</ion-item-divider>
+        <ion-item>
+          <ion-icon name="settings" item-start></ion-icon>
+          Settings
+        </ion-item>
+        <ion-item>
+          <ion-icon name="help" item-start></ion-icon>
+          Help
+        </ion-item>
+        <ion-item>
+          <ion-icon name="information-circle" item-start></ion-icon>
+          About
+        </ion-item>
+      </ion-item-group>
+      <!--<button ion-item menuClose="menu1" detail-none>
         Close Menu 1
-      </button>
+      </button>-->
     </ion-list>
   </ion-content>
 </ion-menu>

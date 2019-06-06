@@ -9,6 +9,7 @@ import { QuizsProvider } from '../providers/quizs/quizs';
 import { HomePage } from '../pages/home/home';
 
 @Component({
+  selector: 'app-root',
   templateUrl: 'app.component.html',
   providers: [QuizsProvider]
 })
