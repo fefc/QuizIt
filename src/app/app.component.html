@@ -1,13 +1,12 @@
 <ion-menu [content]="content" id="menu1">
   <ion-content>
-    <ion-item class="user-info">
+    <ion-item class="user-info" tappable (tap)="openUserProfilePage()">
+      <ion-icon name="create"></ion-icon>
       <ion-avatar>
         <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y">
       </ion-avatar>
         <div class="card-title">First Last</div>
         <div class="card-subtitle">Nickname</div>
-        <ion-icon name="create" item-start></ion-icon>
-
     </ion-item>
 
 

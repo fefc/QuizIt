@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { Platform, ModalController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 
 import { QuizsProvider } from '../providers/quizs/quizs';
+
+import { UserProfilePage } from '../pages/user-profile/user-profile';
 
 import { HomePage } from '../pages/home/home';
 
@@ -17,6 +19,7 @@ export class AppComponent {
   rootPage:any = HomePage;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
+    public modalCtrl: ModalController,
     private screenOrientation: ScreenOrientation,
     private quizsProv: QuizsProvider) {
     platform.ready().then(() => {
@@ -36,6 +39,16 @@ export class AppComponent {
         //statusBar.styleDefault();
         splashScreen.hide();
       });
+    });
+  }
+
+  openUserProfilePage() {
+    let modal = this.modalCtrl.create(UserProfilePage, {});
+    modal.present();
+    modal.onDidDismiss(data => {
+      if (data) {
+        //this.saveChanges(data.question);
+      }
     });
   }
 }

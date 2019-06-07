@@ -9,7 +9,7 @@ export enum QuestionType {
 }
 
 export interface Question {
-  readonly uuid: string;
+  readonly uuid: string,
   question: string,
   type: QuestionType,
   rightAnswer: number,

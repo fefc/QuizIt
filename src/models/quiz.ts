@@ -5,7 +5,7 @@ import { QuizSettings } from './quiz-settings';
 
 
 export interface Quiz {
-  readonly uuid: string;
+  readonly uuid: string,
   title: string,
   creationDate: number,
   selected?: boolean,

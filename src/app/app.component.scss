@@ -21,6 +21,13 @@ app-root {
   .user-info {
     text-align: center;
 
+    ion-icon {
+      position: absolute;
+      top: 0;
+      right: 0;
+      margin: 1em;
+    }
+
     ion-avatar {
       margin: 10px 0 20px 0;
 
