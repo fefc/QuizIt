@@ -11,7 +11,7 @@ export class AboutPage {
 
   constructor(public viewCtrl: ViewController, private appVersion: AppVersion) {
     if (appVersion) {
-      this.versionNumber = this.appVersion.getVersionNumber().then((version) => {
+      this.appVersion.getVersionNumber().then((version) => {
         this.versionNumber = version;
       }).catch((error) => {
         console.log(error);
