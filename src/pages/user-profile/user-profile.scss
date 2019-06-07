@@ -6,6 +6,18 @@ page-user-profile {
     flex-flow: column;
   }
 
+  ion-avatar {
+    margin: 10px 0 20px 0;
+
+    img {
+      height: 128px !important;
+      width: 128px !important;
+      margin: auto;
+      border: 0.2em solid white;
+      padding: 10px;
+    }
+  }
+
   /*ion-slides {
     height: auto;
     flex: 1;

@@ -14,22 +14,18 @@ export class UserProfilePage {
 
   }
 
-  /*slideChanged() {
-    this.background = this.backgrounds[this.slides.getActiveIndex()];
-  }
-
-  enableCreateButton() {
-    let enable: boolean = false;
+  enableSaveButton() {
+  /*  let enable: boolean = false;
     if (this.newQuiz.title) {
       if (this.newQuiz.title.length > 0) {
         enable = true;
       }
-    }
-    return enable;
+    }*/
+    return true;
   }
 
-  create() {
-    if (this.enableCreateButton()) {
+  save() {
+    /*if (this.enableCreateButton()) {
       this.newQuiz.creationDate = Math.floor(Date.now() / 1000);
 
       if (this.background !== DefaultQuizSettings.BACKGROUND_IMAGE) {
@@ -38,8 +34,8 @@ export class UserProfilePage {
       }
 
       this.viewCtrl.dismiss(this.newQuiz);
-    }
-  }*/
+    }*/
+  }
 
   dismiss() {
     this.viewCtrl.dismiss();

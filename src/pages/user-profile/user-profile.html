@@ -12,22 +12,31 @@
 </ion-header>
 
 <ion-content>
-    <!--<ion-item>
-    <ion-label color="primary" fixed>Title</ion-label>
-      <ion-input type="text" placeholder="What is your quiz about?" [(ngModel)]="newQuiz.title"></ion-input>
+  <ion-list>
+    <ion-item no-lines>
+      <ion-avatar>
+        <img src="assets/svgs/icon.svg">
+      </ion-avatar>
     </ion-item>
-
-    <ion-slides centeredSlides pager (ionSlideDidChange)="slideChanged()">
-      <ion-slide *ngFor="let background of backgrounds">
-        <canvas [style.background-image]="'url(assets/imgs/backgrounds/' + background + ')'"></canvas>
-      </ion-slide>
-    </ion-slides>-->
+    <ion-item>
+      <ion-label stacked>First name</ion-label>
+      <ion-input type="text" placeholder=""></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Last name</ion-label>
+      <ion-input type="text" placeholder=""></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Nickname</ion-label>
+      <ion-input type="text" placeholder="Displayed when playing"></ion-input>
+    </ion-item>
+  </ion-list>
 </ion-content>
 
 <ion-footer>
   <ion-toolbar color="fulldark">
-    <!--<ion-buttons end>
-      <button ion-button (click)="create()" [disabled]="!enableCreateButton()">Create</button>
-    </ion-buttons>-->
+    <ion-buttons end>
+      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">Save</button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-footer>
