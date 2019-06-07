@@ -14,6 +14,7 @@ import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
 import { Insomnia } from '@ionic-native/insomnia';
+import { AppVersion } from '@ionic-native/app-version';
 
 import { AppComponent } from './app.component';
 
@@ -86,6 +87,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     FileChooser,
     FilePath,
     Insomnia,
+    AppVersion,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     QuizsProvider
   ]

@@ -11,15 +11,12 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content>
-    <!--<ion-item>
-    <ion-label color="primary" fixed>Title</ion-label>
-      <ion-input type="text" placeholder="What is your quiz about?" [(ngModel)]="newQuiz.title"></ion-input>
-    </ion-item>
-
-    <ion-slides centeredSlides pager (ionSlideDidChange)="slideChanged()">
-      <ion-slide *ngFor="let background of backgrounds">
-        <canvas [style.background-image]="'url(assets/imgs/backgrounds/' + background + ')'"></canvas>
-      </ion-slide>
-    </ion-slides>-->
+<ion-content padding>
+  <div class="app-infos">
+    <div class="app-name">QuizPad</div>
+    <div class="app-version">Version {{versionNumber}}</div>
+    <img src="assets/svgs/icon.svg">
+    <a class="app-href" target="_blank" href="http://www.quizpadapp.com">www.QuizPadApp.com</a>
+    <div class="app-copyright">&copy; 2019 fefc</div>
+  </div>
 </ion-content>

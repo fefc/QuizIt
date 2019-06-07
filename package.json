@@ -22,6 +22,7 @@
     "@angular/platform-browser-dynamic": "5.2.11",
     "@ionic-native/android-full-screen": "^4.20.0",
     "@ionic-native/android-permissions": "^4.20.0",
+    "@ionic-native/app-version": "^4.20.0",
     "@ionic-native/core": "~4.15.0",
     "@ionic-native/email-composer": "^4.20.0",
     "@ionic-native/file": "^4.20.0",
@@ -40,6 +41,7 @@
     "cordova-browser": "5.0.4",
     "cordova-electron": "1.0.2",
     "cordova-plugin-android-permissions": "1.0.0",
+    "cordova-plugin-app-version": "0.1.9",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-file": "6.0.1",
     "cordova-plugin-filechooser": "1.2.0",
@@ -93,7 +95,8 @@
       "cordova-plugin-android-permissions": {},
       "cordova-plugin-filechooser": {},
       "cordova-plugin-filepath": {},
-      "cordova-plugin-insomnia": {}
+      "cordova-plugin-insomnia": {},
+      "cordova-plugin-app-version": {}
     },
     "platforms": [
       "android",
