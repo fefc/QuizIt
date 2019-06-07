@@ -32,9 +32,11 @@ app-root {
       margin: 10px 0 20px 0;
 
       img {
-        height: 80px !important;
-        width: 80px !important;
+        height: 100px !important;
+        width: 100px !important;
         margin: auto;
+        border: 0.2em solid white;
+        padding: 10px;
       }
     }
 
