@@ -21,6 +21,8 @@ import { QuizsProvider } from '../providers/quizs/quizs';
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 
+import { AboutPage } from '../pages/about/about';
+
 import { HomePage } from '../pages/home/home';
 import { HomeMenu } from '../pages/home/menu';
 import { QuizNewPage } from '../pages/quiz-new/quiz-new';
@@ -38,6 +40,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 @NgModule({
   declarations: [
     AppComponent,
+    AboutPage,
     UserProfilePage,
     HomePage,
     HomeMenu,
@@ -58,6 +61,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
   ],
   bootstrap: [IonicApp],
   entryComponents: [
+    AboutPage,
     UserProfilePage,
     HomePage,
     HomeMenu,

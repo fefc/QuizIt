@@ -6,6 +6,8 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
 
 import { QuizsProvider } from '../providers/quizs/quizs';
 
+import { AboutPage } from '../pages/about/about';
+
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 
 import { HomePage } from '../pages/home/home';
@@ -50,5 +52,10 @@ export class AppComponent {
         //this.saveChanges(data.question);
       }
     });
+  }
+
+  openAboutPage() {
+    let modal = this.modalCtrl.create(AboutPage);
+    modal.present();
   }
 }

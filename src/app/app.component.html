@@ -27,18 +27,11 @@
           <ion-icon name="settings" item-start></ion-icon>
           Settings
         </ion-item>
-        <ion-item>
-          <ion-icon name="help" item-start></ion-icon>
-          Help
-        </ion-item>
-        <ion-item>
+        <ion-item tappable (tap)="openAboutPage()">
           <ion-icon name="information-circle" item-start></ion-icon>
           About
         </ion-item>
       </ion-item-group>
-      <!--<button ion-item menuClose="menu1" detail-none>
-        Close Menu 1
-      </button>-->
     </ion-list>
   </ion-content>
 </ion-menu>
