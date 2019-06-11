@@ -1,12 +1,11 @@
-<ion-menu [content]="content" id="menu1">
-  <ion-header>
+<ion-menu [content]="content" id="menu-one">
+  <ion-header *ngIf="profilesProv.profiles.length > 0">
     <ion-item no-lines class="user-info" tappable (tap)="openUserProfilePage()">
       <ion-icon name="create"></ion-icon>
       <ion-avatar>
         <img src="assets/svgs/icon.svg">
       </ion-avatar>
-        <div class="card-title">First Last</div>
-        <div class="card-subtitle">Nickname</div>
+        <div class="card-title">{{profilesProv.profiles[0].nickname}}</div>
     </ion-item>
   </ion-header>
   <ion-content>

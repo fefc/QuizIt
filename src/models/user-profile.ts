@@ -1,6 +1,5 @@
 export interface UserProfile {
-  firstName: string,
-  lastName: string,
+  readonly uuid: string,
   nickname: string,
   avatar: string
 }

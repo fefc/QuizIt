@@ -18,10 +18,12 @@ import { AppVersion } from '@ionic-native/app-version';
 
 import { AppComponent } from './app.component';
 
+import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 
+import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
 
 import { HomePage } from '../pages/home/home';
@@ -41,6 +43,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 @NgModule({
   declarations: [
     AppComponent,
+    StartPage,
     AboutPage,
     UserProfilePage,
     HomePage,
@@ -62,6 +65,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
   ],
   bootstrap: [IonicApp],
   entryComponents: [
+    StartPage,
     AboutPage,
     UserProfilePage,
     HomePage,
@@ -89,6 +93,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     Insomnia,
     AppVersion,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
+    UserProfilesProvider,
     QuizsProvider
   ]
 })

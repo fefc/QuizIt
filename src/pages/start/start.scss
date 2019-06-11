@@ -1,0 +1,42 @@
+page-start {
+  .slide-zoom {
+    height: 100%;
+  }
+
+  .h2 {
+    margin-top: 2.8rem;
+  }
+
+  b {
+    color: color($colors, primary);
+  }
+
+  p {
+      padding: 0 40px;
+      font-size: 14px;
+      line-height: 1.5;
+  }
+
+  .slide-image {
+    max-height: 50%;
+    max-width: 60%;
+    margin: 18px 0;
+  }
+
+  ion-avatar {
+    margin: 10px 0 20px 0;
+
+    img {
+      height: 128px !important;
+      width: 128px !important;
+      margin: auto;
+      border: 0.2em solid white;
+      padding: 10px;
+    }
+  }
+
+  .slide-input {
+    max-width: 600px;
+    margin: auto;
+  }
+}

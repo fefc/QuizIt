@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Profile
+      Edit Profile
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="dismiss()">
@@ -19,17 +19,12 @@
       </ion-avatar>
     </ion-item>
     <ion-item>
-      <ion-label stacked>First name</ion-label>
-      <ion-input type="text" placeholder=""></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label stacked>Last name</ion-label>
-      <ion-input type="text" placeholder=""></ion-input>
-    </ion-item>
-    <ion-item>
       <ion-label stacked>Nickname</ion-label>
-      <ion-input type="text" placeholder="Displayed when playing"></ion-input>
+      <ion-input type="text" minlength="3" [(ngModel)]="profile.nickname"></ion-input>
     </ion-item>
+    <p>
+      Your nickname must be at least 3 characters, it will be displayed when you join a quiz.
+    </p>
   </ion-list>
 </ion-content>
 
