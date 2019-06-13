@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, MenuController, ModalController, LoadingController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -27,6 +28,7 @@ export class AppComponent {
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private screenOrientation: ScreenOrientation,
+    private sanitizer:DomSanitizer,
     private profilesProv: UserProfilesProvider,
     private quizsProv: QuizsProvider) {
     platform.ready().then(() => {
@@ -55,6 +57,10 @@ export class AppComponent {
       }).catch(() => {
       });
     });
+  }
+
+  renderPicture(base64: string) {
+    return this.sanitizer.bypassSecurityTrustUrl(base64);
   }
 
   openUserProfilePage() {

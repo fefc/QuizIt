@@ -31,8 +31,18 @@ page-start {
       width: 128px !important;
       margin: auto;
       border: 0.2em solid white;
+      object-fit: cover;
+    }
+
+    .no-img {
       padding: 10px;
     }
+  }
+
+  .avatar-fab {
+    left: 50%;
+    margin-left: 14px;
+    bottom: 14px;
   }
 
   .slide-input {

@@ -15,8 +15,14 @@
   <ion-list>
     <ion-item no-lines>
       <ion-avatar>
-        <img src="assets/svgs/icon.svg">
+        <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
+        <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
       </ion-avatar>
+      <ion-fab class="avatar-fab" (click)="openImagePicker()">
+      <button ion-fab>
+        <ion-icon name="camera"></ion-icon>
+      </button>
+    </ion-fab>
     </ion-item>
     <ion-item>
       <ion-label stacked>Nickname</ion-label>
@@ -26,6 +32,7 @@
       Your nickname must be at least 3 characters, it will be displayed when you join a quiz.
     </p>
   </ion-list>
+  <input #fileInput type="file" style="display: none" (change)="getBrowserImage()" accept="image/png, image/jpeg"/>
 </ion-content>
 
 <ion-footer>

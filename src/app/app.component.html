@@ -3,7 +3,8 @@
     <ion-item no-lines class="user-info" tappable (tap)="openUserProfilePage()">
       <ion-icon name="create"></ion-icon>
       <ion-avatar>
-        <img src="assets/svgs/icon.svg">
+        <img class="no-img" *ngIf="!profilesProv.profiles[0].avatar" src="assets/svgs/icon.svg">
+        <img *ngIf="profilesProv.profiles[0].avatar" [src]="renderPicture(profilesProv.profiles[0].avatar)">
       </ion-avatar>
         <div class="card-title">{{profilesProv.profiles[0].nickname}}</div>
     </ion-item>
