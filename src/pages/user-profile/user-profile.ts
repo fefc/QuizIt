@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, NavParams } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
@@ -39,7 +39,7 @@ export class UserProfilePage {
 
   openImagePicker() {
     if (this.platform.is('android')) {
-      /*this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
+      this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
       .then(status => {
         if (status.hasPermission) {
           this.openMobileImagePicker();
@@ -51,7 +51,7 @@ export class UserProfilePage {
             }
           });
         }
-      });*/
+      });
     } else {
       this.openBrowserImagePicker();
     }
@@ -66,14 +66,6 @@ export class UserProfilePage {
 
     this.resizeBrowserImage(file).then((e: any) => {
       this.profile.avatar = e;
-      /*var filename: string = this.uuidv4() + '.jpg';
-
-      this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
-        this.question.answers[this.replacePictureIndex] = this.file.cacheDirectory + filename;
-        this.renderPicture(this.file.cacheDirectory, filename, this.replacePictureIndex);
-      }).catch((error) => {
-        alert(error);
-      });*/
     }).catch(() => {
       alert('Could not resize image');
     });
@@ -109,6 +101,17 @@ export class UserProfilePage {
           resolve(ctx.canvas.toDataURL('image/jpeg', 0.8));
         };
       };
+    });
+  }
+
+  openMobileImagePicker() {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, outputType: 1}).then((results) => {
+      if (results.length === 1) {
+        alert(results[0]);
+        this.profile.avatar = 'data:image/png;base64,' + results[0];
+      }
+    }).catch(() => {
+      alert('Could not get images.');
     });
   }
 
