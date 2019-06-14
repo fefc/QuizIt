@@ -107,7 +107,6 @@ export class UserProfilePage {
   openMobileImagePicker() {
     this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, outputType: 1}).then((results) => {
       if (results.length === 1) {
-        alert(results[0]);
         this.profile.avatar = 'data:image/png;base64,' + results[0];
       }
     }).catch(() => {
