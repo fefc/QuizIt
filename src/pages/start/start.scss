@@ -1,6 +1,14 @@
 page-start {
+  .scroll-content {
+    //overflow-y: hidden !important;
+    padding-bottom: 0px !important; //important to API 21
+    display: flex;
+    flex-flow: column;
+  }
+
   .slide-zoom {
     height: 100%;
+    overflow-y: scroll;
   }
 
   .h2 {
