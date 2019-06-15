@@ -40,6 +40,9 @@ import { QuestionPage } from '../pages/question/question';
 import { PlayPage } from '../pages/play/play';
 import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 
+import { GamesPage } from '../pages/games/games';
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -55,7 +58,8 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
-    PlayAddPlayerPage
+    PlayAddPlayerPage,
+    GamesPage
   ],
   imports: [
     BrowserModule,
@@ -77,7 +81,8 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
-    PlayAddPlayerPage
+    PlayAddPlayerPage,
+    GamesPage
   ],
   providers: [
     StatusBar,

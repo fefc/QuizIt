@@ -12,11 +12,11 @@
   <ion-content>
     <ion-list>
       <ion-item-group>
-        <ion-item>
+        <ion-item tappable (tap)="openHomePage()">
           <ion-icon name="quiz-it-icon" item-start></ion-icon>
           Quizzes
         </ion-item>
-        <ion-item>
+        <ion-item tappable (tap)="openGamesPage()">
           <ion-icon name="game-controller-b" item-start></ion-icon>
           Join a game
         </ion-item>

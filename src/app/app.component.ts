@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, MenuController, ModalController, LoadingController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
@@ -14,6 +14,7 @@ import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 import { HomePage } from '../pages/home/home';
+import { GamesPage } from '../pages/games/games';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,8 @@ import { HomePage } from '../pages/home/home';
   providers: [UserProfilesProvider, QuizsProvider]
 })
 export class AppComponent {
+  @ViewChild('content') nav;
+
   rootPage:any;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
@@ -64,6 +67,8 @@ export class AppComponent {
   }
 
   openUserProfilePage() {
+    this.menuCtrl.close('menu-one');
+
     let modal = this.modalCtrl.create(UserProfilePage, {profile: this.profilesProv.profiles[0]});
     modal.present();
     modal.onDidDismiss((data) => {
@@ -86,7 +91,25 @@ export class AppComponent {
     });
   }
 
+  openHomePage() {
+    this.menuCtrl.close('menu-one');
+
+    if (this.nav.getActive().component !== HomePage) {
+      this.nav.setRoot(HomePage);
+    }
+  }
+
+  openGamesPage() {
+    this.menuCtrl.close('menu-one');
+
+    if (this.nav.getActive().component !== GamesPage) {
+      this.nav.setRoot(GamesPage);
+    }
+  }
+
   openAboutPage() {
+    this.menuCtrl.close('menu-one');
+
     let modal = this.modalCtrl.create(AboutPage);
     modal.present();
   }
