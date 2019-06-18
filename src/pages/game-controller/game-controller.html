@@ -1,0 +1,35 @@
+<ion-header>
+  <ion-navbar>
+    <!--<button ion-button menuToggle="menu-one">
+      <ion-icon name="menu"></ion-icon>
+    </button>-->
+    <!--<ion-avatar>
+      <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
+      <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
+    </ion-avatar>-->
+      <!--<canvas class="no-img" height="1" width="1"></canvas>-->
+      <!--<canvas *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)" height="1" width="1"></canvas>
+    -->
+    <ion-title>
+      Game controller
+    </ion-title>
+    <ion-badge color="fulldark"><ion-icon name="list"></ion-icon>1/8</ion-badge>
+<ion-badge color="fulldark"><ion-icon name="list"></ion-icon>120</ion-badge>
+    <ion-buttons end>
+      <button ion-button icon-only ><!--(click)="openMenu($event)">-->
+        <ion-icon name="more"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <p class="information">Some text</p>
+  <!--<div *ngIf="type !== QuestionType.picture" class="answers">
+    <div class="zero" (tap)="setAnswer(0)"  [ngClass]="{'disabled': answer !== 0 && answer !== -1}"></div>
+    <div class="one" (tap)="setAnswer(1)"   [ngClass]="{'disabled': answer !== 1 && answer !== -1}"></div>
+    <div class="two" (tap)="setAnswer(2)"   [ngClass]="{'disabled': answer !== 2 && answer !== -1}"></div>
+    <div class="three" (tap)="setAnswer(3)" [ngClass]="{'disabled': answer !== 3 && answer !== -1}"></div>
+  </div>
+  <canvas *ngIf="type === QuestionType.picture" class="buzzer" height="1" width="1" (tap)="setAnswer(4)" [ngClass]="{'disabled': answer === 4}"></canvas>
+--></ion-content>

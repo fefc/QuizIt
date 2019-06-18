@@ -1,10 +1,14 @@
 import { Component } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController, PopoverController } from 'ionic-angular';
 
+import { UserProfilesProvider } from '../../providers/user-profiles/user-profiles';
+
+import { GameControllerPage } from '../game-controller/game-controller';
+
+
 /*import { Quiz } from '../../models/quiz';
 import { QuestionType } from '../../models/question';
 
-import { QuizsProvider } from '../../providers/quizs/quizs';
 
 import { HomeMenu } from './menu';*/
 
@@ -20,8 +24,13 @@ export class GamesPage {
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    private popoverCtrl: PopoverController) {
+    private popoverCtrl: PopoverController,
+    private profilesProv: UserProfilesProvider) {
 
+  }
+
+  openGameControllerPage() {
+    this.navCtrl.push(GameControllerPage, { profile: this.profilesProv.profiles[0] });
   }
 
   /*openMenu(event) {

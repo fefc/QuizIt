@@ -41,7 +41,7 @@ import { PlayPage } from '../pages/play/play';
 import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 
 import { GamesPage } from '../pages/games/games';
-
+import { GameControllerPage } from '../pages/game-controller/game-controller';
 
 @NgModule({
   declarations: [
@@ -59,7 +59,8 @@ import { GamesPage } from '../pages/games/games';
     QuestionPage,
     PlayPage,
     PlayAddPlayerPage,
-    GamesPage
+    GamesPage,
+    GameControllerPage
   ],
   imports: [
     BrowserModule,
@@ -82,7 +83,8 @@ import { GamesPage } from '../pages/games/games';
     QuestionPage,
     PlayPage,
     PlayAddPlayerPage,
-    GamesPage
+    GamesPage,
+    GameControllerPage
   ],
   providers: [
     StatusBar,
