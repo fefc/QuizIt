@@ -36,12 +36,12 @@ export class GameControllerPage {
         this.profile = JSON.parse(JSON.stringify(params.data.profile));
       }
 
-      this.type = QuestionType.picture;
+      this.type = QuestionType.pictures;
       this.answer = -1;
   }
 
   renderPicture(base64: string) {
-    return this.sanitizer.bypassSecurityTrustUrl(base64);
+    return this.sanitizer.bypassSecurityTrustStyle(`url('${base64}')`);
   }
 
   setAnswer(index: number) {

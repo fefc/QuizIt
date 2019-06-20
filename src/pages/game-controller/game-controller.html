@@ -1,21 +1,29 @@
 <ion-header>
-  <ion-navbar>
-    <!--<button ion-button menuToggle="menu-one">
-      <ion-icon name="menu"></ion-icon>
-    </button>-->
-    <!--<ion-avatar>
-      <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
-      <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
-    </ion-avatar>-->
-      <!--<canvas class="no-img" height="1" width="1"></canvas>-->
-      <!--<canvas *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)" height="1" width="1"></canvas>
-    -->
+  <ion-navbar hideBackButton>
+
+
+    <ion-buttons left>
+
+      <button ion-button>
+        <canvas class="avatar" width="1" height="1"
+        [style.background-image]="renderPicture(profile.avatar)"></canvas>
+      </button>
+    </ion-buttons>
     <ion-title>
+      <!--<img class="no-img" src="assets/svgs/icon.svg">..>
+      <!--<ion-item left>
+        <h2></h2>
+        <ion-avatar item-start>
+          <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
+          <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
+        </ion-avatar>
+
+      </ion-item>-->
       Game controller
     </ion-title>
-    <ion-badge color="fulldark"><ion-icon name="list"></ion-icon>1/8</ion-badge>
-<ion-badge color="fulldark"><ion-icon name="list"></ion-icon>120</ion-badge>
-    <ion-buttons end>
+    <!--<ion-badge color="fulldark"><ion-icon name="list"></ion-icon>1/8</ion-badge>
+    <ion-badge color="fulldark"><ion-icon name="list"></ion-icon>120</ion-badge>-->
+    <ion-buttons right>
       <button ion-button icon-only ><!--(click)="openMenu($event)">-->
         <ion-icon name="more"></ion-icon>
       </button>

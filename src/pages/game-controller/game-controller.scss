@@ -6,6 +6,15 @@ page-game-controller {
     flex-flow: column;
   }
 
+  .avatar {
+    height: 100%;
+    border-radius: 100%;
+
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
   .answers {
     flex-grow: 1;
     margin: 4vh 4vh 0 4vh;
