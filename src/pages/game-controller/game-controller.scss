@@ -10,7 +10,7 @@ page-game-controller {
     height: 100%;
     border-radius: 100%;
 
-    background-size: contain;
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
   }
@@ -76,5 +76,11 @@ page-game-controller {
     margin: auto 4vh;
     text-align: center;
     font-size: 1.6em;
+  }
+
+  .end-icon {
+    width: 100%;
+    font-size: 30em;
+    text-align: center;
   }
 }

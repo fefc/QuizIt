@@ -42,6 +42,7 @@ import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 
 import { GamesPage } from '../pages/games/games';
 import { GameControllerPage } from '../pages/game-controller/game-controller';
+import { GameControllerMenu } from '../pages/game-controller/menu';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { GameControllerPage } from '../pages/game-controller/game-controller';
     PlayPage,
     PlayAddPlayerPage,
     GamesPage,
-    GameControllerPage
+    GameControllerPage,
+    GameControllerMenu
   ],
   imports: [
     BrowserModule,
@@ -84,7 +86,8 @@ import { GameControllerPage } from '../pages/game-controller/game-controller';
     PlayPage,
     PlayAddPlayerPage,
     GamesPage,
-    GameControllerPage
+    GameControllerPage,
+    GameControllerMenu
   ],
   providers: [
     StatusBar,

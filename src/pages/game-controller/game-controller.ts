@@ -7,9 +7,9 @@ import { QuestionType } from '../../models/question';
 
 /*import { Quiz } from '../../models/quiz';
 
-import { QuizsProvider } from '../../providers/quizs/quizs';
+import { QuizsProvider } from '../../providers/quizs/quizs';*/
 
-import { HomeMenu } from './menu';*/
+import { GameControllerMenu } from './menu';
 
 @Component({
   selector: 'page-game-controller',
@@ -40,8 +40,17 @@ export class GameControllerPage {
       this.answer = -1;
   }
 
-  renderPicture(base64: string) {
-    return this.sanitizer.bypassSecurityTrustStyle(`url('${base64}')`);
+  openMenu(event) {
+    let popover = this.popoverCtrl.create(GameControllerMenu);
+    popover.present(({ev: event}));
+
+    popover.onDidDismiss((data) => {
+      if (data) {
+        if (data.index === 0) {
+          this.navCtrl.pop();
+        }
+      }
+    });
   }
 
   setAnswer(index: number) {
@@ -51,22 +60,7 @@ export class GameControllerPage {
     }
   }
 
-  /*openMenu(event) {
-    let popover = this.popoverCtrl.create(HomeMenu);
-    popover.present(({ev: event}));
-
-    popover.onDidDismiss((data) => {
-      if (data) {
-        if (data.index === 0) {
-          this.openQuizNewPage();
-        } else if (data.index === 1) {
-          setTimeout(() => this.import(), 0); //Wired trick to make it work in browser
-        }
-      }
-    });
+  renderPicture(base64: string) {
+    return this.sanitizer.bypassSecurityTrustStyle(`url('${base64}')`);
   }
-
-  startQuiz(quiz: Quiz) {
-    this.navCtrl.push(PlayPage, {quiz: quiz});
-  }*/
 }
