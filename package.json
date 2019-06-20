@@ -59,6 +59,7 @@
     "cordova-plugin-wifiwizard2": "git+https://github.com/tripflex/WifiWizard2.git",
     "cordova-sqlite-storage": "2.5.0",
     "cordova-zip-plugin": "1.1.0",
+    "de.fhg.fokus.famium.presentation": "file:cordova-plugin-presentation-master",
     "es6-promise-plugin": "4.2.2",
     "ionic": "^4.12.0",
     "ionic-angular": "3.9.2",
@@ -96,7 +97,8 @@
       "cordova-plugin-filechooser": {},
       "cordova-plugin-filepath": {},
       "cordova-plugin-insomnia": {},
-      "cordova-plugin-app-version": {}
+      "cordova-plugin-app-version": {},
+      "de.fhg.fokus.famium.presentation": {}
     },
     "platforms": [
       "android",
