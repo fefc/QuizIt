@@ -12,4 +12,8 @@ page-home {
     padding: 0 6px !important;
     margin:  0 5px !important;
   }
+
+  ion-item:last-child {
+    margin-bottom: 66px;
+  }
 }

@@ -26,7 +26,7 @@
 
 <ion-content>
   <ion-list [reorder]="showReorderCategorys" (ionItemReorder)="reorderCategorys($event)">
-    <ion-item-group *ngFor="let category of quiz.categorys">
+    <ion-item-group class="category-questions" *ngFor="let category of quiz.categorys">
       <ion-item-divider>
         <ion-label>{{ category.name }}</ion-label>
         <ion-buttons item-end *ngIf="!showReorderCategorys">
