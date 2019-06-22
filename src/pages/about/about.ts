@@ -1,5 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
-import { ViewController, Slides } from 'ionic-angular';
+import { Component } from '@angular/core';
+import { ViewController } from 'ionic-angular';
 import { AppVersion } from '@ionic-native/app-version';
 
 @Component({
@@ -7,7 +7,7 @@ import { AppVersion } from '@ionic-native/app-version';
   templateUrl: 'about.html'
 })
 export class AboutPage {
-  private versionNumber: string;
+  private versionNumber: string; //for use in Angular html
 
   constructor(public viewCtrl: ViewController, private appVersion: AppVersion) {
     if (appVersion) {
