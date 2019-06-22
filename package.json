@@ -72,7 +72,7 @@
     "zone.js": "0.8.26"
   },
   "devDependencies": {
-    "@angular/compiler": "^8.0.2",
+    "@angular/compiler": "^5.2.11",
     "@ionic/app-scripts": "^3.2.4",
     "typescript": "^3.5.2"
   },
