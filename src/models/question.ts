@@ -3,9 +3,7 @@ import { Category } from './category';
 export enum QuestionType {
   classic = 0,
   stopwatch = 1,
-  rightPicture = 2,
-  video = 3,
-  pictures = 4
+  rightPicture = 2
 }
 
 export interface Question {

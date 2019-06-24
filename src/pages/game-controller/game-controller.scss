@@ -15,6 +15,12 @@ page-game-controller {
     background-position: center;
   }
 
+  .answers-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+  }
+
   .answers {
     flex-grow: 1;
     margin: 4vh 4vh 0 4vh;

@@ -22,6 +22,8 @@ import { Player } from '../../models/player';
 
 import { Buzzer } from '../../models/buzzers';
 import { BuzzersConstants } from '../../models/buzzers';
+import { Game } from '../../models/game';
+import { GameState } from '../../models/game';
 
 import { PlayAddPlayerPage } from '../play-addplayer/play-addplayer';
 
@@ -219,6 +221,8 @@ export class PlayPage {
   private currentWifi: string; //for use in Angular html
   private currentIp: string; //for use in Angular html
 
+  private game: Game;
+
   private players: Array<Player>;
 
   private displayQuestionTimer: any;
@@ -318,6 +322,13 @@ export class PlayPage {
         this.navCtrl.pop();
       }
       else {
+
+        this.game = {
+                      uuid: this.quiz.uuid,
+                      title: this.quiz.title,
+                      host: "Hardcoded",
+                      state: GameState.playersJoining
+                    }
 
         this.currentQuestion = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
@@ -876,6 +887,11 @@ export class PlayPage {
   }
 
   handleHttpdEvent(data: any) {
+    if (data.uri === "/searchingQuizPad") {
+      this.httpd.setRequestResponse([{requestId: +data.requestId}, this.game]).catch(() => {
+        console.log("Could not setRequestResponse for some useless case.");
+      });
+    }
     if (data.uri === "/addPlayer") {
       let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
 
@@ -908,23 +924,18 @@ export class PlayPage {
       let player: Player = this.players.find((p) => p.uuid === data.uuid);
 
       if (player) {
-        if (this.screenState == ScreenStateType.playersJoining) {
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 0}]).catch(() => {
-            console.log("Could not setRequestResponse for /gameState.");
-          });
-        } else if (this.screenState === ScreenStateType.displayQuestion) {
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 1,
-                                                                        uuid: this.currentQuestions[this.currentQuestion].uuid,
-                                                                        type: this.currentQuestions[this.currentQuestion].type}]).catch(() => {
-            console.log("Could not setRequestResponse for /gameState.");
-          });
-        } else if (this.screenState === ScreenStateType.end) {
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 2}]).catch(() => {
+        if (this.screenState === ScreenStateType.displayQuestion) {
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {
+            state: GameState.questionDisplayed,
+            uuid: this.currentQuestions[this.currentQuestion].uuid,
+            type: this.currentQuestions[this.currentQuestion].type}]).catch(() => {
             console.log("Could not setRequestResponse for /gameState.");
           });
         } else {
-          //something is loading
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {gameState: 3}]).catch(() => {
+          this.httpd.setRequestResponse([{requestId: +data.requestId}, {
+            state:(this.screenState == ScreenStateType.playersJoining ? GameState.playersJoining : (this.screenState === ScreenStateType.end ? GameState.ended : GameState.loading)),
+            actualPosition: player.actualPosition,
+            points: player.points}]).catch(() => {
             console.log("Could not setRequestResponse for /gameState.");
           });
         }
@@ -934,7 +945,7 @@ export class PlayPage {
         });
       }
     } else {
-      this.httpd.setRequestResponse([{requestId: +data.requestId}, {msg: "I don't know what you're looking for."}]).catch(() => {
+      this.httpd.setRequestResponse([{requestId: +data.requestId}, {msg: "I don't know what you're looking for: " + data.uri + "."}]).catch(() => {
         console.log("Could not setRequestResponse for some useless case.");
       });
     }
