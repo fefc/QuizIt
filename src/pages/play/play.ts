@@ -27,6 +27,8 @@ import { GameState } from '../../models/game';
 
 import { PlayAddPlayerPage } from '../play-addplayer/play-addplayer';
 
+import { UserProfilesProvider } from '../../providers/user-profiles/user-profiles';
+
 enum ScreenStateType {
   start,
   playersJoining,
@@ -259,6 +261,7 @@ export class PlayPage {
               private screenOrientation: ScreenOrientation,
               private sanitizer:DomSanitizer,
               private insomnia: Insomnia,
+              private profilesProv: UserProfilesProvider,
               params: NavParams) {
 
     this.screenState = ScreenStateType.start;
@@ -324,11 +327,11 @@ export class PlayPage {
       else {
 
         this.game = {
-                      uuid: this.quiz.uuid,
-                      title: this.quiz.title,
-                      host: "Hardcoded",
-                      state: GameState.playersJoining
-                    }
+          uuid: this.quiz.uuid,
+          title: this.quiz.title,
+          host: this.profilesProv.profiles[0].nickname,
+          state: GameState.playersJoining
+        };
 
         this.currentQuestion = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
@@ -421,7 +424,7 @@ export class PlayPage {
 
   addPlayer(nickname: string, avatar: string, uuid?: string) {
     if (this.screenState === ScreenStateType.playersJoining) {
-      if (this.players.findIndex((p) => p.nickname === nickname || p.avatar === avatar) === -1) {
+      if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
         let newPlayer: Player;
         if (uuid === undefined) {
           uuid = this.uuidv4();
@@ -471,6 +474,7 @@ export class PlayPage {
     this.showMenuCounter = 0;
 
     if (this.screenState === ScreenStateType.playersJoining) {
+      this.game.state = GameState.questionDisplayed; //To show other users the game already started
       this.currentCategory = -1;
 
       for (player of this.players) {
@@ -494,6 +498,7 @@ export class PlayPage {
       }
       else {
         this.screenState = ScreenStateType.end;
+        this.game.state = GameState.ended;
         setTimeout(() => this.showExit = true, this.showNextDelay);
       }
     }
@@ -895,7 +900,7 @@ export class PlayPage {
     if (data.uri === "/addPlayer") {
       let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
 
-      this.httpd.setRequestResponse([{requestId: +data.requestId}, {uuid: newPlayer ? newPlayer.uuid : undefined }]).catch(() => {
+      this.httpd.setRequestResponse([{requestId: +data.requestId}, (newPlayer ? {playerUuid: newPlayer.uuid} : this.game) ]).catch(() => {
         console.log("Could not setRequestResponse for /addPlayer.");
       });
 

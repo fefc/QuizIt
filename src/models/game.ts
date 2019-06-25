@@ -4,7 +4,8 @@ export enum GameState {
   playersJoining = 0,
   questionDisplayed = 1,
   loading = 2,
-  ended = 3
+  ended = 3,
+  connectionLost = 4
 }
 
 export interface Game {

@@ -1,6 +1,6 @@
 <ion-header>
   <ion-navbar hideBackButton>
-    <ion-buttons left>
+    <ion-buttons left *ngIf="player.avatar">
       <button ion-button>
         <canvas class="avatar" width="1" height="1" [style.background-image]="renderPicture(player.avatar)"></canvas>
       </button>
@@ -19,9 +19,13 @@
 </ion-header>
 
 <ion-content>
+  <p class="information" *ngIf="game.state === GameState.connectionLost">Unable to reach quiz host.</p>
   <p class="information" *ngIf="game.state === GameState.playersJoining">The game will start soon...</p>
   <p class="information" *ngIf="game.state === GameState.loading"><ion-spinner name="crescent" color="primary"></ion-spinner></p>
   <p class="information" *ngIf="game.state === GameState.ended">That's it, thanks for playing!</p>
+  <button class="exit-button" *ngIf="game.state === GameState.ended" ion-button large (click)="exit()">
+    Exit
+  </button>
   <div class="answers-container" *ngIf="game.state === GameState.questionDisplayed">
     <div *ngIf="game.currentQuestionType !== QuestionType.rightPicture" class="answers">
       <div class="zero" (tap)="setAnswer(0)"  [ngClass]="{'disabled': player.answer !== 0 && player.answer !== -1}"></div>
@@ -29,6 +33,6 @@
       <div class="two" (tap)="setAnswer(2)"   [ngClass]="{'disabled': player.answer !== 2 && player.answer !== -1}"></div>
       <div class="three" (tap)="setAnswer(3)" [ngClass]="{'disabled': player.answer !== 3 && player.answer !== -1}"></div>
   </div>
-    <canvas *ngIf="game.currentQuestionType === QuestionType.rightPicture" class="buzzer" height="1" width="1" (tap)="setAnswer(4)" [ngClass]="{'disabled': answer === 4}"></canvas>
+    <canvas *ngIf="game.currentQuestionType === QuestionType.rightPicture" class="buzzer" height="1" width="1" (tap)="setAnswer(4)" [ngClass]="{'disabled': player.answer === 4}"></canvas>
   </div>
 </ion-content>

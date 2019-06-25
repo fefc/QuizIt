@@ -24,6 +24,8 @@ export class GameControllerPage {
 
   private gameStateInterval: any;
 
+  private gameStateErrorCounter: number;
+
   constructor(
     public navCtrl: NavController,
     public loadingCtrl: LoadingController,
@@ -37,9 +39,10 @@ export class GameControllerPage {
       this.game = params.data.game;
       this.player = params.data.player;
 
+      this.gameStateErrorCounter = 0;
       this.gameStateInterval = setInterval(() => {this.checkGameState();}, 300);
     } else {
-      this.navCtrl.pop();
+      this.exit();
     }
   }
 
@@ -49,6 +52,8 @@ export class GameControllerPage {
       let parsedData: any = JSON.parse(data.data);
 
       if (parsedData.state) {
+        this.gameStateErrorCounter = 0;
+
         this.game.state = parsedData.state;
 
         if (this.game.state === GameState.questionDisplayed) {
@@ -61,11 +66,45 @@ export class GameControllerPage {
           this.player.answer = -1;
         }
       } else {
-        //alert("sometihng bad happend");
+        this.handleGameStateError();
       }
     }).catch((error) => {
-      //alert("sometihng bad happend");
+      this.handleGameStateError();
     });
+  }
+
+  handleGameStateError() {
+    if (this.gameStateErrorCounter < 3) {
+      this.gameStateErrorCounter += 1;
+    }
+
+    if (this.gameStateErrorCounter > 3) {
+      this.game.state = GameState.connectionLost;
+      clearInterval(this.gameStateInterval);
+
+      let message = this.alertCtrl.create({
+        title: 'Lost connection',
+        message: "I'm unable to reach quiz host, do you want to retry?",
+        buttons: [
+          {
+            text: 'No',
+            role: 'cancel',
+            handler: data => {
+              this.game.state = GameState.ended;
+            }
+          },
+          {
+            text: 'Yes',
+            handler: data => {
+              this.gameStateErrorCounter = 0;
+              this.gameStateInterval = setInterval(() => {this.checkGameState();}, 300);
+            }
+          }
+        ]
+      });
+
+      message.present();
+    }
   }
 
   setAnswer(index: number) {
@@ -74,13 +113,13 @@ export class GameControllerPage {
       .then((data) => {
         let parsedData: any = JSON.parse(data.data);
 
-        if (parsedData.succes) {
+        if (parsedData.success) {
           this.player.answer = index;
         } else {
-          //alert("sometihng bad happend");
+          this.showSetAnswerErrorAlert();
         }
       }).catch((error) => {
-        //alert("sometihng bad happend");
+        this.showSetAnswerErrorAlert();
       });
     }
   }
@@ -92,14 +131,33 @@ export class GameControllerPage {
     popover.onDidDismiss((data) => {
       if (data) {
         if (data.index === 0) {
-          this.navCtrl.pop();
+          this.exit();
         }
       }
     });
   }
 
+  showSetAnswerErrorAlert() {
+    let message = this.alertCtrl.create({
+      title: 'Could no set answer',
+      message: 'Please try again',
+      buttons: [
+        {
+          text: 'Close',
+          role: 'ok',
+        }
+      ]
+    });
+
+    message.present();
+  }
+
   renderPicture(base64: string) {
     return this.sanitizer.bypassSecurityTrustStyle(`url('${base64}')`);
+  }
+
+  exit() {
+    this.navCtrl.pop();
   }
 
   /* this will be executed when view is poped, either by exit() or by back button */

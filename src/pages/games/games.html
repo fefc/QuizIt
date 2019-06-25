@@ -6,26 +6,24 @@
     <ion-title>
       Join a game
     </ion-title>
-    <!--<ion-buttons end>
-      <button ion-button icon-only (click)="openMenu($event)">
-        <ion-icon name="more"></ion-icon>
-      </button>
-    </ion-buttons>-->
   </ion-navbar>
 </ion-header>
 
 <ion-content>
+  <ion-refresher #refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content  pullingIcon="arrow-dropdown"
+                            pullingText="Pull to refresh"
+                            refreshingSpinner="crescent"
+                            refreshingText="Searching...">
+    </ion-refresher-content>
+  </ion-refresher>
   <ion-list>
-    <ion-item tappable (tap)="openGameControllerPage()">
-        <h2>40ans, 40ans, 40ans!</h2>
-      </ion-item>
-    <!--<ion-item tappable *ngFor="let quiz of quizsProv.quizs" (tap)="openQuizQuestionsPage($event, quiz)" (press)="selectQuiz(quiz)">
-        <h2>{{ quiz.title }}</h2>
-        <ion-buttons item-end>
-          <button color="fulldark" ion-button icon-only data-stop-propagation (tap)="startQuiz(quiz)">
-            <ion-icon name="play"></ion-icon>
-          </button>
-        </ion-buttons>
-      </ion-item>-->
+    <ion-item tappable *ngFor="let game of games" (tap)="joinGame(game)">
+        <h2>{{ game.title }}</h2>
+        <p *ngIf="game.state === GameState.playersJoining">The quiz will start soon, join now!</p>
+        <p *ngIf="game.state === GameState.questionDisplayed">The quiz already started</p>
+        <p *ngIf="game.state === GameState.ended">The quiz just finished</p>
+        <ion-note item-end>{{ game.host }}</ion-note>
+    </ion-item>
   </ion-list>
 </ion-content>
