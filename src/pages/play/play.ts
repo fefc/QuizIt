@@ -946,7 +946,7 @@ export class PlayPage {
         }
       } else {
         this.httpd.setRequestResponse([{requestId: +data.requestId}, {msg: "Why do you want this information?"}]).catch(() => {
-          console.log("Could not setRequestResponse for /getNextQuestionType.");
+          console.log("Could not setRequestResponse for /gameState.");
         });
       }
     } else {
