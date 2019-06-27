@@ -37,7 +37,7 @@ export class GamesPage {
   }
 
   scanNetwork(refresher?: any) {
-    this.http.post("http://10.0.0.13:8080/searchingQuizPad", {bd: "htttpp", bddd: "Dog.png"}, {})
+    this.http.post("http://10.0.0.13:8080/searchingQuizPad", {some: "parameter"}, {})
     .then((data) => {
       var game: Game = JSON.parse(data.data);
 
