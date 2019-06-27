@@ -17,7 +17,6 @@ import { GameControllerPage } from '../game-controller/game-controller';
 
 export class GamesPage {
   private GameState = GameState; //for use in Angluar html
-
   private games: Array<Game>;
 
   constructor(
@@ -29,7 +28,6 @@ export class GamesPage {
     private profilesProv: UserProfilesProvider) {
 
     this.games = [];
-
     this.scanNetwork();
   }
 
@@ -41,6 +39,7 @@ export class GamesPage {
   scanNetwork(refresher?: any) {
     this.http.post("http://10.0.0.13:8080/searchingQuizPad", {bd: "htttpp", bddd: "Dog.png"}, {})
     .then((data) => {
+      console.log(data);
       var game: Game = JSON.parse(data.data);
 
       if (game.uuid) {
@@ -67,44 +66,49 @@ export class GamesPage {
 
     loading.present();
 
-    this.http.post('http://' + game.address + '/addPlayer', { nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname), avatar: "Dog.png" }, {})
-    .then((data) => {
-      let parsedData: any = JSON.parse(data.data);
+    this.resizeAvatar(this.profilesProv.profiles[0].avatar).then((resizedAvatar) => {
+      this.http.post('http://' + game.address + '/addPlayer', { nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname), avatar: resizedAvatar }, {})
+      .then((data) => {
+        let parsedData: any = JSON.parse(data.data);
 
-      console.log(parsedData);
+        console.log(parsedData);
 
-      if (parsedData.playerUuid) {
-        //Player added Successfully
-        let player: Player = {
-          uuid: parsedData.playerUuid,
-          nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname),
-          avatar: this.profilesProv.profiles[0].avatar,
-          initialPosition: 0,
-          actualPosition: 0,
-          previousPosition: 0,
-          points: 0,
-          answer: -1
-        };
+        if (parsedData.playerUuid) {
+          //Player added Successfully
+          let player: Player = {
+            uuid: parsedData.playerUuid,
+            nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname),
+            avatar: this.profilesProv.profiles[0].avatar,
+            initialPosition: 0,
+            actualPosition: 0,
+            previousPosition: 0,
+            points: 0,
+            answer: -1
+          };
 
-        this.openGameControllerPage(game, player);
-      } else {
-        //Player was not added
-        if (parsedData.uuid) {
-          //But we got information about game state
-          if (parsedData.state !== GameState.playersJoining) {
-            this.showGeneraljoinGameErrorAlert("The game already started.");
-          } else {
-            this.showNicknameAlreadyUsedAlert(game);
-          }
+          this.openGameControllerPage(game, player);
         } else {
-          this.showGeneraljoinGameErrorAlert("General error: Server error.");
+          //Player was not added
+          if (parsedData.uuid) {
+            //But we got information about game state
+            if (parsedData.state !== GameState.playersJoining) {
+              this.showGeneraljoinGameErrorAlert("The game already started.");
+            } else {
+              this.showNicknameAlreadyUsedAlert(game);
+            }
+          } else {
+            this.showGeneraljoinGameErrorAlert("General error: Server error.");
+          }
         }
-      }
 
-      loading.dismiss();
+        loading.dismiss();
+      }).catch((error) => {
+        loading.dismiss();
+        this.showGeneraljoinGameErrorAlert("General error: Server timeout.");
+      });
     }).catch((error) => {
       loading.dismiss();
-      this.showGeneraljoinGameErrorAlert("General error: Server timeout.");
+      this.showGeneraljoinGameErrorAlert("General error: Impossible to resize avatar");
     });
   }
 
@@ -148,6 +152,49 @@ export class GamesPage {
     });
 
     message.present();
+  }
+
+  resizeAvatar(base64Avatar: string) {
+    return new Promise((resolve, reject) => {
+      //First resize the image
+      //The zoom it like avatar displayed
+      //https://zocada.com/compress-resize-images-javascript-browser/
+      //https://stackoverflow.com/a/28048865/7890583
+      let img = new Image();
+      img.src = base64Avatar;
+      img.onload = (pic: any) => {
+        let canvas = document.createElement('canvas');
+        let imgRatio: number = img.width / img.height;
+        let zoom: number;
+        let newImgHeight: number;
+        let newImgWidth: number;
+        let heightMargin: number = 0;
+        let widthMargin: number = 0;
+
+        canvas.width = 200;
+        canvas.height = 200;
+
+        if (imgRatio > 1) {
+          zoom = img.height / canvas.height;
+          newImgHeight = canvas.height;
+          newImgWidth = img.width / zoom;
+          widthMargin = -(newImgWidth / 2) + (canvas.width / 2);
+        } else {
+          zoom = img.width / canvas.width;
+          newImgHeight = img.height / zoom;
+          newImgWidth = canvas.width;
+          heightMargin = -(newImgHeight / 2) + (canvas.height / 2);
+        }
+
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(img, widthMargin, heightMargin, newImgWidth, newImgHeight);
+        resolve(ctx.canvas.toDataURL('image/jpeg', 0.8));
+      };
+
+      img.onerror = (error : any) => {
+        resolve('');
+      }
+    });
   }
 
   openGameControllerPage(game: Game, player: Player) {

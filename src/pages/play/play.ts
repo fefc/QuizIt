@@ -1015,6 +1015,14 @@ export class PlayPage {
     }
   }
 
+  renderAvatar(base64: string) {
+    if (base64) {
+      return this.sanitizer.bypassSecurityTrustStyle(`url('${base64}')`);
+    } else {
+      return this.sanitizer.bypassSecurityTrustStyle(`url(assets/svgs/icon.svg)`);
+    }
+  }
+
   //From https://stackoverflow.com/a/2117523
   uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

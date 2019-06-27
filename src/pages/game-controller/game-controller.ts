@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { NavController, NavParams, AlertController, LoadingController, PopoverController } from 'ionic-angular';
 import { HTTP } from '@ionic-native/http';
 

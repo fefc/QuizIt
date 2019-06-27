@@ -54,8 +54,7 @@
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1"
                 [ngClass]="{'player-answered': player.answer > -1 && screenState === ScreenStateType.displayQuestion}"
-
-                [ngStyle]="{'background-image': 'url(assets/imgs/avatars/' + player.avatar + ')'}"></canvas>
+                [style.background-image]="renderAvatar(player.avatar)"></canvas>
         <canvas class="player-answer" width="1" height="1"
 
                 [ngClass]="{'zero':  player.answer === 0 && displayAnswers,
