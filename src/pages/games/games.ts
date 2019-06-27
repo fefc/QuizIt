@@ -39,14 +39,12 @@ export class GamesPage {
   scanNetwork(refresher?: any) {
     this.http.post("http://10.0.0.13:8080/searchingQuizPad", {bd: "htttpp", bddd: "Dog.png"}, {})
     .then((data) => {
-      console.log(data);
       var game: Game = JSON.parse(data.data);
 
       if (game.uuid) {
         game.address = "10.0.0.13:8080"
         this.games.push(game);
       }
-
 
       if (refresher) {
         refresher.complete();
@@ -70,8 +68,6 @@ export class GamesPage {
       this.http.post('http://' + game.address + '/addPlayer', { nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname), avatar: resizedAvatar }, {})
       .then((data) => {
         let parsedData: any = JSON.parse(data.data);
-
-        console.log(parsedData);
 
         if (parsedData.playerUuid) {
           //Player added Successfully

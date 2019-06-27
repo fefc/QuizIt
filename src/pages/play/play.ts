@@ -897,7 +897,7 @@ export class PlayPage {
         console.log("Could not setRequestResponse for some useless case.");
       });
     }
-    if (data.uri === "/addPlayer") {
+    else if (data.uri === "/addPlayer") {
       let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
 
       this.httpd.setRequestResponse([{requestId: +data.requestId}, (newPlayer ? {playerUuid: newPlayer.uuid} : this.game) ]).catch(() => {
