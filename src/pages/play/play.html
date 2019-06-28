@@ -10,8 +10,9 @@
 
   <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
     The quiz will start shortly...<br><br>
-    Play now by connecting to the Wifi above<br>
-    and follow the instructions on the webpage.<br><br>
+    Play now by downloading the QuizPad App<br>
+    and connecting to the Wifi above!<br> 
+    Or follow the instructions on the webpage!<br><br>
     {{startMessage}}
   </div>
 

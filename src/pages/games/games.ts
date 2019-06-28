@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController } from 'ionic-angular';
 import { HTTP } from '@ionic-native/http';
 
+declare var WifiWizard2: any;
+
 import { Player } from '../../models/player';
 import { Game } from '../../models/game';
 import { GameState } from '../../models/game';
@@ -195,5 +197,34 @@ export class GamesPage {
 
   openGameControllerPage(game: Game, player: Player) {
     this.navCtrl.push(GameControllerPage, { game: game, player: player });
+  }
+
+  getWifiInfos() {
+    /* Lets try to find out if Wifi is enabled and configure the welcome message */
+    WifiWizard2.getConnectedSSID().then((ssid) => {
+      /* Once wifi is done, lets find ip address of the device over wifi and configure the welcome message */
+      WifiWizard2.getWifiIP().then((ip) => {
+        alert(ip.substr(0, ip.lastIndexOf('.')));
+      }).catch((error) => {
+        this.showGeneralWifiErrorAlert("Impossible to get ip address.");
+      });
+    }).catch((error) => {
+      this.showGeneralWifiErrorAlert("Not connected to any wifi.");
+    });
+  }
+
+  showGeneralWifiErrorAlert(content: string) {
+    let message = this.alertCtrl.create({
+      title: 'Could not access wifi',
+      message: content,
+      buttons: [
+        {
+          text: 'Close',
+          role: 'ok',
+        }
+      ]
+    });
+
+    message.present();
   }
 }
