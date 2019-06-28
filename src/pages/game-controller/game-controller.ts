@@ -64,6 +64,10 @@ export class GameControllerPage {
 
           this.player.points = (parsedData.points ? parsedData.points : 0);
           this.player.answer = -1;
+
+          if (this.game.state === GameState.ended) {
+            clearInterval(this.gameStateInterval);
+          }
         }
       } else {
         this.handleGameStateError();
@@ -74,11 +78,9 @@ export class GameControllerPage {
   }
 
   handleGameStateError() {
-    if (this.gameStateErrorCounter < 3) {
+    if (this.gameStateErrorCounter <= 3) {
       this.gameStateErrorCounter += 1;
-    }
-
-    if (this.gameStateErrorCounter > 3) {
+    } else  {
       this.game.state = GameState.connectionLost;
       clearInterval(this.gameStateInterval);
 

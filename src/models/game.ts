@@ -1,11 +1,11 @@
 import { QuestionType } from './question';
 
 export enum GameState {
-  playersJoining = 0,
-  questionDisplayed = 1,
-  loading = 2,
-  ended = 3,
-  connectionLost = 4
+  playersJoining = 1,
+  questionDisplayed = 2,
+  loading = 3,
+  ended = 4,
+  connectionLost = 5
 }
 
 export interface Game {

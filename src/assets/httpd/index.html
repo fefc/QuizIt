@@ -6,42 +6,16 @@
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="script.js"></script>
-    <script type="text/javascript" src="slideshow.js"></script>
   </head>
   <body>
     <div id="player">
       <input id="nickname" type="text" placeholder="Your nickname" autocomplete="off" minlength="3" maxlength="16">
-        <div id="avatar-selector-0">
-          <div class="scale">
-            <div class="main">
-              <div class="avatar-box"></div>
-              <div class="slides">
-                  <div class="center-vertical">
-                      <div class="center-horizontal">
-      		                <img class="slide" style="display:none;" src="imgs/Bunny.png" caption="Bunny"/>
-      			              <img class="slide" style="display:none;" src="imgs/Dog.png" caption="Dog"/>
-                          <img class="slide" style="display:none;" src="imgs/Duck_Guy.png" caption="Duck_Guy"/>
-                          <img class="slide" style="display:none;" src="imgs/Frankie.png" caption="Frankie"/>
-                          <img class="slide" style="display:none;" src="imgs/Happy_Girl.png" caption="Happy_Girl"/>
-                          <img class="slide" style="display:none;" src="imgs/Mad_Guy.png" caption="Mad_Guy"/>
-                          <img class="slide" style="display:none;" src="imgs/Proog.png" caption="Proog"/>
-                          <img class="slide" style="display:none;" src="imgs/Sintel.png" caption="Sintel"/>
-      		            </div>
-      		        </div>
-              </div>
-            </div>
-            <a class="previous">&#10094;</a>
-            <a class="next">&#10095;</a>
-          </div>
-        </div>
-        <br>
         <br><br><br>
         <button id="join-quiz" disabled>Join Quiz</button>
     </div>
 
     <div id="controller" style="display:none;">
       <div id="bar">
-        <canvas id="controller-avatar" height="1" width="1"></canvas>
         <div id="controller-nickname">Nickname</div>
       </div>
       <div id="answers">

@@ -1,11 +1,9 @@
 var playerUuid;
 var nickname;
-var avatar;
-
-var currentQuestionUuid;
 var currentQuestionType;
-var answered;
-var checkQuestionType;
+var answer;
+var checkQuestionTypeInterval;
+var gameStateErrorCounter;
 
 jQuery(function($) {
   $('#nickname').on('input', function() {
@@ -19,114 +17,149 @@ jQuery(function($) {
   $('#join-quiz').click(function(e) {
       e.preventDefault();
       nickname = $('#nickname').val();
-      avatar = $('#avatar-selector-0').data('current-avatar') + '.png';
 
-      $.post('/addPlayer', {nickname: nickname, avatar: avatar}, function(data, status){
-        if (data.uuid) {
-          playerUuid = data.uuid;
+      $.post('/addPlayer', {nickname: nickname, avatar: ''}, function(data, status) {
+        if (data.playerUuid) {
+          playerUuid = data.playerUuid;
 
-          currentQuestionUuid = "";
           currentQuestionType = 0;
-          answered = false;
+          answer = -1;
 
-          checkQuestionType = setInterval(gameState, 300);
+          checkQuestionTypeInterval = setInterval(checkGameState, 300);
 
-          $('#controller-avatar').css('background-image', "url('imgs/" + avatar + "')");
+          //Update graphics
           $('#controller-nickname').html(nickname);
-
           $('#player').css('display', 'none');
           $('#controller').css('display', 'flex');
         } else {
           alert("Is your nickname or avatar already used?");
         }
       }).fail(function(response) {
-        console.log(response.responseText);
+        alert("Unable to join game.");
       });
   });
 
   $('#answers').children('div').each(function(index) {
       $(this).click(function(e) {
-        sendAnswer(index);
+        setAnswer(index);
       });
   });
 
-  function sendAnswer(answer) {
-    if (answered == false) {
-      $.post('/answer', {uuid: playerUuid, answer: answer}, function(data, status){
-        console.log(data);
-        if (data.success) {
-          answered = true;
 
-          if (currentQuestionType == 2) {
-            $('#answers').children('div').each(function(index) {
-                $(this).addClass('disabled');
-            });
-          } else {
-            $('#answers').children('div').each(function(index) {
-              if (index != answer) {
-                $(this).addClass('disabled');
-              }
-            });
+  function checkGameState() {
+    $.post('/gameState', {uuid: playerUuid},
+    function(data, status) {
+      if (data.state) {
+        gameStateErrorCounter = 0;
+
+        gameState = data.state;
+
+        if (gameState == 2) { //GameState questionDisplayed
+          currentQuestionType = data.type;
+
+          //Update graphics
+          if (answer == -1) {
+            $('#answers').css('display', 'flex');
+            $('#texts').css('display', 'none');
+
+            if (currentQuestionType == 2) {
+              //its a buzzer question
+              $('#answers').children('div').each(function(index) {
+                $(this).removeClass('disabled');
+                if (index != 4) {
+                  $(this).css('display', 'none');
+                } else {
+                  $(this).css('display', 'block');
+                }
+              });
+            } else {
+              $('#answers').children('div').each(function(index) {
+                $(this).removeClass('disabled');
+                if (index != 4) {
+                  $(this).css('display', 'block');
+                } else {
+                  $(this).css('display', 'none');
+                }
+              });
+            }
           }
+          //Done updating display
+        } else {
+          //previousPosition
+          //actualPosition
+
+          //points
+          answer = -1;
+
+          //Update graphics
+          $('#answers').css('display', 'none');
+          $('#texts').css('display', 'flex');
+
+          if (gameState == 1) { //playersJoining
+            $('#texts').html("The game will start soon...");
+
+          } else if (gameState == 3) { //loading
+            $('#texts').html("Loading...");
+          } else if (gameState == 4) { //ended
+            $('#texts').html("That's it, thanks for playing!");
+            clearInterval(checkQuestionTypeInterval);
+          }
+          //Done updating display
         }
-      }).fail(function(response) {
-        console.log(response.responseText);
-      });
+      } else {
+        handleGameStateError();
+      }
+    }).fail(function(response) {
+      handleGameStateError();
+    });
+  }
+
+  function handleGameStateError() {
+    if (gameStateErrorCounter <= 3) {
+      gameStateErrorCounter += 1;
+    } else {
+      gameState = 5; //connectionLost
+      $('#texts').html("Unable to reach quiz host.");
+      clearInterval(checkQuestionTypeInterval);
+
+      var message = confirm("I'm unable to reach quiz host, do you want to retry?");
+      if (message == false) {
+        gameState = 4; //ended
+        $('#texts').html("That's it, thanks for playing!");
+      } else {
+        gameStateErrorCounter = 0;
+        checkQuestionTypeInterval = setInterval(checkGameState, 300);
+      }
     }
   }
 
-  function gameState() {
-    $.post('/gameState', {uuid: playerUuid}, function(data, status){
-      if (data.gameState === 0) {
-        $('#answers').css('display', 'none');
-        $('#texts').css('display', 'flex');
-        $('#texts').html("The game will start soon...");
+  function setAnswer(index) {
+    if (answer == -1) {
+      $.post('/answer', {uuid: playerUuid, answer: index},
+      function(data, status){
+        if (data.success) {
+          answer = index;
 
-      } else if (data.gameState === 1) {
-        $('#answers').css('display', 'flex');
-        $('#texts').css('display', 'none');
-
-        if (data.uuid != currentQuestionUuid) {
-          currentQuestionUuid = data.uuid;
-          currentQuestionType = data.type;
-          answered = false;
-
+          //Update display
           if (currentQuestionType == 2) {
-            //its a buzzer question
-            $('#answers').children('div').each(function(index) {
-              $(this).removeClass('disabled');
-              if (index != 4) {
-                $(this).css('display', 'none');
-              } else {
-                $(this).css('display', 'block');
-              }
+            $('#answers').children('div').each(function(divIndex) {
+                $(this).addClass('disabled');
             });
           } else {
-            $('#answers').children('div').each(function(index) {
-              $(this).removeClass('disabled');
-              if (index != 4) {
-                $(this).css('display', 'block');
-              } else {
-                $(this).css('display', 'none');
+            $('#answers').children('div').each(function(divIndex) {
+              if (divIndex != answer) {
+                $(this).addClass('disabled');
               }
             });
           }
+          //Done updating display
+
+        } else {
+          alert("could not set answer, please try again.");
         }
-      } else if (data.gameState === 2) {
-        clearInterval(checkQuestionType);
-
-        $('#answers').css('display', 'none');
-        $('#texts').css('display', 'flex');
-        $('#texts').html("Game is finished!");
-
-      } else if (data.gameState === 3) {
-        $('#answers').css('display', 'none');
-        $('#texts').css('display', 'flex');
-        $('#texts').html("Loading...");
-      }
-    }).fail(function(response) {
-      clearInterval(checkQuestionType);
-      console.log(response.responseText);
-    });
+      }).fail(function(response) {
+        alert("could not set answer, please try again.");
+      });
+    }
   }
 });
