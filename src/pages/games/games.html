@@ -12,7 +12,7 @@
 <ion-content>
   <ion-refresher #refresher (ionRefresh)="doRefresh($event)">
     <ion-refresher-content  pullingIcon="arrow-dropdown"
-                            pullingText="Pull to refresh"
+                            pullingText="Refresh"
                             refreshingSpinner="crescent"
                             refreshingText="Searching...">
     </ion-refresher-content>
@@ -26,5 +26,7 @@
         <ion-note item-end>{{ game.host }}</ion-note>
     </ion-item>
   </ion-list>
-  <div class="information">You need to be connected on the same wifi network as the quiz hoster to be able to join.<br>Pull to refresh</div>
+  <div *ngIf="games.length === 0" class="information">You need to be connected on the same wifi network as the quiz hoster to be able to join.</div>
+  <div class="information">Pull to refresh</div>
+
 </ion-content>

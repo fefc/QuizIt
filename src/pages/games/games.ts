@@ -30,32 +30,63 @@ export class GamesPage {
     private profilesProv: UserProfilesProvider) {
 
     this.games = [];
-    this.scanNetwork();
   }
 
   doRefresh(refresher) {
     this.games = [];
-    this.scanNetwork(refresher);
+
+    WifiWizard2.getWifiIP().then((ip: string) => {
+      this.scanNetwork(ip).then((games: Array<Game>) => {
+        refresher.complete();
+        this.games = games;
+      }).catch((error) => {
+        refresher.complete();
+        this.showGeneralWifiErrorAlert(error);
+      });
+    }).catch((error) => {
+      refresher.complete();
+      this.showGeneralWifiErrorAlert('Please make sure your wifi is enabled and connected.');
+    });
   }
 
-  scanNetwork(refresher?: any) {
-    this.http.post("http://10.0.0.13:8080/searchingQuizPad", {some: "parameter"}, {})
-    .then((data) => {
-      var game: Game = JSON.parse(data.data);
+  scanNetwork(ip: string) {
+    return new Promise((resolve, reject) => {
+      let promises = [];
+      let ipPrefix: string = ip.substr(0, ip.lastIndexOf('.'));
+      let newGames: Array<Game> = [];
 
-      if (game.uuid) {
-        game.address = "10.0.0.13:8080"
-        this.games.push(game);
+      for (let i: number = 0; i < 254; i++) {
+        promises.push(this.scanIp(ipPrefix + '.' + i));
       }
 
-      if (refresher) {
-        refresher.complete();
-      }
-    }).catch((error) => {
-      //Nothing needs to be done if no answer from that ip
-      if (refresher) {
-        refresher.complete();
-      }
+      Promise.all(promises).then((games: Array<Game>) => {
+        for (let game of games) {
+          if (game) {
+            newGames.push(game);
+          }
+        }
+        resolve(newGames);
+      }).catch(() => {
+        reject("Could not scan network.");
+      });
+    });
+  }
+
+  scanIp(ip: string) {
+    return new Promise((resolve, reject) => {
+      this.http.post('http://' + ip + ':8080/searchingQuizPad', {some: "parameter"}, {})
+      .then((data) => {
+        var game: Game = JSON.parse(data.data);
+
+        if (game.uuid) {
+          game.address = ip + ':8080';
+          resolve(game);
+        } else {
+          resolve(undefined);
+        }
+      }).catch((error) => {
+        resolve(undefined);
+      });
     });
   }
 
@@ -152,6 +183,21 @@ export class GamesPage {
     message.present();
   }
 
+  showGeneralWifiErrorAlert(content: string) {
+    let message = this.alertCtrl.create({
+      title: 'Could not access wifi',
+      message: content,
+      buttons: [
+        {
+          text: 'Close',
+          role: 'ok',
+        }
+      ]
+    });
+
+    message.present();
+  }
+
   resizeAvatar(base64Avatar: string) {
     return new Promise((resolve, reject) => {
       //First resize the image
@@ -197,34 +243,5 @@ export class GamesPage {
 
   openGameControllerPage(game: Game, player: Player) {
     this.navCtrl.push(GameControllerPage, { game: game, player: player });
-  }
-
-  getWifiInfos() {
-    /* Lets try to find out if Wifi is enabled and configure the welcome message */
-    WifiWizard2.getConnectedSSID().then((ssid) => {
-      /* Once wifi is done, lets find ip address of the device over wifi and configure the welcome message */
-      WifiWizard2.getWifiIP().then((ip) => {
-        alert(ip.substr(0, ip.lastIndexOf('.')));
-      }).catch((error) => {
-        this.showGeneralWifiErrorAlert("Impossible to get ip address.");
-      });
-    }).catch((error) => {
-      this.showGeneralWifiErrorAlert("Not connected to any wifi.");
-    });
-  }
-
-  showGeneralWifiErrorAlert(content: string) {
-    let message = this.alertCtrl.create({
-      title: 'Could not access wifi',
-      message: content,
-      buttons: [
-        {
-          text: 'Close',
-          role: 'ok',
-        }
-      ]
-    });
-
-    message.present();
   }
 }
