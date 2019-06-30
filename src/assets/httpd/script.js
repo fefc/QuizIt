@@ -22,7 +22,7 @@ jQuery(function($) {
         if (data.playerUuid) {
           playerUuid = data.playerUuid;
 
-          currentQuestionType = 0;
+          currentQuestionType = 1;
           answer = -1;
 
           checkQuestionTypeInterval = setInterval(checkGameState, 300);
@@ -62,7 +62,7 @@ jQuery(function($) {
             $('#answers').css('display', 'flex');
             $('#texts').css('display', 'none');
 
-            if (currentQuestionType == 2) {
+            if (currentQuestionType == 3) {
               //its a buzzer question
               $('#answers').children('div').each(function(index) {
                 $(this).removeClass('disabled');
@@ -141,7 +141,7 @@ jQuery(function($) {
           answer = index;
 
           //Update display
-          if (currentQuestionType == 2) {
+          if (currentQuestionType == 3) {
             $('#answers').children('div').each(function(divIndex) {
                 $(this).addClass('disabled');
             });
