@@ -1,9 +1,9 @@
 import { Category } from './category';
 
 export enum QuestionType {
-  classic = 0,
-  stopwatch = 1,
-  rightPicture = 2
+  classic = 1,
+  stopwatch = 2,
+  rightPicture = 3
 }
 
 export interface Question {
