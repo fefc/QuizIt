@@ -27,6 +27,6 @@
     </ion-item>
   </ion-list>
   <div *ngIf="games.length === 0" class="information">You need to be connected on the same wifi network as the quiz hoster to be able to join.</div>
-  <div class="information">Pull to refresh</div>
+  <div *ngIf="scanning === false" class="information">Pull to refresh</div>
 
 </ion-content>

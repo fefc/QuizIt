@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { NavController, NavParams, AlertController, LoadingController, PopoverController } from 'ionic-angular';
-import { HTTP } from '@ionic-native/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { CustomEncoder } from '../../models/custom-encoder'
+import 'rxjs/add/operator/timeout';
 
 import { Player } from '../../models/player';
 import { Game } from '../../models/game';
@@ -9,6 +11,10 @@ import { GameState } from '../../models/game';
 import { QuestionType } from '../../models/question';
 
 import { GameControllerMenu } from './menu';
+
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
+};
 
 @Component({
   selector: 'page-game-controller',
@@ -32,7 +38,7 @@ export class GameControllerPage {
     private alertCtrl: AlertController,
     private popoverCtrl: PopoverController,
     private sanitizer:DomSanitizer,
-    private http: HTTP,
+    private httpClient: HttpClient,
     params: NavParams) {
 
     if (params.data) {
@@ -47,22 +53,23 @@ export class GameControllerPage {
   }
 
   checkGameState() {
-    this.http.post('http://' + this.game.address + '/gameState', { uuid: this.player.uuid }, {})
-    .then((data) => {
-      let parsedData: any = JSON.parse(data.data);
+    let httpParams = new HttpParams({encoder: new CustomEncoder()});
+    httpParams = httpParams.append("uuid", this.player.uuid);
 
-      if (parsedData.state) {
+    this.httpClient.post('http://' + this.game.address + '/gameState', httpParams, httpOptions).timeout(200)
+    .subscribe((data: any) => {
+      if (data.state) {
         this.gameStateErrorCounter = 0;
 
-        this.game.state = parsedData.state;
+        this.game.state = data.state;
 
         if (this.game.state === GameState.questionDisplayed) {
-          this.game.currentQuestionType = parsedData.type;
+          this.game.currentQuestionType = data.type;
         } else {
           this.player.previousPosition = this.player.actualPosition;
-          this.player.actualPosition = parsedData.actualPosition;
+          this.player.actualPosition = data.actualPosition;
 
-          this.player.points = (parsedData.points ? parsedData.points : 0);
+          this.player.points = (data.points ? data.points : 0);
           this.player.answer = -1;
 
           if (this.game.state === GameState.ended) {
@@ -72,7 +79,7 @@ export class GameControllerPage {
       } else {
         this.handleGameStateError();
       }
-    }).catch((error) => {
+    }, (error) => {
       this.handleGameStateError();
     });
   }
@@ -80,7 +87,7 @@ export class GameControllerPage {
   handleGameStateError() {
     if (this.gameStateErrorCounter <= 3) {
       this.gameStateErrorCounter += 1;
-    } else  {
+    } else if (this.gameStateErrorCounter === 4) {
       this.game.state = GameState.connectionLost;
       clearInterval(this.gameStateInterval);
 
@@ -111,16 +118,18 @@ export class GameControllerPage {
 
   setAnswer(index: number) {
     if (this.player.answer === -1) {
-      this.http.post('http://' + this.game.address + '/answer', { uuid: this.player.uuid, answer: index }, {})
-      .then((data) => {
-        let parsedData: any = JSON.parse(data.data);
+      let httpParams = new HttpParams({encoder: new CustomEncoder()});
+      httpParams = httpParams.append("uuid", this.player.uuid);
+      httpParams = httpParams.append("answer", index.toString());
 
-        if (parsedData.success) {
+      this.httpClient.post('http://' + this.game.address + '/answer', httpParams, httpOptions)
+      .subscribe((data: any) => {
+        if (data.success) {
           this.player.answer = index;
         } else {
           this.showSetAnswerErrorAlert();
         }
-      }).catch((error) => {
+      }, (error) => {
         this.showSetAnswerErrorAlert();
       });
     }

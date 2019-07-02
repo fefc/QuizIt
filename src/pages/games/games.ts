@@ -1,6 +1,13 @@
 import { Component } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController } from 'ionic-angular';
-import { HTTP } from '@ionic-native/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { CustomEncoder } from '../../models/custom-encoder'
+import { Observable } from "rxjs/Observable";
+import 'rxjs/add/observable/forkJoin'
+import 'rxjs/add/observable/of'
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/timeout';
+import 'rxjs/add/operator/map';
 
 declare var WifiWizard2: any;
 
@@ -12,6 +19,10 @@ import { UserProfilesProvider } from '../../providers/user-profiles/user-profile
 
 import { GameControllerPage } from '../game-controller/game-controller';
 
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
+};
+
 @Component({
   selector: 'page-games',
   templateUrl: 'games.html'
@@ -21,73 +32,80 @@ export class GamesPage {
   private GameState = GameState; //for use in Angluar html
   private games: Array<Game>;
 
+  private scanning: boolean;
+
   constructor(
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
-    private http: HTTP,
+    private httpClient: HttpClient,
     private profilesProv: UserProfilesProvider) {
 
     this.games = [];
+    this.scanning = false;
   }
 
   doRefresh(refresher) {
     this.games = [];
+    this.scanning = true;
 
     WifiWizard2.getWifiIP().then((ip: string) => {
-      this.scanNetwork(ip).then((games: Array<Game>) => {
+      this.scanNetwork(ip).subscribe((data) => {
+        this.games.push(data);
+      }, (error) => {
         refresher.complete();
-        this.games = games;
-      }).catch((error) => {
+        this.scanning = false;
+        this.showGeneralWifiErrorAlert('Could not complete scanning.');
+      }, () => {
         refresher.complete();
-        this.showGeneralWifiErrorAlert(error);
+        this.scanning = false;
       });
     }).catch((error) => {
       refresher.complete();
+      this.scanning = false;
       this.showGeneralWifiErrorAlert('Please make sure your wifi is enabled and connected.');
     });
   }
 
-  scanNetwork(ip: string) {
-    return new Promise((resolve, reject) => {
-      let promises = [];
+  scanNetwork(ip: string): Observable<Game> {
+    return new Observable((observer) => {
+      let observables = [];
       let ipPrefix: string = ip.substr(0, ip.lastIndexOf('.'));
       let newGames: Array<Game> = [];
 
       for (let i: number = 0; i < 254; i++) {
-        promises.push(this.scanIp(ipPrefix + '.' + i));
+        observables.push(this.scanIp(ipPrefix + '.' + i));
       }
 
-      Promise.all(promises).then((games: Array<Game>) => {
+      Observable.forkJoin(observables).subscribe((games: any) => {
         for (let game of games) {
           if (game) {
-            newGames.push(game);
+            observer.next(game);
           }
         }
-        resolve(newGames);
-      }).catch(() => {
-        reject("Could not scan network.");
+        observer.complete();
+      }, (error) => {
+        observer.complete();
       });
     });
   }
 
   scanIp(ip: string) {
-    return new Promise((resolve, reject) => {
-      this.http.post('http://' + ip + ':8080/searchingQuizPad', {some: "parameter"}, {})
-      .then((data) => {
-        var game: Game = JSON.parse(data.data);
+    let httpParams = new HttpParams({encoder: new CustomEncoder()});
+    httpParams = httpParams.append("some", "parameter");
 
-        if (game.uuid) {
-          game.address = ip + ':8080';
-          resolve(game);
-        } else {
-          resolve(undefined);
-        }
-      }).catch((error) => {
-        resolve(undefined);
-      });
-    });
+    return this.httpClient.post('http://' + ip + ':8080/searchingQuizPad', httpParams, httpOptions)
+    .timeout(5000)
+    .map((data: any) => {
+      if (data.uuid) {
+        data.address = ip + ':8080';
+        return data;
+      } else {
+        return Observable.of(undefined);
+      }
+    })
+    .catch((error) => Observable.of(undefined));
   }
 
   joinGame(game: Game, newNickname?: string) {
@@ -98,14 +116,16 @@ export class GamesPage {
     loading.present();
 
     this.resizeAvatar(this.profilesProv.profiles[0].avatar).then((resizedAvatar) => {
-      this.http.post('http://' + game.address + '/addPlayer', { nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname), avatar: resizedAvatar }, {})
-      .then((data) => {
-        let parsedData: any = JSON.parse(data.data);
+      let httpParams = new HttpParams({encoder: new CustomEncoder()});
+      httpParams = httpParams.append("nickname", (newNickname ? newNickname : this.profilesProv.profiles[0].nickname));
+      httpParams = httpParams.append("avatar", resizedAvatar);
 
-        if (parsedData.playerUuid) {
+      this.httpClient.post('http://' + game.address + '/addPlayer', httpParams, httpOptions)
+      .subscribe((data: any) => {
+        if (data.playerUuid) {
           //Player added Successfully
           let player: Player = {
-            uuid: parsedData.playerUuid,
+            uuid: data.playerUuid,
             nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname),
             avatar: this.profilesProv.profiles[0].avatar,
             initialPosition: 0,
@@ -118,9 +138,9 @@ export class GamesPage {
           this.openGameControllerPage(game, player);
         } else {
           //Player was not added
-          if (parsedData.uuid) {
+          if (data.uuid) {
             //But we got information about game state
-            if (parsedData.state !== GameState.playersJoining) {
+            if (data.state !== GameState.playersJoining) {
               this.showGeneraljoinGameErrorAlert("The game already started.");
             } else {
               this.showNicknameAlreadyUsedAlert(game);
@@ -131,7 +151,7 @@ export class GamesPage {
         }
 
         loading.dismiss();
-      }).catch((error) => {
+      }, (error) => {
         loading.dismiss();
         this.showGeneraljoinGameErrorAlert("General error: Server timeout.");
       });
@@ -199,7 +219,7 @@ export class GamesPage {
   }
 
   resizeAvatar(base64Avatar: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       //First resize the image
       //The zoom it like avatar displayed
       //https://zocada.com/compress-resize-images-javascript-browser/
