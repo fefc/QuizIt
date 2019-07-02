@@ -22,7 +22,7 @@ import { GamesPage } from '../pages/games/games';
 export class AppComponent {
   @ViewChild('content') nav;
 
-  rootPage:any;
+  rootPage:any = HomePage;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
     public menuCtrl: MenuController,
