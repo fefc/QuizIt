@@ -56,7 +56,7 @@ export class GameControllerPage {
     let httpParams = new HttpParams({encoder: new CustomEncoder()});
     httpParams = httpParams.append("uuid", this.player.uuid);
 
-    this.httpClient.post('http://' + this.game.address + '/gameState', httpParams, httpOptions).timeout(200)
+    this.httpClient.post('http://' + this.game.address + '/gameState', httpParams, httpOptions).timeout(250) //needs to be smaller than checkInterval
     .subscribe((data: any) => {
       if (data.state) {
         this.gameStateErrorCounter = 0;

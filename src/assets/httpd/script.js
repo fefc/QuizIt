@@ -25,6 +25,10 @@ jQuery(function($) {
           currentQuestionType = 1;
           answer = -1;
 
+          $.ajaxSetup({
+            timeout: 250 //Needs to be smaller than setInterval
+          });
+
           checkQuestionTypeInterval = setInterval(checkGameState, 300);
 
           //Update graphics
