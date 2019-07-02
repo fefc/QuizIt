@@ -22,7 +22,7 @@ import { GamesPage } from '../pages/games/games';
 export class AppComponent {
   @ViewChild('content') nav;
 
-  rootPage:any = HomePage;
+  rootPage:any;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
     public menuCtrl: MenuController,
@@ -49,12 +49,12 @@ export class AppComponent {
           this.quizsProv.loadFromStorage().then(() => {
             //statusBar.styleDefault();
             this.rootPage = HomePage;
-            splashScreen.hide();
           });
         } else {
           this.rootPage = StartPage;
           this.menuCtrl.enable(false, 'menu-one');
         }
+        splashScreen.hide();
       }).catch(() => {
       });
     });
