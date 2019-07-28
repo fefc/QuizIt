@@ -119,7 +119,7 @@ jQuery(function($) {
   }
 
   function handleGameStateError() {
-    if (gameStateErrorCounter <= 3) {
+    if (gameStateErrorCounter <= 20) {
       gameStateErrorCounter += 1;
     } else {
       gameState = 5; //connectionLost

@@ -85,9 +85,9 @@ export class GameControllerPage {
   }
 
   handleGameStateError() {
-    if (this.gameStateErrorCounter <= 3) {
+    if (this.gameStateErrorCounter <= 20) {
       this.gameStateErrorCounter += 1;
-    } else if (this.gameStateErrorCounter === 4) {
+    } else if (this.gameStateErrorCounter === 21) {
       this.game.state = GameState.connectionLost;
       clearInterval(this.gameStateInterval);
 
