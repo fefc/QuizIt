@@ -9,6 +9,7 @@
   </div>
 
   <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
+    <img [src]="renderQrCode(qrCode)">
     The quiz will start shortly...<br><br>
     Play now by connecting to {{currentWifi}} Wifi,<br>
     and joining with your QuizPad App!<br><br>

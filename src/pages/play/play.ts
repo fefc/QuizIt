@@ -12,6 +12,7 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
 
 declare var WifiWizard2: any;
+declare var BarcodeGenerator: any;
 
 import { Quiz } from '../../models/quiz';
 import { DefaultQuizSettings } from '../../models/quiz-settings';
@@ -248,6 +249,8 @@ export class PlayPage {
   private httpdSubscription: Subscription;
   private remoteButtonsRequestsSubscription: Subscription;
 
+  private qrCode: string;
+
   constructor(private platform: Platform,
               private navCtrl: NavController,
               private alertCtrl: AlertController,
@@ -332,6 +335,19 @@ export class PlayPage {
           host: this.profilesProv.profiles[0].nickname,
           state: GameState.playersJoining
         };
+
+        BarcodeGenerator.generate({content: this.game.uuid, // relative path to app's www directory
+                                   height: 256,
+                                   width: 256,
+                                   format: 11,
+                                   foregroundColor: '#000000',
+                                   backgroundColor: '#FFFFFF'},
+          (base64: string) => {
+          this.qrCode = "data:image/png;base64, " + base64;
+          }, (error) => {
+            console.log(error);
+          }
+        );
 
         this.currentQuestion = 0;
         this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
@@ -1021,6 +1037,10 @@ export class PlayPage {
     } else {
       return this.sanitizer.bypassSecurityTrustStyle(`url(assets/svgs/icon.svg)`);
     }
+  }
+
+  renderQrCode(base64: string) {
+    return this.sanitizer.bypassSecurityTrustUrl(base64);
   }
 
   //From https://stackoverflow.com/a/2117523
