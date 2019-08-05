@@ -40,15 +40,12 @@
     "cordova-browser": "5.0.4",
     "cordova-electron": "1.0.2",
     "cordova-plugin-android-permissions": "1.0.0",
-    "cordova-plugin-androidx": "1.0.2",
-    "cordova-plugin-androidx-adapter": "1.1.0",
     "cordova-plugin-app-version": "0.1.9",
     "cordova-plugin-barcode-generator": "file:../cordova-plugins/BarcodeGenerator",
     "cordova-plugin-device": "^2.0.3",
     "cordova-plugin-file": "6.0.1",
     "cordova-plugin-filechooser": "1.2.0",
     "cordova-plugin-filepath": "1.5.1",
-    "cordova-plugin-firebasex": "6.0.2",
     "cordova-plugin-fullscreen": "1.2.0",
     "cordova-plugin-httpd": "0.9.3",
     "cordova-plugin-insomnia": "4.3.0",
@@ -104,19 +101,7 @@
       "cordova-plugin-filepath": {},
       "cordova-plugin-insomnia": {},
       "cordova-plugin-app-version": {},
-      "com.attendee.barcodegenerator": {},
-      "cordova-plugin-firebasex": {
-        "ANDROID_ICON_ACCENT": "#FF00FFFF",
-        "ANDROID_PLAY_SERVICES_TAGMANAGER_VERSION": "17.0.0",
-        "ANDROID_FIREBASE_CORE_VERSION": "17.0.0",
-        "ANDROID_FIREBASE_MESSAGING_VERSION": "19.0.0",
-        "ANDROID_FIREBASE_CONFIG_VERSION": "18.0.0",
-        "ANDROID_FIREBASE_PERF_VERSION": "18.0.0",
-        "ANDROID_FIREBASE_AUTH_VERSION": "18.0.0",
-        "ANDROID_CRASHLYTICS_VERSION": "2.10.1",
-        "ANDROID_CRASHLYTICS_NDK_VERSION": "2.1.0",
-        "ANDROID_SHORTCUTBADGER_VERSION": "1.1.22"
-      }
+      "com.attendee.barcodegenerator": {}
     },
     "platforms": [
       "browser",
