@@ -2,7 +2,6 @@ import { Component, NgZone } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, AlertController, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { File } from '@ionic-native/file';
-import { Httpd, HttpdOptions } from '@ionic-native/httpd';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromEvent';
@@ -11,7 +10,6 @@ import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
 
-declare var WifiWizard2: any;
 declare var BarcodeGenerator: any;
 
 import { Quiz } from '../../models/quiz';
@@ -19,16 +17,12 @@ import { DefaultQuizSettings } from '../../models/quiz-settings';
 import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
-import { Player } from '../../models/player';
+import { Player, PlayerStats, PlayerAnimData } from '../../models/player';
 
-import { Buzzer } from '../../models/buzzers';
-import { BuzzersConstants } from '../../models/buzzers';
-import { Game } from '../../models/game';
 import { GameState } from '../../models/game';
 
-import { PlayAddPlayerPage } from '../play-addplayer/play-addplayer';
-
 import { UserProfilesProvider } from '../../providers/user-profiles/user-profiles';
+import { GameProvider } from '../../providers/game/game';
 
 enum ScreenStateType {
   start,
@@ -221,13 +215,6 @@ export class PlayPage {
   private showMenuCounter: number;
   private pause: boolean;
 
-  private currentWifi: string; //for use in Angular html
-  private currentIp: string; //for use in Angular html
-
-  private game: Game;
-
-  private players: Array<Player>;
-
   private displayQuestionTimer: any;
   private switchPicturesTimer: any;
 
@@ -241,14 +228,6 @@ export class PlayPage {
   private currentPictureCounter: number;
   private currentPictures: Array<SafeUrl>;
 
-  private httpdOptions: HttpdOptions = {
-            www_root: 'assets/httpd', // relative path to app's www directory
-            port: 8080,
-            localhost_only: false };
-
-  private httpdSubscription: Subscription;
-  private remoteButtonsRequestsSubscription: Subscription;
-
   private qrCode: string;
 
   constructor(private platform: Platform,
@@ -259,12 +238,12 @@ export class PlayPage {
               private toastCtrl: ToastController,
               private ngZone: NgZone,
               private file: File,
-              private httpd: Httpd,
               private androidFullScreen: AndroidFullScreen,
               private screenOrientation: ScreenOrientation,
               private sanitizer:DomSanitizer,
               private insomnia: Insomnia,
               private profilesProv: UserProfilesProvider,
+              private gameProv: GameProvider,
               params: NavParams) {
 
     this.screenState = ScreenStateType.start;
@@ -278,9 +257,6 @@ export class PlayPage {
     this.showMenuCounter = 0;
     this.pause = false;
 
-    this.currentWifi = '';
-    this.currentIp = '';
-
     //To avoid warings on ionic build
     this.startMessage = this.startMessage;
     this.endMessage = this.endMessage;
@@ -293,20 +269,7 @@ export class PlayPage {
     this.showMenu = this.showMenu;
     this.showExit = this.showExit;
 
-    this.currentWifi = this.currentWifi;
-    this.currentIp = this.currentIp;
-
-    this.players = [];
-
-    /*this.players = [{uuid: "0", nickname: "Zero", avatar: "Dog.png",        initialPosition: 0, previousPosition: 0, actualPosition: 0, points: null, answer: -1},
-                    {uuid: "1", nickname: "One", avatar: "Bunny.png",       initialPosition: 1, previousPosition: 1, actualPosition: 1, points: null, answer: -1},
-                    {uuid: "2", nickname: "Two", avatar: "Duck_Guy.png",    initialPosition: 2, previousPosition: 2, actualPosition: 2, points: null, answer: -1},
-                    {uuid: "3", nickname: "Three", avatar: "Frankie.png",   initialPosition: 3, previousPosition: 3, actualPosition: 3, points: null, answer: -1},
-                    {uuid: "4", nickname: "Four", avatar: "Happy_Girl.png", initialPosition: 4, previousPosition: 4, actualPosition: 4, points: null, answer: -1},
-                    {uuid: "5", nickname: "Five", avatar: "Mad_Guy.png",    initialPosition: 5, previousPosition: 5, actualPosition: 5, points: null, answer: -1},
-                    {uuid: "6", nickname: "Six", avatar: "Proog.png",       initialPosition: 6, previousPosition: 6, actualPosition: 6, points: null, answer: -1},
-                    {uuid: "7", nickname: "Seven", avatar: "Sintel.png",    initialPosition: 7, previousPosition: 7, actualPosition: 7, points: null, answer: -1},];
-    */
+    this.qrCode = '';
 
     this.quiz = params.data.quiz;
 
@@ -328,175 +291,137 @@ export class PlayPage {
         this.navCtrl.pop();
       }
       else {
+        this.gameProv.createGame().then(() => {
+          BarcodeGenerator.generate(
+            { content: 'https://quizpadapp.com/' + this.gameProv.game.uuid, // relative path to app's www directory
+              height: 256,
+              width: 256,
+              format: 11,
+              foregroundColor: '#000000',
+              backgroundColor: '#FFFFFF'},
+            (base64: string) => {
+            //The barcode has been Successfully created, everything is ready now
+            this.qrCode = "data:image/png;base64, " + base64;
 
-        this.game = {
-          uuid: this.quiz.uuid,
-          title: this.quiz.title,
-          host: this.profilesProv.profiles[0].nickname,
-          state: GameState.playersJoining
-        };
+            this.currentQuestion = 0;
+            this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
 
-        BarcodeGenerator.generate({content: this.game.uuid, // relative path to app's www directory
-                                   height: 256,
-                                   width: 256,
-                                   format: 11,
-                                   foregroundColor: '#000000',
-                                   backgroundColor: '#FFFFFF'},
-          (base64: string) => {
-          this.qrCode = "data:image/png;base64, " + base64;
-          }, (error) => {
-            console.log(error);
-          }
-        );
+            this.currentPicture = 0;
+            this.currentPictureCounter = 0;
+            this.currentPictures = [];
 
-        this.currentQuestion = 0;
-        this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
+            //Get Quiz settings
+            if (this.quiz.settings) {
+              if (this.quiz.settings.commonAnimationDuration !== undefined) {
+                this.commonAnimationDuration = this.quiz.settings.commonAnimationDuration;
+              }
 
-        this.currentPicture = 0;
-        this.currentPictureCounter = 0;
-        this.currentPictures = [];
+              if (this.quiz.settings.timeBarAnimationDuration !== undefined) {
+                this.timeBarAnimationDuration = this.quiz.settings.timeBarAnimationDuration;
+                this.currentPictureStayDuration = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW);
+              }
 
-        //Get Quiz settings
-        if (this.quiz.settings) {
-          if (this.quiz.settings.commonAnimationDuration !== undefined) {
-            this.commonAnimationDuration = this.quiz.settings.commonAnimationDuration;
-          }
+              if (this.quiz.settings.playerAnswerAnimationDuration !== undefined) {
+                this.playerAnswerAnimationDuration = this.quiz.settings.playerAnswerAnimationDuration;
+              }
 
-          if (this.quiz.settings.timeBarAnimationDuration !== undefined) {
-            this.timeBarAnimationDuration = this.quiz.settings.timeBarAnimationDuration;
-            this.currentPictureStayDuration = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW);
-          }
+              if (this.quiz.settings.showNextDelay !== undefined) {
+                this.showNextDelay = this.quiz.settings.showNextDelay;
+              }
 
-          if (this.quiz.settings.playerAnswerAnimationDuration !== undefined) {
-            this.playerAnswerAnimationDuration = this.quiz.settings.playerAnswerAnimationDuration;
-          }
+              if (this.quiz.settings.amountOfPicturesToShow !== undefined) {
+                this.currentPictureStayDuration = (this.timeBarAnimationDuration / this.quiz.settings.amountOfPicturesToShow);
+              }
 
-          if (this.quiz.settings.showNextDelay !== undefined) {
-            this.showNextDelay = this.quiz.settings.showNextDelay;
-          }
+              if (this.quiz.settings.autoPlay !== undefined) {
+                this.autoPlay = this.quiz.settings.autoPlay;
+              }
 
-          if (this.quiz.settings.amountOfPicturesToShow !== undefined) {
-            this.currentPictureStayDuration = (this.timeBarAnimationDuration / this.quiz.settings.amountOfPicturesToShow);
-          }
+              if (this.quiz.settings.startMessage !== undefined) {
+                this.startMessage = this.quiz.settings.startMessage;
+              }
 
-          if (this.quiz.settings.autoPlay !== undefined) {
-            this.autoPlay = this.quiz.settings.autoPlay;
-          }
+              if (this.quiz.settings.backgroundImage !== undefined) {
+                this.backgroundImage = this.quiz.settings.backgroundImage;
+              }
+            }
 
-          if (this.quiz.settings.startMessage !== undefined) {
-            this.startMessage = this.quiz.settings.startMessage;
-          }
+            if (this.platform.is('android')) {
+              /* First lets go fullScreenMode if possible */
+              this.goFullScreen();
 
-          if (this.quiz.settings.backgroundImage !== undefined) {
-            this.backgroundImage = this.quiz.settings.backgroundImage;
-          }
-        }
+              /* Lock screen orientation to landscape */
+              this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+            }
 
-        if (this.platform.is('android')) {
-          /* First lets go fullScreenMode if possible */
-          this.goFullScreen();
+            this.screenState = ScreenStateType.playersJoining;
+            this.displayPlayers = true;
 
-          /* Lock screen orientation to landscape */
-          this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+            this.insomnia.keepAwake().then(() => {
+              console.log("Device will be keept awake");
+            }).catch(() => {
+              console.log("Could not set keepAwake.");
+            });
 
-          /* Get Wifi infos if possible */
-          this.getWifiInfos();
+            let toast = this.toastCtrl.create({
+              message: 'Click screen twice to open menu',
+              duration: this.menuTapMessageDuration
+            });
 
-          /* Setup httpd stuff */
-          this.remoteButtonsRequestsSubscription = this.httpd.attachRequestsListener().subscribe((data: any) => this.handleHttpdEvent(data), (error) => {
-            console.log("Could not attach request listener.");
-          });
+            toast.present();
 
-          this.httpdSubscription = this.httpd.startServer(this.httpdOptions).subscribe((data) => {console.log("Successfully started server.");}, (error) => {
-            console.log("Could not sstart server.");
-          });
+            setTimeout(() => this.showNext = true, this.menuTapMessageDuration);
 
-        } else {
-          //We are one a web browser so it is intended to be used with buzz buzzers, so we need to listen to keyboard events
-          this.remoteButtonsRequestsSubscription = Observable.fromEvent(document, 'keypress').subscribe((e: any) => this.handleKeyboardEvent(e), (error) => {
-            console.log("Could not attach request listener.");});
-        }
-
-        this.screenState = ScreenStateType.playersJoining;
-        this.displayPlayers = true;
-
-        this.insomnia.keepAwake().then(() => {
-          console.log("Device will be keept awake");
-        }).catch(() => {
-          console.log("Could not set keepAwake.");
+            }, (error) => {
+              //Unable to generate the QR_CODE, lets say something
+              console.log(error);
+            }
+          );
         });
-
-        let toast = this.toastCtrl.create({
-          message: 'Click screen twice to open menu',
-          duration: this.menuTapMessageDuration
-        });
-
-        toast.present();
-
-        setTimeout(() => this.showNext = true, this.menuTapMessageDuration);
       }
     }
   }
 
-  addPlayer(nickname: string, avatar: string, uuid?: string) {
+  /*addPlayer(newPlayer: Player) {
     if (this.screenState === ScreenStateType.playersJoining) {
-      if (this.players.findIndex((p) => p.nickname === nickname) === -1) {
-        let newPlayer: Player;
-        if (uuid === undefined) {
-          uuid = this.uuidv4();
+      if (this.players.findIndex((p) => p.nickname === newPlayer.nickname) === -1) {
 
-          while (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
-            uuid = this.uuidv4();
-          }
-        } else {
-          if (this.players.findIndex((p) => p.uuid === uuid) !== -1) {
-            return undefined;
-          }
-        }
+        newPlayer.initialPosition = this.players.length;
+        newPlayer.previousPosition = this.players.length;
+        newPlayer.actualPosition = this.players.length;
+        newPlayer.answer = -1;
 
-        newPlayer = {
-          uuid: uuid,
-          nickname: nickname,
-          avatar: avatar,
-          initialPosition: this.players.length,
-          previousPosition: this.players.length,
-          actualPosition: this.players.length,
-          answer: -1
-        };
-
-        return newPlayer;
+        this.players.push(newPlayer);
       }
     }
+  }*/
 
-    return undefined;
-  }
-
-  removePlayer(player: Player, index: number) {
+  /*removePlayer(player: Player, index: number) {
     this.showMenuCounter = 0;
     if (index > -1) {
-       this.players.splice(index, 1);
+      this.gameProv.removePlayer(player.uuid).then(() => {
+        this.players.splice(index, 1);
 
-       for(let i = index; i < this.players.length; i++) {
-         this.players[i].initialPosition = i;
-         this.players[i].actualPosition = i;
-         this.players[i].previousPosition = i;
-       }
+        for(let i = index; i < this.players.length; i++) {
+          this.players[i].initialPosition = i;
+          this.players[i].actualPosition = i;
+          this.players[i].previousPosition = i;
+        }
+      }).catch(() => {
+        console.log("unable to remove player from firebase");
+      });
     }
-  }
+  }*/
 
-  next() {
+  async next() {
     var player: Player;
     this.showNext = false;
     this.showMenuCounter = 0;
 
     if (this.screenState === ScreenStateType.playersJoining) {
-      this.game.state = GameState.questionDisplayed; //To show other users the game already started
+      await this.gameProv.startGame();
+
       this.currentCategory = -1;
-
-      for (player of this.players) {
-        player.points = 0;
-      }
-
       this.screenState = ScreenStateType.displayTitle;
       this.displayPlayers = false;
       this.handleNextStep();
@@ -514,7 +439,9 @@ export class PlayPage {
       }
       else {
         this.screenState = ScreenStateType.end;
-        this.game.state = GameState.ended;
+
+        await this.gameProv.updateState(GameState.ended);
+
         setTimeout(() => this.showExit = true, this.showNextDelay);
       }
     }
@@ -530,10 +457,6 @@ export class PlayPage {
 
       this.displayQuestionTimer = undefined;
       this.switchPicturesTimer  = undefined;
-
-      for (player of this.players) {
-        player.answer = -1;
-      }
 
       if (this.currentQuestion < this.currentQuestions.length) {
         var promises = [];
@@ -556,6 +479,10 @@ export class PlayPage {
 
           this.screenState = ScreenStateType.displayQuestion;
           setTimeout(() => this.displayTimeBar = true, this.commonAnimationDuration);
+
+          this.gameProv.updateState(this.currentQuestions[this.currentQuestion].type === QuestionType.rightPicture ? GameState.pictureQuestionDisplayed : GameState.classicQuestionDisplayed).catch(() => {
+
+          });
 
           this.displayPlayers = true;
           this.displayQuestionTimer = setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
@@ -585,6 +512,8 @@ export class PlayPage {
       }
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
+      await this.gameProv.updateState(GameState.loading);
+
       this.screenState = ScreenStateType.displayPlayersAnswer;
       this.displayTimeBar = false;
 
@@ -593,7 +522,7 @@ export class PlayPage {
         this.currentPictureSwitch(); //This will switch to the right answer picture
       }
 
-      setTimeout(() => this.updatePlayersPointsAndPosition(), this.playerAnswerAnimationDuration * 2);
+      setTimeout(() => this.gameProv.updatePlayersPointsAndPosition(this.currentQuestions[this.currentQuestion].rightAnswer).catch((error) => {console.log(error)}), this.playerAnswerAnimationDuration * 2);
       this.handleNextStep();
     }
     else if (this.screenState === ScreenStateType.displayPlayersAnswer) {
@@ -614,25 +543,6 @@ export class PlayPage {
     } else {
       setTimeout(() => this.showNext = true, this.showNextDelay);
       this.pause = false;
-    }
-  }
-
-  updatePlayersPointsAndPosition() {
-    for (var player of this.players) {
-      if (player.answer === this.currentQuestions[this.currentQuestion].rightAnswer) {
-        player.points += 100; //TODO set settings
-      }
-    }
-
-    //JSON usefull to make a quick and dirty depp copy
-    let sortedPlayers = JSON.parse(JSON.stringify(this.players)).sort((pOne, pTwo) => {
-      return pTwo.points - pOne.points;
-    });;
-
-    for (let newPlayerPosition = 0; newPlayerPosition < sortedPlayers.length; newPlayerPosition++) {
-      let realPlayer = this.players.find((player) => player.uuid === sortedPlayers[newPlayerPosition].uuid);
-      realPlayer.previousPosition = realPlayer.actualPosition;
-      realPlayer.actualPosition = newPlayerPosition;
     }
   }
 
@@ -668,17 +578,17 @@ export class PlayPage {
   }
 
   getPlayerActualYTranslation(player: Player) {
-    return (player.actualPosition - player.initialPosition) * this.getPlayerHeight();
+    return (player.animations.actualPosition - player.animations.initialPosition) * this.getPlayerHeight();
   }
 
   getPlayerPreviousYTranslation(player: Player) {
-    return (player.previousPosition - player.initialPosition) * this.getPlayerHeight();
+    return (player.animations.previousPosition - player.animations.initialPosition) * this.getPlayerHeight();
   }
 
   saveActualYTranslation(e, i) {
-    if (this.players[i]) {
+    if (this.gameProv.players[i]) {
       e.element.setAttribute('style',
-        "transform: translateY(" + (this.players[i].actualPosition - this.players[i].initialPosition)  * this.getPlayerHeight() +"px)");
+        "transform: translateY(" + (this.gameProv.players[i].animations.actualPosition - this.gameProv.players[i].animations.initialPosition)  * this.getPlayerHeight() +"px)");
     }
   }
 
@@ -715,123 +625,25 @@ export class PlayPage {
   }
 
   getMenuButtons() {
-    if (this.screenState === ScreenStateType.playersJoining && this.platform.is('core')) {
-      return [
-        {
-          text: 'Add player',
-          icon: !this.platform.is('ios') ? 'person-add' : null,
-          handler: () => {
-            this.openPlayAddPlayerPage();
-          }
-        },
-        {
-          text: this.pause === false ? 'Pause (after this)' : 'Play',
-          icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
-          handler: () => {
-            this.pause = !this.pause;
-          }
-        },{
-          text: 'Exit',
-          icon: !this.platform.is('ios') ? 'square' : null,
-          handler: () => {
-            this.exit();
-          }
-        },{
-          text: 'Close menu',
-          icon: !this.platform.is('ios') ? 'close' : null,
-          role: 'cancel',
+    return [
+      {
+        text: this.pause === false ? 'Pause (after this)' : 'Play',
+        icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
+        handler: () => {
+          this.pause = !this.pause;
         }
-      ];
-    } else {
-      return [
-        {
-          text: this.pause === false ? 'Pause (after this)' : 'Play',
-          icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
-          handler: () => {
-            this.pause = !this.pause;
-          }
-        },{
-          text: 'Exit',
-          icon: !this.platform.is('ios') ? 'square' : null,
-          handler: () => {
-            this.exit();
-          }
-        },{
-          text: 'Close menu',
-          icon: !this.platform.is('ios') ? 'close' : null,
-          role: 'cancel',
+      },{
+        text: 'Exit',
+        icon: !this.platform.is('ios') ? 'square' : null,
+        handler: () => {
+          this.exit();
         }
-      ];
-    }
-  }
-
-  getWifiInfos() {
-    /* Lets try to find out if Wifi is enabled and configure the welcome message */
-    WifiWizard2.getConnectedSSID().then((ssid) => {
-        this.currentWifi  = ssid;
-        /* Once wifi is done, lets find ip address of the device over wifi and configure the welcome message */
-        WifiWizard2.getWifiIP().then((ip) => {
-          this.currentIp = ip;
-        }).catch((error) => {
-          this.currentIp  = "unknown";
-
-          let alert = this.alertCtrl.create({
-            title: 'Error',
-            message: 'There has been an error getting the device ip address. Please enter device ip here.',
-            inputs: [
-              {
-                name: 'ip',
-                placeholder: 'Ip address'
-              }
-            ],
-            buttons: [
-              {
-                text: 'Cancel',
-                role: 'cancel',
-              },
-              {
-                text: 'Save',
-                handler: data => {
-                  this.currentIp = data.ip;
-                }
-              }
-            ]
-          });
-          alert.present();
-        });
-      }).catch((error) => {
-        this.currentWifi  = "unknown";
-
-        let alert = this.alertCtrl.create({
-          title: 'Error',
-          message: 'There has been an error getting the Wifi name, please check that you are connected to a Wifi. If your device is an Access Point, pleace enter the Wifi name and device ip here.',
-          enableBackdropDismiss: false,
-          inputs: [
-            {
-              name: 'ssid',
-              placeholder: 'Wifi name'
-            },
-            {
-              name: 'ip',
-              placeholder: 'Ip address'
-            }
-          ],
-          buttons: [
-            {
-              text: 'Cancel',
-              role: 'cancel',
-            },
-            {
-              text: 'Save',
-              handler: data => {
-                this.currentWifi = data.ssid;
-                this.currentIp = data.ip;
-              }
-            }
-          ]
-        });
-        alert.present();
-      });
+      },{
+        text: 'Close menu',
+        icon: !this.platform.is('ios') ? 'close' : null,
+        role: 'cancel',
+      }
+    ];
   }
 
   goFullScreen() {
@@ -848,20 +660,7 @@ export class PlayPage {
     });
   }
 
-  openPlayAddPlayerPage() {
-    let modal = this.modalCtrl.create(PlayAddPlayerPage,  {currentPlayers: this.players});
-    modal.present();
-    modal.onDidDismiss((data) => {
-      if (data) {
-        let newPlayer: Player = this.addPlayer(data.nickname, data.avatar, data.uuid);
-        if (newPlayer) {
-          this.players.push(newPlayer);
-        }
-      }
-    });
-  }
-
-  getAnsweringPlayer(uuid: string) {
+  /*getAnsweringPlayer(uuid: string) {
     if (this.screenState === ScreenStateType.displayQuestion) {
       let player: Player = this.players.find((p) => p.uuid === uuid);
 
@@ -873,9 +672,9 @@ export class PlayPage {
     }
 
     return undefined;
-  }
+  }*/
 
-  setPlayerAnswer(player: Player, answer: number) {
+  /*setPlayerAnswer(player: Player, answer: number) {
     this.ngZone.run(() => {
       player.answer = answer;
 
@@ -893,7 +692,7 @@ export class PlayPage {
         this.next();
       }
     });
-  }
+  }*/
 
   checkIfRightRemoteButtonUsed(button: number) {
     if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
@@ -907,7 +706,7 @@ export class PlayPage {
     }
   }
 
-  handleHttpdEvent(data: any) {
+  /*handleHttpdEvent(data: any) {
     if (data.uri === "/searchingQuizPad") {
       this.httpd.setRequestResponse([{requestId: +data.requestId}, this.game]).catch(() => {
         console.log("Could not setRequestResponse for some useless case.");
@@ -970,27 +769,7 @@ export class PlayPage {
         console.log("Could not setRequestResponse for some useless case.");
       });
     }
-  }
-
-  handleKeyboardEvent(event: any) {
-    var buzzer: Buzzer = BuzzersConstants.KEYSETS.find((x) => x.keys.indexOf(event.key) > -1);
-    let answeringPlayer: Player;
-    var answer: number;
-
-    if (buzzer) {
-      answer = buzzer.keys.indexOf(event.key);
-      answeringPlayer = this.getAnsweringPlayer(buzzer.uuid);
-
-      if (answeringPlayer  && this.checkIfRightRemoteButtonUsed(answer)) {
-        if (answer >= buzzer.keys.length - 1) {
-          //This is buzzer
-          answer = this.currentPicture;
-        }
-
-        this.setPlayerAnswer(answeringPlayer, answer);
-      }
-    }
-  }
+  }*/
 
   exit() {
     this.showMenuCounter = 0;
@@ -999,18 +778,19 @@ export class PlayPage {
 
   /* this will be executed when view is poped, either by exit() or by back button */
   ionViewWillUnload() {
+    this.gameProv.deleteGame().then(() => {
+
+    }).catch(error => {
+
+    });
+
     this.insomnia.allowSleepAgain().then(() => {
       console.log("Device can go sleep again.");
     }).catch(() => {
       console.log("Device could not be allowed to sleep again.");
     });
 
-    this.remoteButtonsRequestsSubscription.unsubscribe();
-
     if (this.platform.is('android')) {
-      /* disable httpd */
-      this.httpdSubscription.unsubscribe();
-
       /* Unlock screen orientation */
       this.screenOrientation.unlock();
 

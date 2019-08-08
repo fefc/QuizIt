@@ -1,23 +1,40 @@
 import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { Platform, MenuController, ModalController, LoadingController } from 'ionic-angular';
+import { Platform, MenuController, ModalController, LoadingController, AlertController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
+import { BarcodeScanner, BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
+import * as firebase from "firebase/app";
 
 import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
+import { GameProvider } from '../providers/game/game';
+import { GameControllerProvider } from '../providers/game-controller/game-controller';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 import { HomePage } from '../pages/home/home';
-import { GamesPage } from '../pages/games/games';
+import { GameControllerPage } from '../pages/game-controller/game-controller';
+
+const BARECODE_SCANNER_OPTIONS: BarcodeScannerOptions = {
+    preferFrontCamera : false, // iOS and Android
+    showFlipCameraButton : false, // iOS and Android
+    showTorchButton : false, // iOS and Android
+    torchOn: false, // Android, launch with the torch switched on (if available)
+    prompt : "Scan the QR code to join the game", // Android
+    resultDisplayDuration: 0, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
+    formats : "DATA_MATRIX,UPC_A,UPC_E,EAN_8,EAN_13,CODE_39,CODE_93,CODE_128,CODABAR,ITF,RSS14,PDF_417,RSS_EXPANDED,MSI,AZTEC", //Allow only QR_CODE
+    orientation : "portrait", // Android only (portrait|landscape), default unset so it rotates with the device
+    disableAnimations : false, // iOS
+    disableSuccessBeep: true // iOS and Android
+};
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  providers: [UserProfilesProvider, QuizsProvider]
+  providers: [UserProfilesProvider, QuizsProvider, GameProvider, GameControllerProvider]
 })
 export class AppComponent {
   @ViewChild('content') nav;
@@ -28,13 +45,28 @@ export class AppComponent {
     public menuCtrl: MenuController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
+    private alertCtrl: AlertController,
     private screenOrientation: ScreenOrientation,
     private sanitizer:DomSanitizer,
+    private barcodeScanner: BarcodeScanner,
     private profilesProv: UserProfilesProvider,
-    private quizsProv: QuizsProvider) {
+    private quizsProv: QuizsProvider,
+    private gameControllerProv: GameControllerProvider) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
+      const firebaseConfig = {
+        apiKey: "AIzaSyDR9qWel2I2_PCpZwn_crw-SH-uAug5zIw",
+        authDomain: "quizpad-ff712.firebaseapp.com",
+        databaseURL: "https://quizpad-ff712.firebaseio.com",
+        projectId: "quizpad-ff712",
+        storageBucket: "quizpad-ff712.appspot.com",
+        messagingSenderId: "699661197913",
+        appId: "1:699661197913:web:2abeed2df8580fa9"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
 
       //Eventually lock screen orientation on some devices
       if (platform.is('android')) {
@@ -100,9 +132,9 @@ export class AppComponent {
   openGamesPage() {
     this.menuCtrl.close('menu-one');
 
-    if (this.nav.getActive().component !== GamesPage) {
+    /*if (this.nav.getActive().component !== GamesPage) {
       this.nav.setRoot(GamesPage);
-    }
+    }*/
   }
 
   openAboutPage() {
@@ -110,5 +142,165 @@ export class AppComponent {
 
     let modal = this.modalCtrl.create(AboutPage);
     modal.present();
+  }
+
+  openBarcodeScannerPage() {
+    //this.menuCtrl.close('menu-one');
+    //To not close menu, so that if barcode scanning is cancelled it does not close the app
+    //But closes the menu instead
+    this.startScanning();
+  }
+
+  startScanning() {
+    this.barcodeScanner.scan(BARECODE_SCANNER_OPTIONS).then(data => {
+     if (data.cancelled === false) {
+       if (data.text.startsWith('https://quizpadapp.com/')) {
+         this.menuCtrl.close('menu-one');
+         this.joinGame(data.text.replace('https://quizpadapp.com/', ''));
+       } else {
+         let message = this.alertCtrl.create({
+           title: 'Invalid QR code',
+           message: "The scanned QR code is not valid, do you want to retry?",
+           buttons: [
+             {
+               text: 'No',
+               role: 'cancel',
+               handler: data => {
+                 this.menuCtrl.close('menu-one');
+               }
+             },
+             {
+               text: 'Yes',
+               handler: data => {
+                 this.startScanning();
+               }
+             }
+           ]
+         });
+
+         message.present();
+       }
+     }
+    }).catch(err => {
+      let message = this.alertCtrl.create({
+        title: 'Unable to open scanner',
+        message: "Unable to open scanner, please check that you allowed camera access.",
+        buttons: [
+          {
+            text: 'Ok',
+            role: 'cancel',
+            handler: data => {
+              this.menuCtrl.close('menu-one');
+            }
+          }
+        ]
+      });
+    });
+  }
+
+  joinGame(gameID: string) {
+    let loading = this.loadingCtrl.create({
+      content: 'Joining game...'
+    });
+
+    loading.present();
+
+    this.resizeAvatar(this.profilesProv.profiles[0].avatar).then((resizedAvatar) => {
+
+      this.gameControllerProv.joinGame(gameID, this.profilesProv.profiles[0].nickname, resizedAvatar).then(() => {
+        loading.dismiss();
+        this.nav.push(GameControllerPage);
+      }).catch(() => {
+        loading.dismiss();
+        console.log("Could not join game");
+      });
+
+
+
+      /*let httpParams = new HttpParams({encoder: new CustomEncoder()});
+      httpParams = httpParams.append("nickname", (newNickname ? newNickname : this.profilesProv.profiles[0].nickname));
+      httpParams = httpParams.append("avatar", resizedAvatar);
+
+      this.httpClient.post('http://' + game.address + '/addPlayer', httpParams, httpOptions)
+      .subscribe((data: any) => {
+        if (data.playerUuid) {
+          //Player added Successfully
+          let player: Player = {
+            uuid: data.playerUuid,
+            nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname),
+            avatar: this.profilesProv.profiles[0].avatar,
+            initialPosition: 0,
+            actualPosition: 0,
+            previousPosition: 0,
+            points: 0,
+            answer: -1
+          };
+
+          this.openGameControllerPage(game, player);
+        } else {
+          //Player was not added
+          if (data.uuid) {
+            //But we got information about game state
+            if (data.state !== GameState.playersJoining) {
+              this.showGeneraljoinGameErrorAlert("The game already started.");
+            } else {
+              this.showNicknameAlreadyUsedAlert(game);
+            }
+          } else {
+            this.showGeneraljoinGameErrorAlert("General error: Server error.");
+          }
+        }
+
+      }, (error) => {
+        loading.dismiss();
+        this.showGeneraljoinGameErrorAlert("General error: Server timeout.");
+      });*/
+    }).catch((error) => {
+      loading.dismiss();
+      //this.showGeneraljoinGameErrorAlert("General error: Impossible to resize avatar");
+    });
+  }
+
+  resizeAvatar(base64Avatar: string) {
+    return new Promise<string>((resolve, reject) => {
+      //First resize the image
+      //The zoom it like avatar displayed
+      //https://zocada.com/compress-resize-images-javascript-browser/
+      //https://stackoverflow.com/a/28048865/7890583
+      let img = new Image();
+      img.src = base64Avatar;
+      img.onload = (pic: any) => {
+        let canvas = document.createElement('canvas');
+        let imgRatio: number = img.width / img.height;
+        let zoom: number;
+        let newImgHeight: number;
+        let newImgWidth: number;
+        let heightMargin: number = 0;
+        let widthMargin: number = 0;
+
+        canvas.width = 200;
+        canvas.height = 200;
+
+        if (imgRatio > 1) {
+          zoom = img.height / canvas.height;
+          newImgHeight = canvas.height;
+          newImgWidth = img.width / zoom;
+          widthMargin = -(newImgWidth / 2) + (canvas.width / 2);
+        } else {
+          zoom = img.width / canvas.width;
+          newImgHeight = img.height / zoom;
+          newImgWidth = canvas.width;
+          heightMargin = -(newImgHeight / 2) + (canvas.height / 2);
+        }
+
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(img, widthMargin, heightMargin, newImgWidth, newImgHeight);
+        resolve(ctx.canvas.toDataURL('image/jpeg', 0.8));
+      };
+
+      img.onerror = (error : any) => {
+        resolve('');
+      }
+    });
   }
 }

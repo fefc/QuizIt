@@ -7,7 +7,7 @@ import { IonicStorageModule } from '@ionic/storage';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
-import { Httpd } from '@ionic-native/httpd';
+//import { Httpd } from '@ionic-native/httpd';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
@@ -15,12 +15,15 @@ import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
 import { Insomnia } from '@ionic-native/insomnia';
 import { AppVersion } from '@ionic-native/app-version';
-import { HttpClientModule } from '@angular/common/http';
+//import { HttpClientModule } from '@angular/common/http';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 import { AppComponent } from './app.component';
 
 import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
+import { GameProvider } from '../providers/game/game';
+import { GameControllerProvider } from '../providers/game-controller/game-controller';
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 
@@ -39,7 +42,7 @@ import { QuizSettingsPage } from '../pages/quiz-settings/quiz-settings';
 import { QuestionPage } from '../pages/question/question';
 
 import { PlayPage } from '../pages/play/play';
-import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
+//import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 
 import { GamesPage } from '../pages/games/games';
 import { GameControllerPage } from '../pages/game-controller/game-controller';
@@ -60,14 +63,14 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
-    PlayAddPlayerPage,
+    //PlayAddPlayerPage,
     GamesPage,
     GameControllerPage,
     GameControllerMenu
   ],
   imports: [
     BrowserModule,
-    HttpClientModule,
+    //HttpClientModule,
     BrowserAnimationsModule,
     IonicModule.forRoot(AppComponent),
     IonicStorageModule.forRoot()
@@ -86,7 +89,7 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
-    PlayAddPlayerPage,
+    //PlayAddPlayerPage,
     GamesPage,
     GameControllerPage,
     GameControllerMenu
@@ -96,7 +99,7 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     SplashScreen,
     ImagePicker,
     File,
-    Httpd,
+    //Httpd,
     AndroidFullScreen,
     ScreenOrientation,
     AndroidPermissions,
@@ -104,9 +107,12 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     FilePath,
     Insomnia,
     AppVersion,
+    BarcodeScanner,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     UserProfilesProvider,
-    QuizsProvider
+    QuizsProvider,
+    GameProvider,
+    GameControllerProvider
   ]
 })
 export class AppModule {}

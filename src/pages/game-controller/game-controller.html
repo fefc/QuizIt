@@ -1,16 +1,16 @@
 <ion-header>
   <ion-navbar hideBackButton>
-    <ion-buttons left *ngIf="player.avatar">
+    <ion-buttons left *ngIf="gameControllerProv.player.avatar">
       <button ion-button>
-        <canvas class="avatar" width="1" height="1" [style.background-image]="renderPicture(player.avatar)"></canvas>
+        <canvas class="avatar" width="1" height="1" [style.background-image]="renderPicture(gameControllerProv.player.avatar)"></canvas>
       </button>
     </ion-buttons>
     <ion-title>
-      <span>{{ player.nickname }}</span><br>
-      <small>{{ player.points }} points</small>
+      <span>{{ gameControllerProv.player.nickname }}</span><br>
+      <small>{{ gameControllerProv.player.stats.points }} points</small>
     </ion-title>
     <ion-buttons right>
-      <button ion-button>{{ player.actualPosition + 1 }}</button>
+      <button ion-button>{{ gameControllerProv.player.stats.position }}</button>
       <button ion-button icon-only (click)="openMenu($event)">
         <ion-icon name="more"></ion-icon>
       </button>
@@ -19,20 +19,21 @@
 </ion-header>
 
 <ion-content>
-  <p class="information" *ngIf="game.state === GameState.connectionLost">Unable to reach quiz host.</p>
-  <p class="information" *ngIf="game.state === GameState.playersJoining">The game will start soon...</p>
-  <p class="information" *ngIf="game.state === GameState.loading"><ion-spinner name="crescent" color="primary"></ion-spinner></p>
-  <p class="information" *ngIf="game.state === GameState.ended">That's it, thanks for playing!</p>
-  <button class="exit-button" *ngIf="game.state === GameState.ended" ion-button large (click)="exit()">
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.connectionLost">Unable to reach quiz host.</p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.playersJoining">The game will start soon...</p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.loading"><ion-spinner name="crescent" color="primary"></ion-spinner></p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.ended">That's it, thanks for playing!</p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.quickedOut">You have been quicked out by the admin.</p>
+  <button class="exit-button" *ngIf="gameControllerProv.game.state === GameState.ended || gameControllerProv.game.state === GameState.quickedOut" ion-button large (click)="exit()">
     Exit
   </button>
-  <div class="answers-container" *ngIf="game.state === GameState.questionDisplayed">
-    <div *ngIf="game.currentQuestionType !== QuestionType.rightPicture" class="answers">
-      <div class="zero" (tap)="setAnswer(0)"  [ngClass]="{'disabled': player.answer !== 0 && player.answer !== -1}"></div>
-      <div class="one" (tap)="setAnswer(1)"   [ngClass]="{'disabled': player.answer !== 1 && player.answer !== -1}"></div>
-      <div class="two" (tap)="setAnswer(2)"   [ngClass]="{'disabled': player.answer !== 2 && player.answer !== -1}"></div>
-      <div class="three" (tap)="setAnswer(3)" [ngClass]="{'disabled': player.answer !== 3 && player.answer !== -1}"></div>
+  <div class="answers-container" *ngIf="gameControllerProv.game.state === GameState.classicQuestionDisplayed || gameControllerProv.game.state === GameState.pictureQuestionDisplayed">
+    <div *ngIf="gameControllerProv.game.state === GameState.classicQuestionDisplayed" class="answers">
+      <div class="zero" (tap)="setAnswer(0)"  [ngClass]="{'disabled': gameControllerProv.player.answer !== 0 && gameControllerProv.player.answer !== -1}"></div>
+      <div class="one" (tap)="setAnswer(1)"   [ngClass]="{'disabled': gameControllerProv.player.answer !== 1 && gameControllerProv.player.answer !== -1}"></div>
+      <div class="two" (tap)="setAnswer(2)"   [ngClass]="{'disabled': gameControllerProv.player.answer !== 2 && gameControllerProv.player.answer !== -1}"></div>
+      <div class="three" (tap)="setAnswer(3)" [ngClass]="{'disabled': gameControllerProv.player.answer !== 3 && gameControllerProv.player.answer !== -1}"></div>
   </div>
-    <canvas *ngIf="game.currentQuestionType === QuestionType.rightPicture" class="buzzer" height="1" width="1" (tap)="setAnswer(4)" [ngClass]="{'disabled': player.answer === 4}"></canvas>
+    <canvas *ngIf="gameControllerProv.game.state === GameState.pictureQuestionDisplayed" class="buzzer" height="1" width="1" (tap)="setAnswer(4)" [ngClass]="{'disabled': gameControllerProv.player.answer === 4}"></canvas>
   </div>
 </ion-content>

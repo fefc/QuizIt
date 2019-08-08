@@ -1,10 +1,30 @@
+/*export interface Player {
+  readonly uuid: string,
+  readonly nickname: string,
+  readonly avatar: string,
+  initialPosition?: number,
+  actualPosition?: number,
+  previousPosition?: number,
+  points?: number,
+  answer?: number,
+}*/
+
 export interface Player {
   readonly uuid: string,
   readonly nickname: string,
   readonly avatar: string,
-  initialPosition: number,
-  actualPosition: number,
-  previousPosition: number,
-  points?: number,
   answer: number,
+  stats: PlayerStats,
+  animations?: PlayerAnimData
+}
+
+export interface PlayerStats {
+  position: number,
+  points: number
+}
+
+export interface PlayerAnimData {
+  initialPosition?: number,
+  actualPosition?: number,
+  previousPosition?: number,
 }

@@ -1,28 +1,14 @@
 <ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/backgrounds/' + backgroundImage + ')'}" (tap)="setShowMenu($event)">
 
   <!--General Texts and title Zone-->
-  <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info wifi">
-    Wifi: {{currentWifi}}
-  </div>
-  <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="network-info webpage">
-    http://{{currentIp}}:8080
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-title">
+    The quiz will start shortly...<br>
+    Play now by scanning the QR code!
   </div>
 
-  <div *ngIf="screenState === ScreenStateType.playersJoining && platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
-    <img [src]="renderQrCode(qrCode)">
-    The quiz will start shortly...<br><br>
-    Play now by connecting to {{currentWifi}} Wifi,<br>
-    and joining with your QuizPad App!<br><br>
-    Or follow the instructions on the webpage:<br>
-    http://{{currentIp}}:8080
-    <br><br>
-    {{startMessage}}
-  </div>
+  <img *ngIf="screenState === ScreenStateType.playersJoining" [src]="renderQrCode(qrCode)" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="qrcode">
 
-  <div *ngIf="screenState === ScreenStateType.playersJoining && !platform.is('android')" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
-    The quiz will start shortly...<br><br>
-    Add a player by double clicking the screen twice<br>
-    and follow the instructions under Add Player.<br><br>
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
     {{startMessage}}
   </div>
 
@@ -38,8 +24,8 @@
 
   <!--Player Avatar, nickname & points Zone-->
   <div class="players" *ngIf="displayPlayers" [@playersContainerAnimation]>
-    <div class="player" *ngFor="let player of players; let i = index"
-    [@playerPositionAnimation]="{value: player.actualPosition,
+    <div class="player" *ngFor="let player of gameProv.players; let i = index"
+    [@playerPositionAnimation]="{value: player.animations.actualPosition,
       params: {
           time: commonAnimationDuration,
           previousYTranslation: getPlayerPreviousYTranslation(player),
@@ -53,7 +39,7 @@
       </button>
       <div class="info" [ngStyle]="getAvatarWidth()">
         <div class="nickname" [ngStyle]="getNicknameFontSize()">{{player.nickname}}</div>
-        <div class="nickname" [ngStyle]="getPointsFontSize()" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.points}}</div>
+        <div class="nickname" [ngStyle]="getPointsFontSize()" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.stats.points}}</div>
       </div>
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1"

@@ -21,6 +21,7 @@
     "@ionic-native/android-full-screen": "^4.20.0",
     "@ionic-native/android-permissions": "^4.20.0",
     "@ionic-native/app-version": "^4.20.0",
+    "@ionic-native/barcode-scanner": "^4.20.0",
     "@ionic-native/core": "~4.15.0",
     "@ionic-native/email-composer": "^4.20.0",
     "@ionic-native/file": "^4.20.0",
@@ -65,6 +66,7 @@
     "ionic-angular": "^3.9.8",
     "ionicons": "3.0.0",
     "npm-install-peers": "^1.2.1",
+    "phonegap-plugin-barcodescanner": "8.1.0",
     "rxjs": "5.5.11",
     "sw-toolbox": "3.6.0",
     "web-animations-js": "^2.3.2",
@@ -102,6 +104,9 @@
       "cordova-plugin-filepath": {},
       "cordova-plugin-insomnia": {},
       "cordova-plugin-app-version": {},
+      "phonegap-plugin-barcodescanner": {
+        "ANDROID_SUPPORT_V4_VERSION": "27.+"
+      },
       "com.attendee.barcodegenerator": {}
     },
     "platforms": [

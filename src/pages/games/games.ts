@@ -109,7 +109,7 @@ export class GamesPage {
   }
 
   joinGame(game: Game, newNickname?: string) {
-    let loading = this.loadingCtrl.create({
+    /*let loading = this.loadingCtrl.create({
       content: 'Joining game...'
     });
 
@@ -158,11 +158,11 @@ export class GamesPage {
     }).catch((error) => {
       loading.dismiss();
       this.showGeneraljoinGameErrorAlert("General error: Impossible to resize avatar");
-    });
+    });*/
   }
 
   showNicknameAlreadyUsedAlert(game: Game) {
-    let alertMsg = this.alertCtrl.create({
+    /*let alertMsg = this.alertCtrl.create({
       title: 'Nickname already used',
       message: 'Your nickname is already used by someone else, please change it just for now.',
       enableBackdropDismiss: false,
@@ -185,7 +185,7 @@ export class GamesPage {
         }
       ]
     });
-    alertMsg.present();
+    alertMsg.present();*/
   }
 
   showGeneraljoinGameErrorAlert(content: string) {
