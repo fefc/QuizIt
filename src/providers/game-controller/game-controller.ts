@@ -106,7 +106,11 @@ export class GameControllerProvider {
   gameStateChanges() {
     return new Observable<GameState>(observer => {
       firebase.firestore().collection('G').doc(this.game.uuid).onSnapshot(docSnapshot => {
-        observer.next(docSnapshot.data().S);
+        if (docSnapshot.exists) {
+          observer.next(docSnapshot.data().S);
+        } else {
+          observer.next(GameState.ended);
+        }
       });
 
       return () => {
@@ -134,7 +138,7 @@ export class GameControllerProvider {
       });
 
       return () => {
-        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.player.uuid).collection('L').doc('S').collection('cities').onSnapshot(() => {});
+        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.player.uuid).collection('L').doc('S').onSnapshot(() => {});
         unsub();
       };
     });
