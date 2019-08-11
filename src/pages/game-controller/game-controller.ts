@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { NavController, NavParams, AlertController, LoadingController, PopoverController } from 'ionic-angular';
 
-import { Player, PlayerStats } from '../../models/player';
-import { Game, GameState } from '../../models/game';
+import { GameState } from '../../models/game';
 
 import { GameControllerMenu } from './menu';
 import { GameControllerProvider } from '../../providers/game-controller/game-controller';

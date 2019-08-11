@@ -7,7 +7,6 @@ import { IonicStorageModule } from '@ionic/storage';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
-//import { Httpd } from '@ionic-native/httpd';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
@@ -15,7 +14,6 @@ import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
 import { Insomnia } from '@ionic-native/insomnia';
 import { AppVersion } from '@ionic-native/app-version';
-//import { HttpClientModule } from '@angular/common/http';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 import { AppComponent } from './app.component';
@@ -42,9 +40,7 @@ import { QuizSettingsPage } from '../pages/quiz-settings/quiz-settings';
 import { QuestionPage } from '../pages/question/question';
 
 import { PlayPage } from '../pages/play/play';
-//import { PlayAddPlayerPage } from '../pages/play-addplayer/play-addplayer';
 
-import { GamesPage } from '../pages/games/games';
 import { GameControllerPage } from '../pages/game-controller/game-controller';
 import { GameControllerMenu } from '../pages/game-controller/menu';
 
@@ -63,14 +59,11 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
-    //PlayAddPlayerPage,
-    GamesPage,
     GameControllerPage,
     GameControllerMenu
   ],
   imports: [
     BrowserModule,
-    //HttpClientModule,
     BrowserAnimationsModule,
     IonicModule.forRoot(AppComponent),
     IonicStorageModule.forRoot()
@@ -89,8 +82,6 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     QuizSettingsPage,
     QuestionPage,
     PlayPage,
-    //PlayAddPlayerPage,
-    GamesPage,
     GameControllerPage,
     GameControllerMenu
   ],
@@ -99,7 +90,6 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     SplashScreen,
     ImagePicker,
     File,
-    //Httpd,
     AndroidFullScreen,
     ScreenOrientation,
     AndroidPermissions,

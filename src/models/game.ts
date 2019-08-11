@@ -1,5 +1,3 @@
-import { QuestionType } from './question';
-
 export enum GameState {
   playersJoining = 1,
   loading = 2,

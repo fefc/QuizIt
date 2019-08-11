@@ -31,6 +31,16 @@ const BARECODE_SCANNER_OPTIONS: BarcodeScannerOptions = {
     disableSuccessBeep: true // iOS and Android
 };
 
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDR9qWel2I2_PCpZwn_crw-SH-uAug5zIw",
+  authDomain: "quizpad-ff712.firebaseapp.com",
+  databaseURL: "https://quizpad-ff712.firebaseio.com",
+  projectId: "quizpad-ff712",
+  storageBucket: "quizpad-ff712.appspot.com",
+  messagingSenderId: "699661197913",
+  appId: "1:699661197913:web:2abeed2df8580fa9"
+};
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -55,18 +65,9 @@ export class AppComponent {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
-      const firebaseConfig = {
-        apiKey: "AIzaSyDR9qWel2I2_PCpZwn_crw-SH-uAug5zIw",
-        authDomain: "quizpad-ff712.firebaseapp.com",
-        databaseURL: "https://quizpad-ff712.firebaseio.com",
-        projectId: "quizpad-ff712",
-        storageBucket: "quizpad-ff712.appspot.com",
-        messagingSenderId: "699661197913",
-        appId: "1:699661197913:web:2abeed2df8580fa9"
-      };
 
       // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
+      firebase.initializeApp(FIREBASE_CONFIG);
 
       //Eventually lock screen orientation on some devices
       if (platform.is('android')) {
@@ -129,12 +130,11 @@ export class AppComponent {
     }
   }
 
-  openGamesPage() {
-    this.menuCtrl.close('menu-one');
-
-    /*if (this.nav.getActive().component !== GamesPage) {
-      this.nav.setRoot(GamesPage);
-    }*/
+  openBarcodeScannerPage() {
+    //this.menuCtrl.close('menu-one');
+    //To not close menu, so that if barcode scanning is cancelled it does not close the app
+    //But closes the menu instead
+    this.startScanning();
   }
 
   openAboutPage() {
@@ -144,57 +144,20 @@ export class AppComponent {
     modal.present();
   }
 
-  openBarcodeScannerPage() {
-    //this.menuCtrl.close('menu-one');
-    //To not close menu, so that if barcode scanning is cancelled it does not close the app
-    //But closes the menu instead
-    this.startScanning();
-  }
-
   startScanning() {
-    this.barcodeScanner.scan(BARECODE_SCANNER_OPTIONS).then(data => {
+    this.barcodeScanner.scan(BARECODE_SCANNER_OPTIONS).then((data) => {
      if (data.cancelled === false) {
        if (data.text.startsWith('https://quizpadapp.com/')) {
          this.menuCtrl.close('menu-one');
          this.joinGame(data.text.replace('https://quizpadapp.com/', ''));
        } else {
-         let message = this.alertCtrl.create({
-           title: 'Invalid QR code',
-           message: "The scanned QR code is not valid, do you want to retry?",
-           buttons: [
-             {
-               text: 'No',
-               role: 'cancel',
-               handler: data => {
-                 this.menuCtrl.close('menu-one');
-               }
-             },
-             {
-               text: 'Yes',
-               handler: data => {
-                 this.startScanning();
-               }
-             }
-           ]
-         });
-
-         message.present();
+         this.menuCtrl.close('menu-one');
+         this.showGeneralErrorAlert('Invalid QR code', 'The scanned QR code is not valid, please try again with a valid QuizPad QR code.');
        }
      }
-    }).catch(err => {
-      let message = this.alertCtrl.create({
-        title: 'Unable to open scanner',
-        message: "Unable to open scanner, please check that you allowed camera access.",
-        buttons: [
-          {
-            text: 'Ok',
-            role: 'cancel',
-            handler: data => {
-              this.menuCtrl.close('menu-one');
-            }
-          }
-        ]
-      });
+    }).catch((err) => {
+      this.menuCtrl.close('menu-one');
+      this.showGeneralErrorAlert('Unable to open scanner', 'Unable to open scanner, please check that you allowed camera access.');
     });
   }
 
@@ -210,9 +173,10 @@ export class AppComponent {
       this.gameControllerProv.joinGame(gameID, this.profilesProv.profiles[0].nickname, resizedAvatar).then(() => {
         loading.dismiss();
         this.nav.push(GameControllerPage);
-      }).catch(() => {
+      }).catch((err) => {
         loading.dismiss();
         console.log("Could not join game");
+        //TODO nickname check
       });
 
 
@@ -257,8 +221,23 @@ export class AppComponent {
       });*/
     }).catch((error) => {
       loading.dismiss();
-      //this.showGeneraljoinGameErrorAlert("General error: Impossible to resize avatar");
+      this.showGeneralErrorAlert('General error', 'Unable to resize avatar.');
     });
+  }
+
+  showGeneralErrorAlert(title: string, content: string) {
+    let message = this.alertCtrl.create({
+      title: title,
+      message: content,
+      buttons: [
+        {
+          text: 'Close',
+          role: 'ok',
+        }
+      ]
+    });
+
+    message.present();
   }
 
   resizeAvatar(base64Avatar: string) {

@@ -84,11 +84,8 @@ export class GameControllerProvider {
   leaveGame() {
     return new Promise((resolve, reject) => {
       if (this.game.uuid) {
-        this.gameStateChangesSubscription.unsubscribe(); //Not working properly
+        this.gameStateChangesSubscription.unsubscribe();
         this.playerStatsChangesSubscription.unsubscribe();
-
-        //this.game = undefined;
-        //this.player = undefined;
       }
 
       resolve();
@@ -111,6 +108,11 @@ export class GameControllerProvider {
       firebase.firestore().collection('G').doc(this.game.uuid).onSnapshot(docSnapshot => {
         observer.next(docSnapshot.data().S);
       });
+
+      return () => {
+        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).onSnapshot(() => {});
+        unsub();
+      };
     });
   }
 
@@ -130,6 +132,11 @@ export class GameControllerProvider {
           });
         }
       });
+
+      return () => {
+        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.player.uuid).collection('L').doc('S').collection('cities').onSnapshot(() => {});
+        unsub();
+      };
     });
   }
 }

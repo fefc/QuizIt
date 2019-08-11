@@ -1,11 +1,9 @@
-import { Component, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, AlertController, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
-import { File } from '@ionic-native/file';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
+import { File } from '@ionic-native/file';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/fromEvent';
-import { Subscription } from "rxjs/Subscription";
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
@@ -21,7 +19,6 @@ import { Player, PlayerStats, PlayerAnimData } from '../../models/player';
 
 import { GameState } from '../../models/game';
 
-import { UserProfilesProvider } from '../../providers/user-profiles/user-profiles';
 import { GameProvider } from '../../providers/game/game';
 
 enum ScreenStateType {
@@ -236,13 +233,11 @@ export class PlayPage {
               private actionSheetCtrl: ActionSheetController,
               public modalCtrl: ModalController,
               private toastCtrl: ToastController,
-              private ngZone: NgZone,
               private file: File,
               private androidFullScreen: AndroidFullScreen,
               private screenOrientation: ScreenOrientation,
               private sanitizer:DomSanitizer,
               private insomnia: Insomnia,
-              private profilesProv: UserProfilesProvider,
               private gameProv: GameProvider,
               params: NavParams) {
 
@@ -382,39 +377,7 @@ export class PlayPage {
     }
   }
 
-  /*addPlayer(newPlayer: Player) {
-    if (this.screenState === ScreenStateType.playersJoining) {
-      if (this.players.findIndex((p) => p.nickname === newPlayer.nickname) === -1) {
-
-        newPlayer.initialPosition = this.players.length;
-        newPlayer.previousPosition = this.players.length;
-        newPlayer.actualPosition = this.players.length;
-        newPlayer.answer = -1;
-
-        this.players.push(newPlayer);
-      }
-    }
-  }*/
-
-  /*removePlayer(player: Player, index: number) {
-    this.showMenuCounter = 0;
-    if (index > -1) {
-      this.gameProv.removePlayer(player.uuid).then(() => {
-        this.players.splice(index, 1);
-
-        for(let i = index; i < this.players.length; i++) {
-          this.players[i].initialPosition = i;
-          this.players[i].actualPosition = i;
-          this.players[i].previousPosition = i;
-        }
-      }).catch(() => {
-        console.log("unable to remove player from firebase");
-      });
-    }
-  }*/
-
   async next() {
-    var player: Player;
     this.showNext = false;
     this.showMenuCounter = 0;
 
@@ -694,7 +657,7 @@ export class PlayPage {
     });
   }*/
 
-  checkIfRightRemoteButtonUsed(button: number) {
+  /*checkIfRightRemoteButtonUsed(button: number) {
     if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
       if (button >= 4) {
         return true;
@@ -703,71 +666,6 @@ export class PlayPage {
       if (button > -1 && button < this.currentQuestions[this.currentQuestion].answers.length) {
         return true;
       }
-    }
-  }
-
-  /*handleHttpdEvent(data: any) {
-    if (data.uri === "/searchingQuizPad") {
-      this.httpd.setRequestResponse([{requestId: +data.requestId}, this.game]).catch(() => {
-        console.log("Could not setRequestResponse for some useless case.");
-      });
-    }
-    else if (data.uri === "/addPlayer") {
-      let newPlayer: Player = this.addPlayer(data.nickname, data.avatar);
-
-      this.httpd.setRequestResponse([{requestId: +data.requestId}, (newPlayer ? {playerUuid: newPlayer.uuid} : this.game) ]).catch(() => {
-        console.log("Could not setRequestResponse for /addPlayer.");
-      });
-
-      if (newPlayer) {
-        this.ngZone.run(() => {
-          this.players.push(newPlayer);
-        });
-      }
-    } else if (data.uri === "/answer") {
-      let answeringPlayer: Player = this.getAnsweringPlayer(data.uuid);
-      this.httpd.setRequestResponse([{requestId: +data.requestId}, {success: answeringPlayer ? true : false}]).catch(() => {
-        console.log("Could not setRequestResponse for /answer.");
-      });
-
-      data.answer = +data.answer; //Explicit cast cause httpd is giving us strings only
-
-      if (answeringPlayer && this.checkIfRightRemoteButtonUsed(data.answer)) {
-        if (data.answer >= 4) {
-          //This is buzzer
-          data.answer = this.currentPicture;
-        }
-
-        this.setPlayerAnswer(answeringPlayer, data.answer);
-      }
-    } else if (data.uri === "/gameState") {
-      let player: Player = this.players.find((p) => p.uuid === data.uuid);
-
-      if (player) {
-        if (this.screenState === ScreenStateType.displayQuestion) {
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {
-            state: GameState.questionDisplayed,
-            uuid: this.currentQuestions[this.currentQuestion].uuid,
-            type: this.currentQuestions[this.currentQuestion].type}]).catch(() => {
-            console.log("Could not setRequestResponse for /gameState.");
-          });
-        } else {
-          this.httpd.setRequestResponse([{requestId: +data.requestId}, {
-            state:(this.screenState == ScreenStateType.playersJoining ? GameState.playersJoining : (this.screenState === ScreenStateType.end ? GameState.ended : GameState.loading)),
-            actualPosition: player.actualPosition,
-            points: player.points}]).catch(() => {
-            console.log("Could not setRequestResponse for /gameState.");
-          });
-        }
-      } else {
-        this.httpd.setRequestResponse([{requestId: +data.requestId}, {msg: "Why do you want this information?"}]).catch(() => {
-          console.log("Could not setRequestResponse for /gameState.");
-        });
-      }
-    } else {
-      this.httpd.setRequestResponse([{requestId: +data.requestId}, {msg: "I don't know what you're looking for: " + data.uri + "."}]).catch(() => {
-        console.log("Could not setRequestResponse for some useless case.");
-      });
     }
   }*/
 
@@ -821,13 +719,5 @@ export class PlayPage {
 
   renderQrCode(base64: string) {
     return this.sanitizer.bypassSecurityTrustUrl(base64);
-  }
-
-  //From https://stackoverflow.com/a/2117523
-  uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
   }
 }

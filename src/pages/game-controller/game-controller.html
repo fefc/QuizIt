@@ -34,6 +34,6 @@
       <div class="two" (tap)="setAnswer(2)"   [ngClass]="{'disabled': gameControllerProv.player.answer !== 2 && gameControllerProv.player.answer !== -1}"></div>
       <div class="three" (tap)="setAnswer(3)" [ngClass]="{'disabled': gameControllerProv.player.answer !== 3 && gameControllerProv.player.answer !== -1}"></div>
   </div>
-    <canvas *ngIf="gameControllerProv.game.state === GameState.pictureQuestionDisplayed" class="buzzer" height="1" width="1" (tap)="setAnswer(4)" [ngClass]="{'disabled': gameControllerProv.player.answer === 4}"></canvas>
+    <canvas *ngIf="gameControllerProv.game.state === GameState.pictureQuestionDisplayed" class="buzzer" height="1" width="1" (tap)="setAnswer(100)" [ngClass]="{'disabled': gameControllerProv.player.answer === 100}"></canvas>
   </div>
 </ion-content>
