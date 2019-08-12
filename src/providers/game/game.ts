@@ -61,7 +61,7 @@ export class GameProvider {
 
   startGame() {
     return new Promise<string>((resolve, reject) => {
-      firebase.firestore().collection('G').doc(this.game.uuid).set({S: GameState.loading, T: firebase.firestore.FieldValue.serverTimestamp()}).then(data => {
+      firebase.firestore().collection('G').doc(this.game.uuid).update({S: GameState.loading, T: firebase.firestore.FieldValue.serverTimestamp()}).then(data => {
         this.playersChangesSubscription.unsubscribe();
 
         for (let player of this.players) {
@@ -93,7 +93,7 @@ export class GameProvider {
         }
       }
 
-      firebase.firestore().collection('G').doc(this.game.uuid).set({S: gameState, T: firebase.firestore.FieldValue.serverTimestamp()}).then(data => {
+      firebase.firestore().collection('G').doc(this.game.uuid).update({S: gameState, T: firebase.firestore.FieldValue.serverTimestamp()}).then(data => {
         this.game.state = gameState;
         resolve();
       }).catch(error => {
@@ -135,12 +135,6 @@ export class GameProvider {
             };
             observer.next(player);
           }
-          /*if (change.type === 'modified') {
-            console.log('Modified city: ', change.doc.data());
-          }*/
-          /*if (change.type === 'removed') {
-            console.log('Removed city: ', change.doc.data());
-          }*/
         });
       });
     });
@@ -153,23 +147,7 @@ export class GameProvider {
           if (change.type === 'modified') {
             observer.next({uuid: change.doc.id, answer: change.doc.data().I});
           }
-          /*if (change.type === 'modified') {
-            console.log('Modified city: ', change.doc.data());
-          }*/
-          /*if (change.type === 'removed') {
-            console.log('Removed city: ', change.doc.data());
-          }*/
         });
-      });
-    });
-  }
-
-  updatePlayersStats(playerID: string) {
-    return new Promise<string>((resolve, reject) => {
-      firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(playerID).update({points: 10}).then(data => {
-        resolve();
-      }).catch(error => {
-        reject("Could not delete game online");
       });
     });
   }
@@ -211,8 +189,19 @@ export class GameProvider {
         realPlayer.animations.actualPosition = newPlayerPosition;
       }
 
-      //TO DO UPDATE Firebase
-      resolve();
+      let batch = firebase.firestore().batch();
+
+      for (let player of this.players) {
+        let playerRef = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(player.uuid).collection('L').doc('S');
+        batch.update(playerRef, {R: player.stats.position, P: player.stats.points});
+      }
+
+      // Commit the batch
+      return batch.commit().then(() => {
+        resolve();
+      }).catch(() => {
+        reject("Could not update players online");
+      });
     });
   }
 
