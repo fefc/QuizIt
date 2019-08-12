@@ -87,7 +87,7 @@
     <div class="picture" *ngIf="displayPictures"
           [@pictureInOutAnimation]="{value: '', params: {time: commonAnimationDuration}}"
           [@pictureTransitionAnimation]="{value: currentPictureCounter, params: {time: commonAnimationDuration}}">
-          <canvas [style.background-image]="currentPictures[currentPicture]"></canvas>
+          <canvas [style.background-image]="currentPictures[this.gameProv.currentPicture]"></canvas>
   </div>
 
   <!-- Manual mode fabs -->

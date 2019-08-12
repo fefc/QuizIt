@@ -13,6 +13,7 @@ import { Player } from '../../models/player';
 export class GameProvider {
   public game: Game;
   public players: Array<Player>;
+  public currentPicture: number;
 
   private playersChangesSubscription: Subscription;
 
@@ -69,11 +70,6 @@ export class GameProvider {
           player.stats.points = 0;
         }
 
-        this.playersChangesSubscription = this.playerAnswerChanges().subscribe((data) => {
-          let player: Player = this.players.find((p) => p.uuid === data.uuid);
-          player.answer = data.answer;
-        });
-
         this.updateState(GameState.loading).then(() => {
           resolve();
         }).catch((error) => {
@@ -91,6 +87,24 @@ export class GameProvider {
         for (let player of this.players) {
           player.answer = -1;
         }
+
+        this.playersChangesSubscription = this.playerAnswerChanges().subscribe((data) => {
+          if ((data.answer >= 0 && data.answer <= 3) || data.answer === 100) {
+            let player: Player = this.players.find((p) => p.uuid === data.uuid);
+
+            if (player) {
+              if (player.answer === -1) {
+                if (data.answer === 100) {
+                  player.answer = this.currentPicture;
+                } else {
+                  player.answer = data.answer;
+                }
+              }
+            }
+          }
+        });
+      } else {
+        this.playersChangesSubscription.unsubscribe();
       }
 
       firebase.firestore().collection('G').doc(this.game.uuid).update({S: gameState, T: firebase.firestore.FieldValue.serverTimestamp()}).then(data => {
@@ -104,6 +118,8 @@ export class GameProvider {
 
   deleteGame() {
     return new Promise<string>((resolve, reject) => {
+      this.playersChangesSubscription.unsubscribe();
+
       const deleteGameFirebase = firebase.functions().httpsCallable('deleteGame');
 
       deleteGameFirebase({P: this.game.uuid}).then(result => {
@@ -137,6 +153,11 @@ export class GameProvider {
           }
         });
       });
+
+      return () => {
+        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(() => {});
+        unsub();
+      };
     });
   }
 
@@ -149,6 +170,11 @@ export class GameProvider {
           }
         });
       });
+
+      return () => {
+        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(() => {});
+        unsub();
+      };
     });
   }
 
@@ -204,64 +230,4 @@ export class GameProvider {
       });
     });
   }
-
-  /*joinGame(gameID: string, nickname: string, avatar: string) {
-    return new Promise<string>((resolve, reject) => {
-      const joinGameFirebase = firebase.functions().httpsCallable('joinGame');
-
-      joinGameFirebase({G: gameID, P: {N: nickname, A: avatar}}).then(data => {
-
-        this.game = {
-          uuid: gameID,
-          state: GameState.playersJoining
-        };
-
-        this.player = {
-          uuid: data.data.uuid,
-          nickname: nickname,
-          avatar: avatar
-        };
-
-        //this.player
-
-        resolve();
-      }).catch(error => {
-        console.log(error);
-        reject("Could not add player online");
-      });
-    });
-  }*/
-
-  /*playerChanges() {
-    return new Observable(observer => {
-      firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.player.uuid).onSnapshot(docSnapshot => {
-        if (docSnapshot.exists) {
-          console.log("Player has been updated");
-        } else {
-          console.log("Player deleted");
-        }
-        console.log(docSnapshot);
-        observer.next("toto");*/
-        /*querySnapshot.docChanges().forEach(change => {
-          /*if (change.type === 'added') {
-            let player: Player = {
-              uuid: change.doc.id,
-              nickname: change.doc.data().N,
-              avatar: change.doc.data().A
-            };
-            observer.next(player);
-          }*/
-          /*if (change.type === 'modified') {
-            console.log('Modified city: ', change.doc.data());
-          }*/
-          /*if (change.type === 'removed') {
-            console.log(change.doc.id);
-            console.log('Removed city: ', change.doc.data());
-            observer.next("toto");
-          }
-        });*/
-
-      /*});
-    });
-  }*/
 }

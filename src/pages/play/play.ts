@@ -221,7 +221,7 @@ export class PlayPage {
   private currentQuestion: number;
   private currentQuestions: Array<Question>;
 
-  private currentPicture: number;
+  //private currentPicture: number;
   private currentPictureCounter: number;
   private currentPictures: Array<SafeUrl>;
 
@@ -301,7 +301,7 @@ export class PlayPage {
             this.currentQuestion = 0;
             this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
 
-            this.currentPicture = 0;
+            this.gameProv.currentPicture = 0;
             this.currentPictureCounter = 0;
             this.currentPictures = [];
 
@@ -426,7 +426,7 @@ export class PlayPage {
 
         if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
 
-          this.currentPicture = 0;
+          this.gameProv.currentPicture = 0;
           this.currentPictureCounter = 0;
           this.currentPictures = [];
 
@@ -481,7 +481,7 @@ export class PlayPage {
       this.displayTimeBar = false;
 
       if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture
-          && this.currentPicture !== this.currentQuestions[this.currentQuestion].rightAnswer) {
+          && this.gameProv.currentPicture !== this.currentQuestions[this.currentQuestion].rightAnswer) {
         this.currentPictureSwitch(); //This will switch to the right answer picture
       }
 
@@ -515,9 +515,9 @@ export class PlayPage {
     setTimeout(() => {
       //This picture switch occurs in the middle of the rotation animation so no one can se
       if (this.screenState === ScreenStateType.displayPlayersAnswer) {
-        this.currentPicture = this.currentQuestions[this.currentQuestion].rightAnswer;
+        this.gameProv.currentPicture = this.currentQuestions[this.currentQuestion].rightAnswer;
       } else {
-        this.currentPicture = this.currentPictureCounter % this.currentQuestions[this.currentQuestion].answers.length;
+        this.gameProv.currentPicture = this.currentPictureCounter % this.currentQuestions[this.currentQuestion].answers.length;
       }
 
     }, this.commonAnimationDuration / 2);
@@ -623,20 +623,6 @@ export class PlayPage {
     });
   }
 
-  /*getAnsweringPlayer(uuid: string) {
-    if (this.screenState === ScreenStateType.displayQuestion) {
-      let player: Player = this.players.find((p) => p.uuid === uuid);
-
-      if (player) {
-        if (player.answer === -1) {
-          return player;
-        }
-      }
-    }
-
-    return undefined;
-  }*/
-
   /*setPlayerAnswer(player: Player, answer: number) {
     this.ngZone.run(() => {
       player.answer = answer;
@@ -655,18 +641,6 @@ export class PlayPage {
         this.next();
       }
     });
-  }*/
-
-  /*checkIfRightRemoteButtonUsed(button: number) {
-    if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
-      if (button >= 4) {
-        return true;
-      }
-    } else {
-      if (button > -1 && button < this.currentQuestions[this.currentQuestion].answers.length) {
-        return true;
-      }
-    }
   }*/
 
   exit() {
