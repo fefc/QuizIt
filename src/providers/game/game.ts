@@ -61,7 +61,7 @@ export class GameProvider {
 
   startGame() {
     return new Promise<string>((resolve, reject) => {
-      firebase.firestore().collection('G').add({S: GameState.loading, T: firebase.firestore.FieldValue.serverTimestamp()}).then(data => {
+      firebase.firestore().collection('G').doc(this.game.uuid).set({S: GameState.loading, T: firebase.firestore.FieldValue.serverTimestamp()}).then(data => {
         this.playersChangesSubscription.unsubscribe();
 
         for (let player of this.players) {
@@ -104,10 +104,16 @@ export class GameProvider {
 
   deleteGame() {
     return new Promise<string>((resolve, reject) => {
-      firebase.firestore().collection('G').doc(this.game.uuid).delete().then(data => {
-        resolve();
+      const deleteGameFirebase = firebase.functions().httpsCallable('deleteGame');
+
+      deleteGameFirebase({P: this.game.uuid}).then(result => {
+        if (result.data.deleted) {
+          resolve();
+        } else {
+          reject();
+        }
       }).catch(error => {
-        reject("Could not delete game online");
+        reject("Unable to delete game online.");
       });
     });
   }
