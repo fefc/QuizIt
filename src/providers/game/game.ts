@@ -220,6 +220,10 @@ export class GameProvider {
       for (let player of this.players) {
         let playerRef = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(player.uuid).collection('L').doc('S');
         batch.update(playerRef, {R: player.stats.position, P: player.stats.points});
+
+        //Update answer Index to -1 so that it will generate an event next time user clicks on same button 
+        let answerRef = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(player.uuid);
+        batch.update(answerRef, {I: -1});
       }
 
       // Commit the batch
