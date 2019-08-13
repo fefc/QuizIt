@@ -161,7 +161,7 @@ export class AppComponent {
     });
   }
 
-  joinGame(gameID: string) {
+  joinGame(gameID: string, alternativeNickname?: string) {
     let loading = this.loadingCtrl.create({
       content: 'Joining game...'
     });
@@ -170,59 +170,48 @@ export class AppComponent {
 
     this.resizeAvatar(this.profilesProv.profiles[0].avatar).then((resizedAvatar) => {
 
-      this.gameControllerProv.joinGame(gameID, this.profilesProv.profiles[0].nickname, resizedAvatar).then(() => {
+      this.gameControllerProv.joinGame(gameID, alternativeNickname ? alternativeNickname : this.profilesProv.profiles[0].nickname, resizedAvatar).then(() => {
         loading.dismiss();
         this.nav.push(GameControllerPage);
-      }).catch((err) => {
+      }).catch((error) => {
         loading.dismiss();
-        console.log("Could not join game");
-        //TODO nickname check
-      });
-
-
-
-      /*let httpParams = new HttpParams({encoder: new CustomEncoder()});
-      httpParams = httpParams.append("nickname", (newNickname ? newNickname : this.profilesProv.profiles[0].nickname));
-      httpParams = httpParams.append("avatar", resizedAvatar);
-
-      this.httpClient.post('http://' + game.address + '/addPlayer', httpParams, httpOptions)
-      .subscribe((data: any) => {
-        if (data.playerUuid) {
-          //Player added Successfully
-          let player: Player = {
-            uuid: data.playerUuid,
-            nickname: (newNickname ? newNickname : this.profilesProv.profiles[0].nickname),
-            avatar: this.profilesProv.profiles[0].avatar,
-            initialPosition: 0,
-            actualPosition: 0,
-            previousPosition: 0,
-            points: 0,
-            answer: -1
-          };
-
-          this.openGameControllerPage(game, player);
+        if (error === 20) {
+          this.showNicknameAlreadyUsedAlert(gameID);
         } else {
-          //Player was not added
-          if (data.uuid) {
-            //But we got information about game state
-            if (data.state !== GameState.playersJoining) {
-              this.showGeneraljoinGameErrorAlert("The game already started.");
-            } else {
-              this.showNicknameAlreadyUsedAlert(game);
-            }
-          } else {
-            this.showGeneraljoinGameErrorAlert("General error: Server error.");
-          }
+          this.showGeneralErrorAlert('General error', 'Could not join game: ' + error + '.');
         }
-
-      }, (error) => {
-        loading.dismiss();
-        this.showGeneraljoinGameErrorAlert("General error: Server timeout.");
-      });*/
+      });
     }).catch((error) => {
       loading.dismiss();
       this.showGeneralErrorAlert('General error', 'Unable to resize avatar.');
     });
+  }
+
+  showNicknameAlreadyUsedAlert(gameID: string) {
+    let alertMsg = this.alertCtrl.create({
+      title: 'Nickname already used',
+      message: 'Your nickname is already used by someone else, please change it just for now.',
+      enableBackdropDismiss: false,
+      inputs: [
+        {
+          name: 'nickname',
+          placeholder: 'New nickname'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Join',
+          handler: data => {
+            this.joinGame(gameID, data.nickname);
+          }
+        }
+      ]
+    });
+    alertMsg.present();
   }
 
   showGeneralErrorAlert(title: string, content: string) {

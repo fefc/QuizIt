@@ -73,7 +73,11 @@ export class GameControllerProvider {
 
           resolve();
         } else {
-          reject();
+          if (result.data.error) {
+            reject(result.data.error);
+          } else {
+              reject(50);
+          }
         }
       }).catch(error => {
         reject("Unable to create game online.");
