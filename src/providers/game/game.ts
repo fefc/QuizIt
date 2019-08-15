@@ -5,6 +5,7 @@ import 'firebase/functions';
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable"
 import { Subscription } from "rxjs/Subscription";
+import { Subject } from 'rxjs/Subject';
 
 import { Game, GameState } from '../../models/game';
 import { Player } from '../../models/player';
@@ -15,11 +16,17 @@ export class GameProvider {
   public players: Array<Player>;
   public currentPicture: number;
 
+  public allPlayersAnswered: Subject<boolean>;
+  public allPlayersAnswered$: Observable<boolean>; //Has a $
+
   private playersChangesSubscription: Subscription;
 
   constructor() {
     this.game = undefined;
     this.players = undefined;
+
+    this.allPlayersAnswered = new Subject<boolean>();
+    this.allPlayersAnswered$ = this.allPlayersAnswered.asObservable();
   }
 
   createGame() {
@@ -98,6 +105,11 @@ export class GameProvider {
                   player.answer = this.currentPicture;
                 } else {
                   player.answer = data.answer;
+                }
+
+                //check if all player answered the curren question, if so send an event
+                if (!this.players.some((x) => x.answer === -1)) {
+                    this.allPlayersAnswered.next(true);
                 }
               }
             }
@@ -221,7 +233,7 @@ export class GameProvider {
         let playerRef = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(player.uuid).collection('L').doc('S');
         batch.update(playerRef, {R: player.stats.position, P: player.stats.points});
 
-        //Update answer Index to -1 so that it will generate an event next time user clicks on same button 
+        //Update answer Index to -1 so that it will generate an event next time user clicks on same button
         let answerRef = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(player.uuid);
         batch.update(answerRef, {I: -1});
       }

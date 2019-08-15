@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
+import { Subscription } from "rxjs/Subscription";
 
 declare var BarcodeGenerator: any;
 
@@ -212,6 +213,8 @@ export class PlayPage {
   private showMenuCounter: number;
   private pause: boolean;
 
+  private allPlayersAnsweredSubscription: Subscription;
+
   private displayQuestionTimer: any;
   private switchPicturesTimer: any;
 
@@ -351,6 +354,20 @@ export class PlayPage {
 
             this.screenState = ScreenStateType.playersJoining;
             this.displayPlayers = true;
+
+            this.allPlayersAnsweredSubscription = this.gameProv.allPlayersAnswered$.subscribe((data) => {
+              if(this.displayQuestionTimer) {
+                clearTimeout(this.displayQuestionTimer);
+                this.displayQuestionTimer = undefined;
+              }
+
+              if(this.switchPicturesTimer) {
+                clearTimeout(this.switchPicturesTimer);
+                this.switchPicturesTimer = undefined;
+              }
+
+              this.next();
+            });
 
             this.insomnia.keepAwake().then(() => {
               console.log("Device will be keept awake");
