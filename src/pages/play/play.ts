@@ -673,6 +673,8 @@ export class PlayPage {
 
     });
 
+    this.allPlayersAnsweredSubscription.unsubscribe();
+
     this.insomnia.allowSleepAgain().then(() => {
       console.log("Device can go sleep again.");
     }).catch(() => {
