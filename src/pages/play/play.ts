@@ -289,6 +289,50 @@ export class PlayPage {
         this.navCtrl.pop();
       }
       else {
+        //Get Quiz settings
+        if (this.quiz.settings) {
+          if (this.quiz.settings.commonAnimationDuration !== undefined) {
+            this.commonAnimationDuration = this.quiz.settings.commonAnimationDuration;
+          }
+
+          if (this.quiz.settings.timeBarAnimationDuration !== undefined) {
+            this.timeBarAnimationDuration = this.quiz.settings.timeBarAnimationDuration;
+            this.currentPictureStayDuration = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW);
+          }
+
+          if (this.quiz.settings.playerAnswerAnimationDuration !== undefined) {
+            this.playerAnswerAnimationDuration = this.quiz.settings.playerAnswerAnimationDuration;
+          }
+
+          if (this.quiz.settings.showNextDelay !== undefined) {
+            this.showNextDelay = this.quiz.settings.showNextDelay;
+          }
+
+          if (this.quiz.settings.amountOfPicturesToShow !== undefined) {
+            this.currentPictureStayDuration = (this.timeBarAnimationDuration / this.quiz.settings.amountOfPicturesToShow);
+          }
+
+          if (this.quiz.settings.autoPlay !== undefined) {
+            this.autoPlay = this.quiz.settings.autoPlay;
+          }
+
+          if (this.quiz.settings.startMessage !== undefined) {
+            this.startMessage = this.quiz.settings.startMessage;
+          }
+
+          if (this.quiz.settings.backgroundImage !== undefined) {
+            this.backgroundImage = this.quiz.settings.backgroundImage;
+          }
+        }
+
+        if (this.platform.is('android')) {
+          /* First lets go fullScreenMode if possible */
+          this.goFullScreen();
+
+          /* Lock screen orientation to landscape */
+          this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
+        }
+
         this.gameProv.createGame().then(() => {
           BarcodeGenerator.generate(
             { content: 'https://quizpadapp.com/' + this.gameProv.game.uuid, // relative path to app's www directory
@@ -307,50 +351,6 @@ export class PlayPage {
             this.gameProv.currentPicture = 0;
             this.currentPictureCounter = 0;
             this.currentPictures = [];
-
-            //Get Quiz settings
-            if (this.quiz.settings) {
-              if (this.quiz.settings.commonAnimationDuration !== undefined) {
-                this.commonAnimationDuration = this.quiz.settings.commonAnimationDuration;
-              }
-
-              if (this.quiz.settings.timeBarAnimationDuration !== undefined) {
-                this.timeBarAnimationDuration = this.quiz.settings.timeBarAnimationDuration;
-                this.currentPictureStayDuration = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW);
-              }
-
-              if (this.quiz.settings.playerAnswerAnimationDuration !== undefined) {
-                this.playerAnswerAnimationDuration = this.quiz.settings.playerAnswerAnimationDuration;
-              }
-
-              if (this.quiz.settings.showNextDelay !== undefined) {
-                this.showNextDelay = this.quiz.settings.showNextDelay;
-              }
-
-              if (this.quiz.settings.amountOfPicturesToShow !== undefined) {
-                this.currentPictureStayDuration = (this.timeBarAnimationDuration / this.quiz.settings.amountOfPicturesToShow);
-              }
-
-              if (this.quiz.settings.autoPlay !== undefined) {
-                this.autoPlay = this.quiz.settings.autoPlay;
-              }
-
-              if (this.quiz.settings.startMessage !== undefined) {
-                this.startMessage = this.quiz.settings.startMessage;
-              }
-
-              if (this.quiz.settings.backgroundImage !== undefined) {
-                this.backgroundImage = this.quiz.settings.backgroundImage;
-              }
-            }
-
-            if (this.platform.is('android')) {
-              /* First lets go fullScreenMode if possible */
-              this.goFullScreen();
-
-              /* Lock screen orientation to landscape */
-              this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.LANDSCAPE);
-            }
 
             this.screenState = ScreenStateType.playersJoining;
             this.displayPlayers = true;
