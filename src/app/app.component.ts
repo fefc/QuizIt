@@ -147,9 +147,9 @@ export class AppComponent {
   startScanning() {
     this.barcodeScanner.scan(BARECODE_SCANNER_OPTIONS).then((data) => {
      if (data.cancelled === false) {
-       if (data.text.startsWith('https://quizpadapp.com/')) {
+       if (data.text.startsWith('https://quizpadapp.com/controller?id=')) {
          this.menuCtrl.close('menu-one');
-         this.joinGame(data.text.replace('https://quizpadapp.com/', ''));
+         this.joinGame(data.text.replace('https://quizpadapp.com/controller?id=', ''));
        } else {
          this.menuCtrl.close('menu-one');
          this.showGeneralErrorAlert('Invalid QR code', 'The scanned QR code is not valid, please try again with a valid QuizPad QR code.');

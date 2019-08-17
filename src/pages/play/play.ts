@@ -335,7 +335,7 @@ export class PlayPage {
 
         this.gameProv.createGame().then(() => {
           BarcodeGenerator.generate(
-            { content: 'https://quizpadapp.com/' + this.gameProv.game.uuid, // relative path to app's www directory
+            { content: 'https://quizpadapp.com/controller?id=' + this.gameProv.game.uuid,
               height: 256,
               width: 256,
               format: 11,
