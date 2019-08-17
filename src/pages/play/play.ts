@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Platform, AlertController, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
+import { Platform, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 import { File } from '@ionic-native/file';
-import { Observable } from 'rxjs/Observable';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
@@ -16,7 +15,7 @@ import { DefaultQuizSettings } from '../../models/quiz-settings';
 import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
-import { Player, PlayerStats, PlayerAnimData } from '../../models/player';
+import { Player } from '../../models/player';
 
 import { GameState } from '../../models/game';
 
@@ -232,7 +231,6 @@ export class PlayPage {
 
   constructor(private platform: Platform,
               private navCtrl: NavController,
-              private alertCtrl: AlertController,
               private actionSheetCtrl: ActionSheetController,
               public modalCtrl: ModalController,
               private toastCtrl: ToastController,
