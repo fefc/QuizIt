@@ -27,18 +27,8 @@
             <application android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" />
         </edit-config>
         <resource-file src="resources/android/values/ic_launcher_background.xml" target="app/src/main/res/values/ic_launcher_background.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-ldpi-v26/ic_launcher.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-ldpi-v26/ic_launcher_round.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-mdpi-v26/ic_launcher.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-mdpi-v26/ic_launcher_round.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-hdpi-v26/ic_launcher.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-hdpi-v26/ic_launcher_round.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-xhdpi-v26/ic_launcher.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-xhdpi-v26/ic_launcher_round.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-xxhdpi-v26/ic_launcher.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-xxhdpi-v26/ic_launcher_round.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-xxxhdpi-v26/ic_launcher.xml" />
-        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-xxxhdpi-v26/ic_launcher_round.xml" />
+        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" />
+        <resource-file src="resources/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" />
         <resource-file src="resources/android/mipmap-ldpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-ldpi-v26/ic_launcher_foreground.png" />
         <resource-file src="resources/android/mipmap-mdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-mdpi-v26/ic_launcher_foreground.png" />
         <resource-file src="resources/android/mipmap-hdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-hdpi-v26/ic_launcher_foreground.png" />
@@ -123,5 +113,5 @@
         <variable name="ANDROID_SUPPORT_VERSION" value="27.+" />
     </plugin>
     <engine name="browser" spec="5.0.4" />
-    <engine name="android" spec="8.0.0" />
+    <engine name="android" spec="~8.0.0" />
 </widget>
