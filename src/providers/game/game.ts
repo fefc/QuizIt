@@ -225,6 +225,8 @@ export class GameProvider {
         let realPlayer = this.players.find((player) => player.uuid === sortedPlayers[newPlayerPosition].uuid);
         realPlayer.animations.previousPosition = realPlayer.animations.actualPosition;
         realPlayer.animations.actualPosition = newPlayerPosition;
+
+        realPlayer.stats.position = realPlayer.animations.actualPosition + 1;
       }
 
       let batch = firebase.firestore().batch();
