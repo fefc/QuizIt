@@ -6,7 +6,8 @@
     Play now by scanning the QR code!
   </div>
 
-  <img *ngIf="screenState === ScreenStateType.playersJoining" [src]="renderQrCode(qrCode)" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="qrcode">
+  <img *ngIf="screenState === ScreenStateType.playersJoining" [src]="renderQrCode(qrCode)" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}"
+    class="qrcode" [ngClass]="{'qrcode-browser': platform.is('cordova')}">
 
   <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
     {{startMessage}}
