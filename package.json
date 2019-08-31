@@ -102,11 +102,11 @@
       "cordova-plugin-insomnia": {},
       "cordova-plugin-app-version": {},
       "phonegap-plugin-barcodescanner": {},
-      "com.attendee.barcodegenerator": {},
       "cordova-plugin-telerik-imagepicker": {},
       "cordova-android-support-gradle-release": {
         "ANDROID_SUPPORT_VERSION": "27.+"
-      }
+      },
+      "cordova-plugin-barcodegenerator": {}
     },
     "platforms": [
       "browser",
