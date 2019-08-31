@@ -51,7 +51,7 @@ export class AppComponent {
 
   rootPage:any;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
+  constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
     public menuCtrl: MenuController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,

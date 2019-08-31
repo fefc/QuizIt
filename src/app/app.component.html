@@ -16,7 +16,7 @@
           <ion-icon name="clipboard" item-start></ion-icon>
           Quizzes
         </ion-item>
-        <ion-item tappable (tap)="openBarcodeScannerPage()">
+        <ion-item *ngIf="!platform.is('cordova')" tappable (tap)="openBarcodeScannerPage()">
           <ion-icon name="game-controller-b" item-start></ion-icon>
           Join game
         </ion-item>
