@@ -26,6 +26,6 @@ ion-icon {
   }
 
   &[class*="quiz-it-icon"] {
-    mask-image: url(../assets/svgs/icon.svg);
+    mask-image: url("../assets/svgs/icon.svg");
   }
 }

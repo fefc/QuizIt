@@ -62,6 +62,28 @@ export class AppComponent {
     private profilesProv: UserProfilesProvider,
     private quizsProv: QuizsProvider,
     private gameControllerProv: GameControllerProvider) {
+
+    //toBlob function for Edge support
+    //https://stackoverflow.com/a/47487073/7890583  
+    if (!HTMLCanvasElement.prototype.toBlob) {
+      Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+        value: function (callback, type, quality) {
+          var canvas = this;
+          setTimeout(function() {
+            var binStr = atob( canvas.toDataURL(type, quality).split(',')[1] ),
+            len = binStr.length,
+            arr = new Uint8Array(len);
+
+            for (var i = 0; i < len; i++ ) {
+              arr[i] = binStr.charCodeAt(i);
+            }
+
+            callback( new Blob( [arr], {type: type || 'image/png'} ) );
+          });
+        }
+      });
+    }
+
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
