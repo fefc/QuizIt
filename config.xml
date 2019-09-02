@@ -98,10 +98,10 @@
     </platform>
     <platform name="browser">
         <preference name="AutoHideSplashScreen" value="true" />
-        <preference name="SplashScreen" value="resources/browser/splash/screen.png" />
+        <preference name="SplashScreen" value="assets/svgs/icon.svg" />
         <preference name="SplashScreenBackgroundColor" value="#222" />
-        <preference name="SplashScreenWidth" value="450" />
-        <preference name="SplashScreenHeight" value="436" />
+        <preference name="SplashScreenWidth" value="512" />
+        <preference name="SplashScreenHeight" value="512" />
     </platform>
     <plugin name="cordova-plugin-whitelist" spec="1.3.3" />
     <plugin name="cordova-plugin-statusbar" spec="2.4.2" />
@@ -114,6 +114,6 @@
     </plugin>
     <plugin name="cordova-plugin-barcodegenerator" spec="../cordova-plugins/BarcodeGenerator" />
     <plugin name="cordova-plugin-app-version" spec="../cordova-plugins/cordova-plugin-app-version" />
-    <engine name="browser" spec="5.0.4" />
     <engine name="android" spec="8.0.0" />
+    <engine name="browser" spec="~5.0.4" />
 </widget>
