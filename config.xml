@@ -116,4 +116,5 @@
     <plugin name="cordova-plugin-app-version" spec="../cordova-plugins/cordova-plugin-app-version" />
     <engine name="browser" spec="5.0.4" />
     <engine name="android" spec="8.0.0" />
+    <plugin name="cordova-plugin-file" spec="6.0.2" />
 </widget>
