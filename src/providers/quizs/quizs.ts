@@ -253,8 +253,8 @@ export class QuizsProvider {
   }
 
   moveAttachementsFromCacheToDataDir(quizUuid: string, questionUuid: string, attachements: Array<string>) {
-    return new Promise((resolve, reject) => {
-      var promises = [];
+    return new Promise(async (resolve, reject) => {
+      //var promises = []; //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
       var destinationDir: string = this.file.dataDirectory + quizUuid + '/' + questionUuid;
       var sourceDir: string;
       var fileName: string;
@@ -268,19 +268,19 @@ export class QuizsProvider {
         sourceDir = attachement.substring(0, indexOfSlash);
         fileName = attachement.substring(indexOfSlash);
         if (indexOfSlash > 0) {
-          promises.push(this.file.moveFile(sourceDir, fileName, destinationDir, fileName));
+          try {
+            await this.file.moveFile(sourceDir, fileName, destinationDir, fileName);
+          } catch (error) {
+           reject('Moving file from temporary to persistant failed');
+          }
+          
           result.fileNames.push(fileName);
         }
         else {
           reject('Invalid sourceDir of fileName.');
         }
       }
-
-      Promise.all(promises).then(() => {
-        resolve(result);
-      }).catch(() => {
-        reject('Something happend moving attachements.');
-      });
+      resolve(result);
     });
   }
 
