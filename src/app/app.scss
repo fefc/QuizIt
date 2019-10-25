@@ -17,15 +17,15 @@
 
 ion-icon {
   &[class*="quiz-it-"] {
-    mask-size: contain;
-    mask-position: 50% 50%;
-    mask-repeat: no-repeat;
-    background: currentColor;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    //background: currentColor;
     width: 1.6em;
     height: 1.6em;
   }
 
   &[class*="quiz-it-icon"] {
-    mask-image: url("../assets/svgs/icon.svg");
+    background-image: url("../assets/svgs/icon.svg");
   }
 }
