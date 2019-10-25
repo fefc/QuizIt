@@ -111,8 +111,8 @@ export class QuizsProvider {
           //Check attachements
           var promises = [];
 
-          for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///")) !== -1))) {
-            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, question.answers.filter((a) => a.startsWith("file:///"))));
+          for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///") || a.startsWith("filesystem:")) !== -1))) {
+            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
           }
 
           Promise.all(promises).then((results: Array<AttachementsResult>) => {
