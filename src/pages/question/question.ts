@@ -31,10 +31,12 @@ export class QuestionPage {
   private previousRightAnswer: number;
 
   private pictures: Array<SafeUrl>;
+  private extras: Array<SafeUrl>;
 
   @ViewChild(Slides) slides: Slides;
   @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
   @ViewChild('fileInputReplace') fileInputReplace: ElementRef; //Picture selector for browser
+  @ViewChild('fileInputExtra') fileInputExtra: ElementRef; //Extra selector for browser
 
   private replacePictureIndex: number;
 
@@ -67,6 +69,7 @@ export class QuestionPage {
 
       this.attachementDir = '';
       this.pictures = [];
+      this.extras = [];
 
       this.title = "New Question";
       this.saveButtonName = "Create";
@@ -76,6 +79,7 @@ export class QuestionPage {
 
       this.attachementDir = params.data.quizUuid + '/' + this.question.uuid + '/';
       this.pictures = new Array<SafeUrl>(this.question.answers.length);
+      this.extras = new Array<SafeUrl>(this.question.extras.length);
 
       if (this.question.type == QuestionType.rightPicture) {
         for (let i: number = 0; i < this.question.answers.length; i++) {
@@ -171,28 +175,32 @@ export class QuestionPage {
     this.question.rightAnswer = val;
   }
 
-  openImagePicker() {
+  openImagePicker(maximumImagesCount: number, extra: boolean) {
     if (this.platform.is('android')) {
       this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
       .then(status => {
         if (status.hasPermission) {
-          this.openMobileImagePicker();
+          this.openMobileImagePicker(maximumImagesCount, extra);
         } else {
           this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
           .then(status => {
             if(status.hasPermission) {
-              this.openMobileImagePicker();
+              this.openMobileImagePicker(maximumImagesCount, extra);
             }
           });
         }
       });
     } else {
-      this.openBrowserImagePicker();
+      this.openBrowserImagePicker(extra);
     }
   }
 
-  openBrowserImagePicker(){
-    this.fileInput.nativeElement.click();
+  openBrowserImagePicker(extra: boolean){
+    if (extra) {
+      this.fileInputExtra.nativeElement.click();
+    } else {
+      this.fileInput.nativeElement.click();
+    }
   };
 
   replacePicture(val: number) {
@@ -221,16 +229,33 @@ export class QuestionPage {
   }
 
   //https://stackoverflow.com/a/52970316
-  openMobileImagePicker() {
-    this.imagePicker.getPictures({maximumImagesCount: this.maxPictures - this.question.answers.length, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
+  openMobileImagePicker(maximumImagesCount: number, extra: boolean) {
+    let maxImages: number;
+
+    if (extra) {
+      maxImages = maximumImagesCount;
+    } else {
+      maxImages = maximumImagesCount - this.question.answers.length;
+    }
+
+    this.imagePicker.getPictures({maximumImagesCount: maxImages, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
       let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
       let decodedURI: string = '';
 
       for (var i = 0; i < results.length; i++) {
         decodedURI = decodeURIComponent(results[i]);
-        this.question.answers.push(decodedURI);
-        this.pictures.push(undefined);
-        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), this.pictures.length - 1);
+
+        if (extra) {
+          this.question.extras = [];
+          this.question.extras.push(decodedURI);
+
+          this.extras = [];
+          this.extras.push(undefined);
+        } else {
+          this.question.answers.push(decodedURI);
+          this.pictures.push(undefined);
+          this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), this.pictures.length - 1);
+        }
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -251,10 +276,25 @@ export class QuestionPage {
     });
   }
 
-  getBrowserImages() {
-    let files: Array<any> = this.fileInput.nativeElement.files;
+  getBrowserImages(maximumImagesCount: number, extra: boolean) {
+    let error: boolean = false;
+    let files: Array<any>;
 
-    if (files.length > this.maxPictures - this.question.answers.length) {
+    if (extra) {
+      files = this.fileInputExtra.nativeElement.files;
+
+      if (files.length > maximumImagesCount) {
+        error = true;
+      }
+    } else {
+      files = this.fileInput.nativeElement.files;
+
+      if (files.length > maximumImagesCount - this.question.answers.length) {
+        error = true;
+      }
+    }
+
+    if (error) {
       alert("to many images");
     } else {
       for (let file of files) {
@@ -262,9 +302,17 @@ export class QuestionPage {
           var filename: string = this.uuidv4() + '.jpg';
 
           this.file.writeFile(this.file.cacheDirectory, filename, e.target.result, { replace: true }).then(() => {
-            this.question.answers.push(this.file.cacheDirectory + filename);
-            this.pictures.push(undefined);
-            this.renderPicture(this.file.cacheDirectory, filename, this.pictures.length - 1);
+            if (extra) {
+              this.question.extras = [];
+              this.question.extras.push(this.file.cacheDirectory + filename);
+
+              this.extras = [];
+              this.extras.push(undefined);
+            } else {
+              this.question.answers.push(this.file.cacheDirectory + filename);
+              this.pictures.push(undefined);
+              this.renderPicture(this.file.cacheDirectory, filename, this.pictures.length - 1);
+            }
           }).catch((error) => {
             alert(error);
           });

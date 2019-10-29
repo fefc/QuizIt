@@ -62,7 +62,7 @@
         </ion-fab-list>
       </ion-fab>
     </ion-slide>
-    <input #fileInput type="file" style="display: none" (change)="getBrowserImages()" accept="image/png, image/jpeg" multiple/>
+    <input #fileInput type="file" style="display: none" (change)="getBrowserImages(maxPictures, false)" accept="image/png, image/jpeg" multiple/>
     <input #fileInputReplace type="file" style="display: none" (change)="getBrowserReplaceImage()" accept="image/png, image/jpeg"/>
   </ion-slides>
 </ion-content>
@@ -70,10 +70,12 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons left *ngIf="question.type === QuestionType.rightPicture">
-      <button ion-button (click)="openImagePicker()" [disabled]="question.answers.length >= maxPictures">Add pictures</button>
+      <button ion-button (click)="openImagePicker(maxPictures, false)" [disabled]="question.answers.length >= maxPictures">Add pictures</button>
     </ion-buttons>
     <ion-buttons right>
+      <button ion-button (click)="openImagePicker(1, true)">Add Extra</button>
       <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{saveButtonName}}</button>
     </ion-buttons>
+    <input #fileInputExtra type="file" style="display: none" (change)="getBrowserImages(1, true)" accept="image/png, image/jpeg"/>
   </ion-toolbar>
 </ion-footer>
