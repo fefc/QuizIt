@@ -63,6 +63,12 @@
     </div>
   </div>
 
+  <!--Extra Zone-->
+  <div class="extra" *ngIf="screenState === ScreenStateType.displayExtra"
+    [@extraAnimation]="{value: '', params: {time: commonAnimationDuration}}">
+
+  </div>
+
   <!--Question & Timebar Zone-->
   <div class="time-bar" *ngIf="displayTimeBar"
         [@timeBarAnimation]="{value: '', params: {time: timeBarAnimationDuration}}">

@@ -32,6 +32,7 @@ enum ScreenStateType {
   displayPlayersAnswer,
   hideQuestion,
   end,
+  displayExtra,
 }
 
 @Component({
@@ -180,6 +181,17 @@ enum ScreenStateType {
           )
         ],  { params: { time: 600, previousYTranslation: 0, actualYTranslationHalf: 0, actualYTranslation: 0 } }),
       ]),
+      trigger(
+      'extraAnimation' , [
+        transition(':enter', [
+          style({transform: 'rotate3d(1, 1, 0, -90deg)', transformOrigin: "0 92.5vh", opacity: 0}),
+          animate('{{time}}ms', style({transform: 'none', opacity: 1}))
+        ], { params: { time: 600 } }),
+        transition(':leave', [
+          style({transform: 'none', transformOrigin: "72vw 92.5vh", opacity: 1}),
+          animate('{{time}}ms', style({transform: 'rotate3d(1, 0, 1, -90deg)', opacity: 0}))
+        ], { params: { time: 600 } }),
+      ]),
   ],
   templateUrl: 'play.html'
 })
@@ -190,6 +202,7 @@ export class PlayPage {
   private timeBarAnimationDuration: number = DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION;
   private playerAnswerAnimationDuration: number = DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION;
   private currentPictureStayDuration: number = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW); //The dividing number is the number of picture I want to see
+  private displayExtraStayDuration: number = 10000;
   private showNextDelay: number = DefaultQuizSettings.SHOW_NEXT_DELAY;
 
   private autoPlay: boolean = DefaultQuizSettings.AUTO_PLAY;
@@ -455,21 +468,14 @@ export class PlayPage {
             this.currentPictures.push(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
           }
 
-          this.screenState = ScreenStateType.displayQuestion;
-          setTimeout(() => this.displayTimeBar = true, this.commonAnimationDuration);
+          let some = true;
 
-          this.gameProv.updateState(this.currentQuestions[this.currentQuestion].type === QuestionType.rightPicture ? GameState.pictureQuestionDisplayed : GameState.classicQuestionDisplayed).catch(() => {
+          this.screenState = ScreenStateType.displayExtra;
 
-          });
-
-          this.displayPlayers = true;
-          this.displayQuestionTimer = setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
-
-          if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
-            this.displayPictures = true;
-            this.switchPicturesTimer = setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration + (this.commonAnimationDuration / 2));
+          if (this.currentQuestions[this.currentQuestion].extras.length > 0) {
+            setTimeout(() => this.next(), this.displayExtraStayDuration);
           } else {
-            this.displayAnswers = true;
+            this.next();
           }
         }).catch(() => {
           console.log("Something went wrong when reading pictures.");
@@ -487,6 +493,24 @@ export class PlayPage {
           this.displayPlayers = false;
         }
         setTimeout(() => this.next(), this.commonAnimationDuration);
+      }
+    }
+    else if (this.screenState === ScreenStateType.displayExtra) {
+      this.screenState = ScreenStateType.displayQuestion;
+      setTimeout(() => this.displayTimeBar = true, this.commonAnimationDuration);
+
+      this.gameProv.updateState(this.currentQuestions[this.currentQuestion].type === QuestionType.rightPicture ? GameState.pictureQuestionDisplayed : GameState.classicQuestionDisplayed).catch(() => {
+        console.log("Update game state did not worked properly.");
+      });
+
+      this.displayPlayers = true;
+      this.displayQuestionTimer = setTimeout(() => this.next(), this.timeBarAnimationDuration + this.commonAnimationDuration);
+
+      if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+        this.displayPictures = true;
+        this.switchPicturesTimer = setTimeout(() => this.currentPictureSwitch(), this.currentPictureStayDuration + (this.commonAnimationDuration / 2));
+      } else {
+        this.displayAnswers = true;
       }
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
