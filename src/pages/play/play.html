@@ -66,7 +66,7 @@
   <!--Extra Zone-->
   <div class="extra" *ngIf="screenState === ScreenStateType.displayExtra"
     [@extraAnimation]="{value: '', params: {time: commonAnimationDuration}}">
-
+    <canvas [style.background-image]="currentExtras[0]"></canvas>
   </div>
 
   <!--Question & Timebar Zone-->

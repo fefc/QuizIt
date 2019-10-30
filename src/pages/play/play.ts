@@ -236,9 +236,9 @@ export class PlayPage {
   private currentQuestion: number;
   private currentQuestions: Array<Question>;
 
-  //private currentPicture: number;
   private currentPictureCounter: number;
   private currentPictures: Array<SafeUrl>;
+  private currentExtras: Array<SafeUrl>;
 
   private qrCode: string;
 
@@ -362,6 +362,7 @@ export class PlayPage {
             this.gameProv.currentPicture = 0;
             this.currentPictureCounter = 0;
             this.currentPictures = [];
+            this.currentExtras = [];
 
             this.screenState = ScreenStateType.playersJoining;
             this.displayPlayers = true;
@@ -452,47 +453,61 @@ export class PlayPage {
       if (this.currentQuestion < this.currentQuestions.length) {
         var promises = [];
 
-        if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
+        this.currentExtras = [];
 
-          this.gameProv.currentPicture = 0;
-          this.currentPictureCounter = 0;
-          this.currentPictures = [];
-
-          for (let i: number = 0; i < this.currentQuestions[this.currentQuestion].answers.length; i++) {
-            promises.push(this.file.readAsDataURL(this.file.dataDirectory, this.getPicturePath(this.currentQuestions[this.currentQuestion], i)));
-          }
+        //Add extras to be loaded
+        for (let i: number = 0; i < this.currentQuestions[this.currentQuestion].extras.length; i++) {
+          promises.push(this.file.readAsDataURL(this.file.dataDirectory, this.getExtraPath(this.currentQuestions[this.currentQuestion], i)));
         }
 
-        Promise.all(promises).then((pictures) => {
-          for (let picture of pictures) {
-            this.currentPictures.push(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
+        Promise.all(promises).then((extras) => {
+          for (let extra of extras) {
+            //No need to worry about the order, the order is preserved with Promise.all
+            this.currentExtras.push(this.sanitizer.bypassSecurityTrustStyle(`url('${extra}')`));
           }
 
-          let some = true;
+          promises = [];
 
-          this.screenState = ScreenStateType.displayExtra;
+          if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
 
-          if (this.currentQuestions[this.currentQuestion].extras.length > 0) {
-            setTimeout(() => this.next(), this.displayExtraStayDuration);
-          } else {
-            this.next();
+            this.gameProv.currentPicture = 0;
+            this.currentPictureCounter = 0;
+            this.currentPictures = [];
+
+            for (let i: number = 0; i < this.currentQuestions[this.currentQuestion].answers.length; i++) {
+              promises.push(this.file.readAsDataURL(this.file.dataDirectory, this.getPicturePath(this.currentQuestions[this.currentQuestion], i)));
+            }
           }
+
+          Promise.all(promises).then((pictures) => {
+            for (let picture of pictures) {
+              //No need to worry about the order, the order is preserved with Promise.all
+              this.currentPictures.push(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
+            }
+
+            this.screenState = ScreenStateType.displayExtra;
+
+            if (this.currentQuestions[this.currentQuestion].extras.length > 0) {
+              setTimeout(() => this.next(), this.displayExtraStayDuration);
+            } else {
+              this.next();
+            }
+          }).catch(() => {
+            console.log("Something went wrong when reading pictures.");
+
+            this.screenState = ScreenStateType.loadNextQuestion;
+            this.hidePlayers();
+          });
         }).catch(() => {
-          console.log("Something went wrong when reading pictures.");
+          console.log("Something went wrong when reading extras.");
 
           this.screenState = ScreenStateType.loadNextQuestion;
-          if (this.currentCategory + 1 < this.currentCategories.length) {
-            this.displayPlayers = false;
-          }
-          setTimeout(() => this.next(), this.commonAnimationDuration);
+          this.hidePlayers();
         });
       }
       else {
         this.screenState = ScreenStateType.loadNextCategory;
-        if (this.currentCategory + 1 < this.currentCategories.length) {
-          this.displayPlayers = false;
-        }
-        setTimeout(() => this.next(), this.commonAnimationDuration);
+        this.hidePlayers();
       }
     }
     else if (this.screenState === ScreenStateType.displayExtra) {
@@ -548,6 +563,13 @@ export class PlayPage {
     }
   }
 
+  hidePlayers() {
+    if (this.currentCategory + 1 < this.currentCategories.length) {
+      this.displayPlayers = false;
+    }
+    setTimeout(() => this.next(), this.commonAnimationDuration);
+  }
+
   currentPictureSwitch() {
     this.currentPictureCounter++;
 
@@ -572,6 +594,10 @@ export class PlayPage {
 
   getPicturePath(question: Question, answerIndex: number) {
     return this.quiz.uuid + '/' + question.uuid + '/' + question.answers[answerIndex];
+  }
+
+  getExtraPath(question: Question, extraIndex: number) {
+    return this.quiz.uuid + '/' + question.uuid + '/' + question.extras[extraIndex];
   }
 
   getPlayerHeight() {
