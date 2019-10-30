@@ -8,11 +8,16 @@ import { Quiz } from '../../models/quiz';
 import { Question } from '../../models/question';
 import { QuestionType } from '../../models/question';
 
-interface AttachementsResult {
-  questionUuid: string,
-  fileNames: Array<string>
+enum AttachementType {
+  answers,
+  extras
 }
 
+interface AttachementsResult {
+  questionUuid: string,
+  type: AttachementType,
+  fileNames: Array<string>
+}
 
 /*
   Generated class for the QuizsProvider provider.
@@ -111,22 +116,43 @@ export class QuizsProvider {
           //Check attachements
           var promises = [];
 
+          //First check question answers (pictures)
           for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///") || a.startsWith("filesystem:")) !== -1))) {
-            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
+            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
+          }
+
+          //// TODO: Maybe do a cleaner code for that?
+
+          //Second check question extras
+          for (let question of quiz.questions.filter((q) => (q.extras.findIndex((e) => e.startsWith("file:///") || e.startsWith("filesystem:")) !== -1))) {
+            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
           }
 
           Promise.all(promises).then((results: Array<AttachementsResult>) => {
             //Update answers so that they contain only fileName and not fullPath
+            let attachementIndex: number;
+
             if (results) {
               for (let result of results) {
                 questionIndex = quiz.questions.findIndex((q) => q.uuid === result.questionUuid);
 
                 if (questionIndex !== -1) {
-                  for (let fileName of result.fileNames) {
-                    let answerIndex: number = quiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
+                  if (result.type === AttachementType.answers) {
+                    //set correct answers
+                    for (let fileName of result.fileNames) {
+                      attachementIndex = quiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
 
-                    quiz.questions[questionIndex].answers[answerIndex] = fileName;
+                      quiz.questions[questionIndex].answers[attachementIndex] = fileName;
+                    }
+                  } else if (result.type === AttachementType.extras) {
+                    //set correct extras
+                    for (let fileName of result.fileNames) {
+                      attachementIndex = quiz.questions[questionIndex].extras.findIndex((e) => e.endsWith(fileName));
+
+                      quiz.questions[questionIndex].extras[attachementIndex] = fileName;
+                    }
                   }
+
                 }
               }
             }
@@ -208,10 +234,10 @@ export class QuizsProvider {
     });
   }
 
-  copyAttachementsToDataDirectory(quizUuid: string, questionUuid: string, attachements: Array<string>) {
+  copyAttachementsToDataDirectory(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
     return new Promise((resolve, reject) => {
       this.checkAndCreateDirectories(quizUuid, questionUuid).then(() => {
-        this.moveAttachementsFromCacheToDataDir(quizUuid, questionUuid, attachements).then((result: AttachementsResult) => {
+        this.moveAttachementsFromCacheToDataDir(quizUuid, questionUuid, type, attachements).then((result: AttachementsResult) => {
           resolve(result);
         }).catch((err) => {
           reject(err);
@@ -252,7 +278,7 @@ export class QuizsProvider {
     });
   }
 
-  moveAttachementsFromCacheToDataDir(quizUuid: string, questionUuid: string, attachements: Array<string>) {
+  moveAttachementsFromCacheToDataDir(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
     return new Promise(async (resolve, reject) => {
       //var promises = []; //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
       var destinationDir: string = this.file.dataDirectory + quizUuid + '/' + questionUuid;
@@ -260,6 +286,7 @@ export class QuizsProvider {
       var fileName: string;
       var result: AttachementsResult = {
         questionUuid: questionUuid,
+        type: type,
         fileNames: []
       };
 
@@ -273,7 +300,7 @@ export class QuizsProvider {
           } catch (error) {
            reject('Moving file from temporary to persistant failed');
           }
-          
+
           result.fileNames.push(fileName);
         }
         else {
@@ -367,6 +394,7 @@ export class QuizsProvider {
     });
   }
 
+  // TODO: This function needs to be updated to export extras!!
   unzipImportedQuizAndImport(cordovaFilePath: string, filePath: string) {
     return new Promise((resolve, reject) => {
       JJzip.unzip(cordovaFilePath + filePath, {target: this.file.cacheDirectory + 'import'}, (data) => {
@@ -403,7 +431,7 @@ export class QuizsProvider {
                       var movePromises = [];
 
                       for (let question of importQuiz.questions.filter((q) => q.type === QuestionType.rightPicture)) {
-                        movePromises.push(this.copyAttachementsToDataDirectory(importQuiz.uuid, question.uuid, question.answers));
+                        movePromises.push(this.copyAttachementsToDataDirectory(importQuiz.uuid, question.uuid, AttachementType.answers, question.answers));
                       }
 
                       Promise.all(movePromises).then((results: Array<AttachementsResult>) => {
