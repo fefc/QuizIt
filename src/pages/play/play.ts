@@ -202,7 +202,7 @@ export class PlayPage {
   private timeBarAnimationDuration: number = DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION;
   private playerAnswerAnimationDuration: number = DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION;
   private currentPictureStayDuration: number = (this.timeBarAnimationDuration / DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW); //The dividing number is the number of picture I want to see
-  private displayExtraStayDuration: number = 10000;
+  private extraDisplayDuration: number = DefaultQuizSettings.EXTRA_DISPLAY_DURATION;
   private showNextDelay: number = DefaultQuizSettings.SHOW_NEXT_DELAY;
 
   private autoPlay: boolean = DefaultQuizSettings.AUTO_PLAY;
@@ -218,6 +218,7 @@ export class PlayPage {
   private displayAnswers: boolean;
   private displayPictures: boolean;
   private displayPlayers: boolean;
+  private displayExtras: boolean;
 
   private showNext: boolean; //for use in Angular html
   private showMenu: boolean; //for use in Angular html
@@ -259,6 +260,7 @@ export class PlayPage {
     this.displayAnswers = false;
     this.displayPictures = false;
     this.displayPlayers = false;
+    this.displayExtras = false;
 
     this.showNext = false;
     this.showMenu = false;
@@ -273,6 +275,7 @@ export class PlayPage {
     this.displayAnswers = this.displayAnswers;
     this.displayPictures = this.displayPictures;
     this.displayPlayers = this.displayPlayers;
+    this.displayExtras = this.displayExtras;
 
     this.showNext = this.showNext;
     this.showMenu = this.showMenu;
@@ -333,6 +336,10 @@ export class PlayPage {
 
           if (this.quiz.settings.backgroundImage !== undefined) {
             this.backgroundImage = this.quiz.settings.backgroundImage;
+          }
+
+          if (this.quiz.settings.extraDisplayDuration !== undefined) {
+            this.extraDisplayDuration = this.quiz.settings.extraDisplayDuration;
           }
         }
 
@@ -461,9 +468,13 @@ export class PlayPage {
         }
 
         Promise.all(promises).then((extras) => {
-          for (let extra of extras) {
+          for (let i: number = 0; i < extras.length; i++) {
             //No need to worry about the order, the order is preserved with Promise.all
-            this.currentExtras.push(this.sanitizer.bypassSecurityTrustStyle(`url('${extra}')`));
+            if (['.mp4', '.webm', '.ogg'].some(extension => this.currentQuestions[this.currentQuestion].extras[i].endsWith(extension))) {
+              this.currentExtras.push(this.sanitizer.bypassSecurityTrustUrl(extras[i]));
+            } else {
+              this.currentExtras.push(this.sanitizer.bypassSecurityTrustStyle(`url('${extras[i]}')`));
+            }
           }
 
           promises = [];
@@ -488,7 +499,9 @@ export class PlayPage {
             this.screenState = ScreenStateType.displayExtra;
 
             if (this.currentQuestions[this.currentQuestion].extras.length > 0) {
-              setTimeout(() => this.next(), this.displayExtraStayDuration);
+              setTimeout(() => this.displayExtras = true, this.commonAnimationDuration);
+              setTimeout(() => this.displayExtras = false, this.commonAnimationDuration + this.extraDisplayDuration);
+              setTimeout(() => this.next(), this.extraDisplayDuration + this.commonAnimationDuration * 2);
             } else {
               this.next();
             }

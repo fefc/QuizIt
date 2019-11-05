@@ -35,7 +35,7 @@
         }
     }"
     (@playerPositionAnimation.done) = "saveActualYTranslation($event, i)">
-      <button *ngIf="screenState === ScreenStateType.playersJoining" ion-button icon-only class="remove-button" (click)="removePlayer(player, i)">
+      <button *ngIf="screenState === ScreenStateType.playersJoining" ion-button icon-only class="remove-button" (click)="gameProv.deletePlayer(i)">
         <ion-icon name="remove-circle"></ion-icon>
       </button>
       <div class="info" [ngStyle]="getAvatarWidth()">
@@ -64,9 +64,12 @@
   </div>
 
   <!--Extra Zone-->
-  <div class="extra" *ngIf="screenState === ScreenStateType.displayExtra"
+  <div class="extra" *ngIf="displayExtras"
     [@extraAnimation]="{value: '', params: {time: commonAnimationDuration}}">
     <canvas [style.background-image]="currentExtras[0]"></canvas>
+    <video autoplay>
+      <source [src]="currentExtras[0]"/>
+    </video>
   </div>
 
   <!--Question & Timebar Zone-->
