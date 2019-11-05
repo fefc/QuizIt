@@ -351,7 +351,7 @@ export class QuestionPage {
       alert("to many medias");
     } else {
       for (let file of files) {
-        if (['Video', 'gif'].some(type => file.type.includes(type))) {
+        if (['video', 'gif'].some(type => file.type.includes(type))) {
           //Videos or gif files are not to be resized
           var reader = new FileReader();
           reader.readAsArrayBuffer(file);
