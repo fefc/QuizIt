@@ -192,7 +192,7 @@ export class GameProvider {
 
   deletePlayer(index: number) {
     return new Promise<string>((resolve, reject) => {
-      firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.players[index].uuid).delete().then(data => {
+      firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.players[index].uuid).collection('L').doc('S').update({R: -1}).then(data => {
           this.players.splice(index, 1);
 
           for(let i = index; i < this.players.length; i++) {
@@ -203,7 +203,7 @@ export class GameProvider {
 
         resolve();
       }).catch(error => {
-        reject("Could not delete game online");
+        reject("Could not delete player online");
       });
     });
   }
