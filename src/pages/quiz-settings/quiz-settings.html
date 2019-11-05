@@ -67,6 +67,10 @@
           <ion-label>Player answers animation</ion-label>
           <ion-input type="number" min="1" placeholder="Time of player answer animation in ms" [(ngModel)]="settings.playerAnswerAnimationDuration"></ion-input>
         </ion-item>
+        <ion-item>
+          <ion-label>Intro duration</ion-label>
+          <ion-input type="number" min="1" placeholder="Display time of the introduction in ms" [(ngModel)]="settings.extraDisplayDuration"></ion-input>
+        </ion-item>
         <ion-item *ngIf="settings.autoPlay">
           <ion-label>Delay between questions</ion-label>
           <ion-input type="number" min="1" placeholder="Time before switching to next question in ms" [(ngModel)]="settings.showNextDelay"></ion-input>

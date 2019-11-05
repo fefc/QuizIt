@@ -66,6 +66,10 @@ export class QuizSettingsPage {
     if (this.settings.backgroundImage === undefined) {
       this.settings.backgroundImage = DefaultQuizSettings.BACKGROUND_IMAGE;
     }
+
+    if (this.settings.extraDisplayDuration === undefined) {
+      this.settings.extraDisplayDuration = DefaultQuizSettings.EXTRA_DISPLAY_DURATION;
+    }
   }
 
   enableSaveButton() {
@@ -92,6 +96,10 @@ export class QuizSettingsPage {
     }
 
     if (this.settings.amountOfPicturesToShow < 1 || this.settings.amountOfPicturesToShow > DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW * 4) {
+      enable = false;
+    }
+
+    if (this.settings.extraDisplayDuration < 1 || this.settings.extraDisplayDuration > DefaultQuizSettings.EXTRA_DISPLAY_DURATION * 4) {
       enable = false;
     }
 
@@ -138,6 +146,10 @@ export class QuizSettingsPage {
         newSettings.backgroundImage = this.settings.backgroundImage;
       }
 
+      if (this.settings.extraDisplayDuration !== DefaultQuizSettings.EXTRA_DISPLAY_DURATION) {
+        newSettings.extraDisplayDuration = Number(this.settings.extraDisplayDuration);
+      }
+
       this.viewCtrl.dismiss({title: this.title, settings: newSettings});
     }
   }
@@ -153,6 +165,7 @@ export class QuizSettingsPage {
       this.settings.autoPlay = DefaultQuizSettings.AUTO_PLAY;
       this.settings.endMessage = DefaultQuizSettings.END_MESSAGE;
       this.settings.backgroundImage = DefaultQuizSettings.BACKGROUND_IMAGE;
+      this.settings.extraDisplayDuration = DefaultQuizSettings.EXTRA_DISPLAY_DURATION;
   }
 
   showAdvanced() {
