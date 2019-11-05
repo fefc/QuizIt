@@ -8,6 +8,7 @@ export namespace DefaultQuizSettings {
     export const START_MESSAGE: string = ":)";
     export const END_MESSAGE: string = "The End";
     export const BACKGROUND_IMAGE: string = "0.jpg";
+    export const EXTRA_DISPLAY_DURATION: number = 3000;
 }
 
 export interface QuizSettings {
@@ -20,4 +21,5 @@ export interface QuizSettings {
   startMessage?: string,
   endMessage?: string,
   backgroundImage?: string,
+  extraDisplayDuration?: number,
 }
