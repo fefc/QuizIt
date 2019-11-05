@@ -53,29 +53,32 @@
       <ion-spinner *ngIf="!pictures[i]" name="dots" color="primary"></ion-spinner>
       <canvas *ngIf="pictures[i]" [style.background-image]="pictures[i]"></canvas>
       <ion-icon *ngIf="i === question.rightAnswer" name="checkmark-circle-outline" color="primary" class="checkmark"></ion-icon>
-      <ion-fab left bottom>
-        <button ion-fab mini><ion-icon name="image"></ion-icon></button>
-        <ion-fab-list side="right">
-          <button ion-fab (click)="rightPicture(i)"><ion-icon name="checkmark"></ion-icon></button>
-          <button ion-fab (click)="replacePicture(i)"><ion-icon name="create"></ion-icon></button>
-          <button ion-fab (click)="deletePicture(i)"><ion-icon name="trash"></ion-icon></button>
-        </ion-fab-list>
-      </ion-fab>
     </ion-slide>
-    <input #fileInput type="file" style="display: none" (change)="getBrowserImages(maxPictures, false)" accept="image/png, image/jpeg" multiple/>
-    <input #fileInputReplace type="file" style="display: none" (change)="getBrowserReplaceImage()" accept="image/png, image/jpeg"/>
   </ion-slides>
+
+  <ion-fab #slidesFab *ngIf="question.type === QuestionType.rightPicture" left bottom>
+    <button ion-fab mini><ion-icon name="image"></ion-icon></button>
+    <ion-fab-list side="right">
+      <!-- realIndex: https://github.com/ionic-team/ionic/issues/12297#issuecomment-329772167 -->
+      <button ion-fab (click)="openImagePicker(maxPictures, false)" *ngIf="question.answers.length < maxPictures"><ion-icon name="add"></ion-icon></button>
+      <button ion-fab (click)="replacePicture(slides.realIndex)" *ngIf="question.answers.length > 0"><ion-icon name="create"></ion-icon></button>
+      <button ion-fab (click)="deletePicture(slides.realIndex)" *ngIf="question.answers.length > 0"><ion-icon name="trash"></ion-icon></button>
+      <button ion-fab (click)="rightPicture(slides.realIndex)" *ngIf="question.answers.length > 0"><ion-icon name="checkmark"></ion-icon></button>
+    </ion-fab-list>
+    <input #fileInput type="file" style="display: none" (change)="getBrowserPictures(maxPictures, false)" accept="image/png, image/jpeg" multiple/>
+    <input #fileInputReplace type="file" style="display: none" (change)="getBrowserReplacePicture()" accept="image/png, image/jpeg"/>
+  </ion-fab>
 </ion-content>
 
 <ion-footer>
   <ion-toolbar color="fulldark">
-    <ion-buttons left *ngIf="question.type === QuestionType.rightPicture">
-      <button ion-button (click)="openImagePicker(maxPictures, false)" [disabled]="question.answers.length >= maxPictures">Add pictures</button>
+    <ion-buttons left>
+      <button ion-button icon-start (click)="openImagePicker(1, true)" *ngIf="question.extras.length === 0"><ion-icon name="film"></ion-icon>Add intro</button>
+      <button ion-button icon-start (click)="deleteExtras()" *ngIf="question.extras.length > 0"><ion-icon name="trash"></ion-icon>Delete intro</button>
     </ion-buttons>
+    <input #fileInputExtra type="file" style="display: none" (change)="getBrowserExtras()" accept="image/png, image/jpeg, image/gif, video/mp4, video/webm, video/ogg"/>
     <ion-buttons right>
-      <button ion-button (click)="openImagePicker(1, true)">Add Extra</button>
       <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{saveButtonName}}</button>
     </ion-buttons>
-    <input #fileInputExtra type="file" style="display: none" (change)="getBrowserImages(1, true)" accept="image/png, image/jpeg"/>
   </ion-toolbar>
 </ion-footer>
