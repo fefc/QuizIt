@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
@@ -33,6 +33,12 @@ enum ScreenStateType {
   hideQuestion,
   end,
   displayExtra,
+}
+
+enum ExtraType {
+  none,
+  picture,
+  video
 }
 
 @Component({
@@ -212,6 +218,7 @@ export class PlayPage {
 
   private ScreenStateType = ScreenStateType; //for use in Angluar html
   private QuestionType = QuestionType; //for use in Angular html
+  private ExtraType = ExtraType; //for use in Angular html
 
   private screenState: ScreenStateType;
   private displayTimeBar: boolean;
@@ -240,8 +247,11 @@ export class PlayPage {
   private currentPictureCounter: number;
   private currentPictures: Array<SafeUrl>;
   private currentExtras: Array<SafeUrl>;
+  private currentExtraType: ExtraType;
 
   private qrCode: string;
+
+  @ViewChild('extraVideo') extraVideo: ElementRef; //Video reference to control play and video duration
 
   constructor(private platform: Platform,
               private navCtrl: NavController,
@@ -257,6 +267,8 @@ export class PlayPage {
               params: NavParams) {
 
     this.screenState = ScreenStateType.start;
+    this.currentExtraType = ExtraType.none;
+
     this.displayAnswers = false;
     this.displayPictures = false;
     this.displayPlayers = false;
@@ -461,6 +473,7 @@ export class PlayPage {
         var promises = [];
 
         this.currentExtras = [];
+        this.currentExtraType = ExtraType.none;
 
         //Add extras to be loaded
         for (let i: number = 0; i < this.currentQuestions[this.currentQuestion].extras.length; i++) {
@@ -472,8 +485,10 @@ export class PlayPage {
             //No need to worry about the order, the order is preserved with Promise.all
             if (['.mp4', '.webm', '.ogg'].some(extension => this.currentQuestions[this.currentQuestion].extras[i].endsWith(extension))) {
               this.currentExtras.push(this.sanitizer.bypassSecurityTrustUrl(extras[i]));
+              this.currentExtraType = ExtraType.video;
             } else {
               this.currentExtras.push(this.sanitizer.bypassSecurityTrustStyle(`url('${extras[i]}')`));
+              this.currentExtraType = ExtraType.picture;
             }
           }
 
@@ -499,9 +514,30 @@ export class PlayPage {
             this.screenState = ScreenStateType.displayExtra;
 
             if (this.currentQuestions[this.currentQuestion].extras.length > 0) {
-              setTimeout(() => this.displayExtras = true, this.commonAnimationDuration);
-              setTimeout(() => this.displayExtras = false, this.commonAnimationDuration + this.extraDisplayDuration);
-              setTimeout(() => this.next(), this.extraDisplayDuration + this.commonAnimationDuration * 2);
+              setTimeout(() => {
+                this.displayExtras = true;
+
+                if (this.currentExtraType === ExtraType.video) {
+                  setTimeout(() => {
+                    this.extraVideo.nativeElement.play(); //Once animation is done, start the video
+
+                    this.extraVideo.nativeElement.onended = () => {
+                      this.displayExtras = false;
+                      setTimeout(() => this.next(), this.commonAnimationDuration);
+                    };
+
+                  }, this.commonAnimationDuration);
+
+                } else {
+                  setTimeout(() => {
+                    this.displayExtras = false;
+                    setTimeout(() => this.next(), this.commonAnimationDuration);
+
+                  }, this.extraDisplayDuration);
+                }
+
+              }, this.commonAnimationDuration);
+
             } else {
               this.next();
             }

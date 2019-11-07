@@ -66,8 +66,8 @@
   <!--Extra Zone-->
   <div class="extra" *ngIf="displayExtras"
     [@extraAnimation]="{value: '', params: {time: commonAnimationDuration}}">
-    <canvas [style.background-image]="currentExtras[0]"></canvas>
-    <video autoplay>
+    <canvas *ngIf="currentExtraType === ExtraType.picture" [style.background-image]="currentExtras[0]"></canvas>
+    <video #extraVideo *ngIf="currentExtraType === ExtraType.video">
       <source [src]="currentExtras[0]"/>
     </video>
   </div>
