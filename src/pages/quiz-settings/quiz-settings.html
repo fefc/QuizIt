@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Quiz settings
+      {{ 'QUIZ_SETTINGS' | translate }}
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="setDefaultValues()">
@@ -24,31 +24,31 @@
         <ion-label>Basic</ion-label>
       </ion-item-divider>-->
       <ion-item>
-      <ion-label>Title</ion-label>
+      <ion-label>{{ 'TITLE' | translate }}</ion-label>
         <ion-input type="text" placeholder="Title of the quiz" [(ngModel)]="title"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-label>Auto play</ion-label>
+        <ion-label>{{ 'AUTO_PLAY' | translate }}</ion-label>
         <ion-toggle slot="end" [(ngModel)]="settings.autoPlay"></ion-toggle>
       </ion-item>
       <ion-item>
-        <ion-label>Time per question</ion-label>
+        <ion-label>{{ 'TIME_PER_QUESTION' | translate }}</ion-label>
         <ion-input type="number" min="1" placeholder="Available time for each question in ms" [(ngModel)]="settings.timeBarAnimationDuration"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-label>Amount of pictures</ion-label>
+        <ion-label>{{ 'AMOUNT_OF_PICTURES' | translate }}</ion-label>
         <ion-input type="number" min="1" placeholder="Number of pictures you want to be displayed" [(ngModel)]="settings.amountOfPicturesToShow"></ion-input>
       </ion-item>
       <ion-item>
-      <ion-label>Welcome message</ion-label>
+      <ion-label>{{ 'WELCOME_MESSAGE' | translate }}</ion-label>
         <ion-input type="text" placeholder="A short welcome message" [(ngModel)]="settings.startMessage"></ion-input>
       </ion-item>
       <ion-item>
-      <ion-label>End message</ion-label>
+      <ion-label>{{ 'END_MESSAGE' | translate }}</ion-label>
         <ion-input type="text" placeholder="Message showing up at the end" [(ngModel)]="settings.endMessage"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-label>Background</ion-label>
+        <ion-label>{{ 'BACKGROUND' | translate }}</ion-label>
         <ion-select [(ngModel)]="settings.backgroundImage" interface="popover">
           <ion-option value="0.jpg">Blur</ion-option>
           <ion-option value="1.jpg">Geometry</ion-option>
@@ -57,26 +57,26 @@
       </ion-item-group>
       <ion-item-group *ngIf="showAdvancedCounter > 2">
         <ion-item-divider>
-          <ion-label>Advanced</ion-label>
+          <ion-label>{{ 'ADVANCED' | translate }}</ion-label>
         </ion-item-divider>
         <ion-item>
-          <ion-label>Common animation</ion-label>
+          <ion-label>{{ 'COMMON_ANUMATION' | translate }}</ion-label>
           <ion-input type="number" min="1" placeholder="Time of usual animations in ms" [(ngModel)]="settings.commonAnimationDuration"></ion-input>
         </ion-item>
         <ion-item>
-          <ion-label>Player answers animation</ion-label>
+          <ion-label>{{ 'PLAYER_ANSWER_ANIMATION' | translate }}</ion-label>
           <ion-input type="number" min="1" placeholder="Time of player answer animation in ms" [(ngModel)]="settings.playerAnswerAnimationDuration"></ion-input>
         </ion-item>
         <ion-item>
-          <ion-label>Intro duration</ion-label>
+          <ion-label>{{ 'EXTRA_DURATION' | translate }}</ion-label>
           <ion-input type="number" min="1" placeholder="Display time of the introduction in ms" [(ngModel)]="settings.extraDisplayDuration"></ion-input>
         </ion-item>
         <ion-item *ngIf="settings.autoPlay">
-          <ion-label>Delay between questions</ion-label>
+          <ion-label>{{ 'DELAY_BETWEEN_QUESTIONS' | translate }}</ion-label>
           <ion-input type="number" min="1" placeholder="Time before switching to next question in ms" [(ngModel)]="settings.showNextDelay"></ion-input>
         </ion-item>
         <ion-item *ngIf="!settings.autoPlay">
-          <ion-label>Delay before showing next button</ion-label>
+          <ion-label>{{ 'DELAY_BEFORE_NEXT_BUTTON' | translate }}</ion-label>
           <ion-input type="number" min="1" placeholder="Time before showing the next button in ms" [(ngModel)]="settings.showNextDelay"></ion-input>
         </ion-item>
         </ion-item-group>
@@ -86,7 +86,7 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons end>
-      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">Save</button>
+      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ 'SAVE' | translate }}</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

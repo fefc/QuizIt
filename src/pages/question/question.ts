@@ -21,8 +21,6 @@ export class QuestionPage {
   private answerNumber: Array<string> = ['one', 'two', 'three', 'four'];
   private maxPictures: number = 5;
   private QuestionType = QuestionType; //for use in Angluar html
-  private title: string;
-  private saveButtonName: string;
   private categorys: Array<Category>;
   private question: Question;
   private attachementDir: string;
@@ -32,6 +30,8 @@ export class QuestionPage {
 
   private pictures: Array<SafeUrl>;
   private extras: Array<SafeUrl>;
+
+  private newQuestion: boolean;
 
   @ViewChild(Slides) slides: Slides;
   @ViewChild('slidesFab') slidesFab : FabContainer;
@@ -49,9 +49,8 @@ export class QuestionPage {
               private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
               params: NavParams) {
-    //avoid ionic warnings
-    this.title = this.title;
-    this.saveButtonName = this.saveButtonName;
+
+    this.newQuestion = true;
 
     //lets make deep copies, so that we don't modfiy anything before user confirmation
     this.categorys = JSON.parse(JSON.stringify(params.data.categorys));
@@ -71,9 +70,6 @@ export class QuestionPage {
       this.attachementDir = '';
       this.pictures = [];
       this.extras = [];
-
-      this.title = "New Question";
-      this.saveButtonName = "Create";
     }
     else {
       this.question = JSON.parse(JSON.stringify(params.data.question));
@@ -88,8 +84,7 @@ export class QuestionPage {
         }
       }
 
-      this.title = "Edit Question";
-      this.saveButtonName = "Save";
+      this.newQuestion = false;
     }
 
     if (this.question.type === QuestionType.rightPicture) {
@@ -448,21 +443,6 @@ export class QuestionPage {
         reject(error);
       });
     });
-    /*this.file.writeFile(this.file.cacheDirectory, filename, arrayBuffer, { replace: true }).then(() => {
-      if (extra) {
-        this.question.extras = [];
-        this.question.extras.push(this.file.cacheDirectory + filename);
-
-        this.extras = [];
-        this.extras.push(undefined);
-      } else {
-        this.question.answers.push(this.file.cacheDirectory + filename);
-        this.pictures.push(undefined);
-        this.renderPicture(this.file.cacheDirectory, filename, this.pictures.length - 1);
-      }
-    }).catch((error) => {
-      alert(error);
-    });*/
   }
 
   resizeBrowserImage(file: any) {

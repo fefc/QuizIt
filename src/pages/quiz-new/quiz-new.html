@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      New Quiz
+      {{ 'NEW_QUIZ' | translate }}
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="dismiss()">
@@ -13,11 +13,11 @@
 
 <ion-content>
     <ion-item>
-    <ion-label stacked>Title</ion-label>
+    <ion-label stacked>{{ 'TITLE' | translate }}</ion-label>
       <ion-input type="text" placeholder="What is your quiz about?" [(ngModel)]="newQuiz.title"></ion-input>
     </ion-item>
     <ion-item>
-    <ion-label stacked>background</ion-label>
+    <ion-label stacked>{{ 'BACKGROUND' | translate }}</ion-label>
     </ion-item>
 
     <ion-slides centeredSlides pager (ionSlideDidChange)="slideChanged()">
@@ -30,7 +30,7 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons end>
-      <button ion-button (click)="create()" [disabled]="!enableCreateButton()">Create</button>
+      <button ion-button (click)="create()" [disabled]="!enableCreateButton()">{{ 'CREATE' | translate }}</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

@@ -4,7 +4,7 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>
-      {{selectedQuizs === 0 ? 'QuizPad' : selectedQuizs + ' Selected'}}
+      {{selectedQuizs === 0 ? 'QuizPad' : selectedQuizs + ' ' +  ('SELECTED' | translate) }}
     </ion-title>
     <ion-buttons end *ngIf="selectedQuizs === 0">
       <button ion-button icon-only (click)="openMenu($event)">

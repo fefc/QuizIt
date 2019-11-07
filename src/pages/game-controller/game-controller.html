@@ -19,11 +19,11 @@
 </ion-header>
 
 <ion-content>
-  <p class="information" *ngIf="gameControllerProv.game.state === GameState.connectionLost">Unable to reach quiz host.</p>
-  <p class="information" *ngIf="gameControllerProv.game.state === GameState.playersJoining">The game will start soon...</p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.connectionLost">{{ 'CTRL_ERROR_HOST' | translate }}</p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.playersJoining">{{ 'CTRL_START_SOON' | translate }}</p>
   <p class="information" *ngIf="gameControllerProv.game.state === GameState.loading"><ion-spinner name="crescent" color="primary"></ion-spinner></p>
-  <p class="information" *ngIf="gameControllerProv.game.state === GameState.ended">That's it, thanks for playing!</p>
-  <p class="information" *ngIf="gameControllerProv.game.state === GameState.quickedOut">You have been quicked out by the admin.</p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.ended">{{ 'CTRL_END' | translate }}</p>
+  <p class="information" *ngIf="gameControllerProv.game.state === GameState.quickedOut">{{ 'CTRL_KICKED' | translate }}</p>
   <button class="exit-button" *ngIf="gameControllerProv.game.state === GameState.ended || gameControllerProv.game.state === GameState.quickedOut" ion-button large (click)="exit()">
     Exit
   </button>

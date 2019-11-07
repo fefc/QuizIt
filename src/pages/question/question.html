@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      {{title}}
+      {{ newQuestion === true ? ('NEW_QUESTION' | translate) : ('EDIT_QUESTION' | translate) }}
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="dismiss()">
@@ -14,33 +14,31 @@
 <ion-content>
   <ion-list>
     <ion-item>
-      <ion-label stacked>Question</ion-label>
+      <ion-label stacked>{{ 'QUESTION' | translate }}</ion-label>
       <ion-input type="text" placeholder="This is your question" [(ngModel)]="question.question"></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label fixed>Category</ion-label>
+      <ion-label fixed>{{ 'CATEGORY' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.category.name" interface="popover" (ionChange)="categoryChange($event)">
         <ion-option *ngFor="let category of categorys" [value]="category.name">{{category.name}}</ion-option>
-        <ion-option value="new">New category</ion-option>
+        <ion-option value="new">{{ 'NEW_CATEGORY' | translate }}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item>
-      <ion-label fixed>Type</ion-label>
+      <ion-label fixed>{{ 'TYPE' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.type" interface="popover" (ionChange)="typeChange($event)">
-        <ion-option [value]="QuestionType.classic">Classic</ion-option>
-        <ion-option [value]="QuestionType.stopwatch">Stopwatch</ion-option>
-        <ion-option [value]="QuestionType.rightPicture">Right picture</ion-option>
-        <!--<ion-option value="3">Video</ion-option>
-        <ion-option value="4">Pictures</ion-option>-->
+        <ion-option [value]="QuestionType.classic">{{ 'TYPE_CLASSIC' | translate }}</ion-option>
+        <ion-option [value]="QuestionType.stopwatch">{{ 'TYPE_STOPWATCH' | translate }}</ion-option>
+        <ion-option [value]="QuestionType.rightPicture">{{ 'TYPE_RIGHT_PICTURE' | translate }}</ion-option>
       </ion-select>
     </ion-item>
     <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
     <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-      <ion-label fixed>Answer {{answerNumber[i]}}</ion-label>
+      <ion-label fixed>Answer {{answerNumber[i]}}</ion-label> <!-- TODO: translate -->
       <ion-input type="text" placeholder="An answer" [(ngModel)]="question.answers[i]"></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label fixed>Right answer</ion-label>
+      <ion-label fixed>{{ 'RIGHT_ANSWER' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.rightAnswer" interface="popover">
         <ion-option *ngFor="let answer of question.answers; let i = index" [value]="i">{{answer}}</ion-option>
       </ion-select>
@@ -73,12 +71,12 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons left>
-      <button ion-button icon-start (click)="openImagePicker(1, true)" *ngIf="question.extras.length === 0"><ion-icon name="film"></ion-icon>Add intro</button>
-      <button ion-button icon-start (click)="deleteExtras()" *ngIf="question.extras.length > 0"><ion-icon name="trash"></ion-icon>Delete intro</button>
+      <button ion-button icon-start (click)="openImagePicker(1, true)" *ngIf="question.extras.length === 0"><ion-icon name="film"></ion-icon>{{ 'ADD_INTRO' | translate }}</button>
+      <button ion-button icon-start (click)="deleteExtras()" *ngIf="question.extras.length > 0"><ion-icon name="trash"></ion-icon>{{ 'DELETE_INTRO' | translate }}</button>
     </ion-buttons>
     <input #fileInputExtra type="file" style="display: none" (change)="getBrowserExtras()" accept="image/png, image/jpeg, image/gif, video/mp4, video/webm, video/ogg"/>
     <ion-buttons right>
-      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{saveButtonName}}</button>
+      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ newQuestion === true ? ('CREATE' | translate) : ('SAVE' | translate) }}</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

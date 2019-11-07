@@ -15,6 +15,9 @@ import { FilePath } from '@ionic-native/file-path';
 import { Insomnia } from '@ionic-native/insomnia';
 import { AppVersion } from '@ionic-native/app-version';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 
@@ -44,6 +47,10 @@ import { PlayPage } from '../pages/play/play';
 import { GameControllerPage } from '../pages/game-controller/game-controller';
 import { GameControllerMenu } from '../pages/game-controller/menu';
 
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -66,7 +73,15 @@ import { GameControllerMenu } from '../pages/game-controller/menu';
     BrowserModule,
     BrowserAnimationsModule,
     IonicModule.forRoot(AppComponent),
-    IonicStorageModule.forRoot()
+    IonicStorageModule.forRoot(),
+    HttpClientModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: (createTranslateLoader),
+        deps: [HttpClient]
+      }
+    })
   ],
   bootstrap: [IonicApp],
   entryComponents: [

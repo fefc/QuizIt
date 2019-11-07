@@ -9,17 +9,17 @@
 <ion-content>
   <ion-slides>
     <ion-slide>
-      <h2 class="title">Welcome to QuizPad</h2>
+      <h2 class="title">{{ 'WELCOME_START' | translate }}</h2>
       <img src="assets/svgs/icon.svg" class="slide-image">
-      <p>In a few seconds you will be able to <b>create, share and play</b> quizzes easily!</p>
-      <p>But first let's setup your profile!</p>
+      <p>{{ 'INTRO_START' | translate }}</p>
+      <p>{{ 'SETUP_PROFILE_START' | translate }}</p>
       <button ion-button large color="primary" (click)="gotToCreateProfile()">
-        Let's go!
+        {{ 'LETS_GO_START' | translate }}
       </button>
     </ion-slide>
     <ion-slide>
-      <h2 class="title">Create your profile</h2>
-      <p>Choose your avatar and a nickname, that's it!</p>
+      <h2 class="title">{{ 'CREATE_PROFILE' | translate }}</h2>
+      <p>{{ 'CHOSE_NICKNAME' | translate }}</p>
       <ion-list>
         <ion-item no-lines>
           <ion-avatar>
@@ -33,13 +33,13 @@
         </ion-fab>
         </ion-item>
         <ion-item class="slide-input">
-          <ion-label stacked>Nickname</ion-label>
+          <ion-label stacked>{{ 'NICKNAME' | translate }}</ion-label>
           <ion-input type="text" minlength="3" [(ngModel)]="profile.nickname"></ion-input>
         </ion-item>
       </ion-list>
-      <p>Your nickname must be at least 3 characters, it will be displayed when you join a quiz.</p>
+      <p>{{ 'NICKNAME_INFO' | translate }}</p>
       <button ion-button large (click)="createProfile()" [disabled]="!enableCreateButton()">
-        I'm done
+        {{ 'DONE_START' | translate }}
       </button>
     </ion-slide>
   </ion-slides>

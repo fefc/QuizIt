@@ -14,23 +14,23 @@
       <ion-item-group>
         <ion-item tappable (tap)="openHomePage()">
           <ion-icon name="clipboard" item-start></ion-icon>
-          Quizzes
+          {{ 'QUIZZES' | translate }}
         </ion-item>
         <ion-item *ngIf="!platform.is('cordova')" tappable (tap)="openBarcodeScannerPage()">
           <ion-icon name="game-controller-b" item-start></ion-icon>
-          Join game
+          {{ 'JOIN_GAME' | translate }}
         </ion-item>
       </ion-item-group>
       <div class="empty-space"></div>
       <ion-item-group>
-        <ion-item-divider color="light">App</ion-item-divider>
+        <ion-item-divider color="light">{{ 'APP' | translate }}</ion-item-divider>
         <!--<ion-item>
           <ion-icon name="settings" item-start></ion-icon>
           Settings
         </ion-item>-->
         <ion-item tappable (tap)="openAboutPage()">
           <ion-icon name="information-circle" item-start></ion-icon>
-          About
+          {{ 'ABOUT' | translate }}
         </ion-item>
       </ion-item-group>
     </ion-list>

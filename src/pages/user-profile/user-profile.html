@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Edit Profile
+      {{ 'EDIT_PROFILE' | translate }}
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="dismiss()">
@@ -25,11 +25,11 @@
     </ion-fab>
     </ion-item>
     <ion-item>
-      <ion-label stacked>Nickname</ion-label>
+      <ion-label stacked>{{ 'NICKNAME' | translate }}</ion-label>
       <ion-input type="text" minlength="3" [(ngModel)]="profile.nickname"></ion-input>
     </ion-item>
     <p>
-      Your nickname must be at least 3 characters, it will be displayed when you join a quiz.
+      {{ 'NICKNAME_INFO' | translate }}
     </p>
   </ion-list>
   <input #fileInput type="file" style="display: none" (change)="getBrowserImage()" accept="image/png, image/jpeg"/>
@@ -38,7 +38,7 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons end>
-      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">Save</button>
+      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ 'SAVE' | translate }}</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

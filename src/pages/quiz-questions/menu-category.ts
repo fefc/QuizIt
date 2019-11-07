@@ -8,8 +8,8 @@ import { ViewController } from 'ionic-angular';
     }`],
   template: `
     <ion-list>
-      <button ion-item (click)="close(0)">Rename</button>
-      <button ion-item (click)="close(1)">Delete</button>
+      <button ion-item (click)="close(0)">{{ 'RENAME' | translate }}</button>
+      <button ion-item (click)="close(1)">{{ 'DELETE' | translate }}</button>
     </ion-list>
   `
 })

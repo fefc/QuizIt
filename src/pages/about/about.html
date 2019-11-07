@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      About
+      {{ 'ABOUT' | translate }}
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="dismiss()">
@@ -14,7 +14,7 @@
 <ion-content padding>
   <div class="app-infos">
     <div class="app-name">QuizPad</div>
-    <div class="app-version">Version {{versionNumber}}</div>
+    <div class="app-version">{{ 'VERSION' | translate }} {{versionNumber}}</div>
     <img src="assets/svgs/icon.svg">
     <a class="app-href" target="_blank" href="http://www.quizpadapp.com">www.QuizPadApp.com</a>
     <div class="app-copyright">&copy; 2019 fefc</div>

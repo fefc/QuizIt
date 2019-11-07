@@ -5,6 +5,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { BarcodeScanner, BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
+import { TranslateService } from '@ngx-translate/core';
 import * as firebase from "firebase/app";
 
 import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
@@ -61,10 +62,11 @@ export class AppComponent {
     private barcodeScanner: BarcodeScanner,
     private profilesProv: UserProfilesProvider,
     private quizsProv: QuizsProvider,
-    private gameControllerProv: GameControllerProvider) {
+    private gameControllerProv: GameControllerProvider,
+    private translate: TranslateService) {
 
     //toBlob function for Edge support
-    //https://stackoverflow.com/a/47487073/7890583  
+    //https://stackoverflow.com/a/47487073/7890583
     if (!HTMLCanvasElement.prototype.toBlob) {
       Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
         value: function (callback, type, quality) {
@@ -87,6 +89,9 @@ export class AppComponent {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
+
+      // Set default language
+      translate.setDefaultLang('fr');
 
       // Initialize Firebase
       firebase.initializeApp(FIREBASE_CONFIG);

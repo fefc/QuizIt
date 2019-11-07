@@ -8,7 +8,7 @@ import { ViewController } from 'ionic-angular';
     }`],
   template: `
     <ion-list>
-      <button ion-item (click)="close(0)">Exit</button>
+      <button ion-item (click)="close(0)">{{ 'EXIT' | translate }}</button>
     </ion-list>
   `
 })
