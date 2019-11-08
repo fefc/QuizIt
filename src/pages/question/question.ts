@@ -4,6 +4,7 @@ import { Platform, ViewController, AlertController, NavParams, Slides, FabContai
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
+import { TranslateService } from '@ngx-translate/core';
 
 import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
@@ -48,6 +49,7 @@ export class QuestionPage {
               private imagePicker: ImagePicker,
               private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
+              public translate: TranslateService,
               params: NavParams) {
 
     this.newQuestion = true;
@@ -106,7 +108,7 @@ export class QuestionPage {
   categoryChange(val: string) {
     if (val === "new") {
       let alert = this.alertCtrl.create({
-        title: 'New category',
+        title: this.translate.instant('NEW_CATEGORY'),
         inputs: [
           {
             name: 'categoryName',
@@ -115,14 +117,14 @@ export class QuestionPage {
         ],
         buttons: [
           {
-            text: 'Cancel',
+            text: this.translate.instant('CANCEL'),
             role: 'cancel',
             handler: data => {
               this.question.category.name = this.categorys[0].name;
             }
           },
           {
-            text: 'Create',
+            text: this.translate.instant('CREATE'),
             handler: data => {
               if (data.categoryName.length > 3 && this.categorys.findIndex((category) => category.name === data.categoryName) === -1 ) {
                 this.categorys.push({name: data.categoryName});
@@ -132,11 +134,11 @@ export class QuestionPage {
                 this.question.category.name = this.categorys[0].name;
 
                 let error = this.alertCtrl.create({
-                  title: 'Error creating category',
-                  message: 'Category name must be more than 3 characters long and should not already exist',
+                  title: this.translate.instant('ERROR_CREATING_CATEGORY'),
+                  message: this.translate.instant('ERROR_CREATING_CATEGORY_INFO'),
                   buttons: [
                     {
-                      text: 'Ok',
+                      text: this.translate.instant('OK'),
                       role: 'ok',
                     }
                   ]

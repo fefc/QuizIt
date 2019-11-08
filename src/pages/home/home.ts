@@ -4,6 +4,7 @@ import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { FileChooser } from '@ionic-native/file-chooser';
 import { FilePath } from '@ionic-native/file-path';
 import { File } from '@ionic-native/file';
+import { TranslateService } from '@ngx-translate/core';
 
 import { Quiz } from '../../models/quiz';
 import { QuestionType } from '../../models/question';
@@ -38,7 +39,8 @@ export class HomePage {
     private fileChooser: FileChooser,
     private filePath: FilePath,
     private file: File,
-    private quizsProv: QuizsProvider) {
+    private quizsProv: QuizsProvider,
+    public translate: TranslateService) {
 
       this.selectedQuizs = 0;
   }
@@ -64,7 +66,7 @@ export class HomePage {
     modal.onDidDismiss(data => {
       if (data) {
         let loading = this.loadingCtrl.create({
-          content: 'Creating Quiz...'
+          content: this.translate.instant('CREATING')
         });
 
         loading.present();
@@ -123,7 +125,7 @@ export class HomePage {
 
   deleteSelected() {
     let deleting = this.loadingCtrl.create({
-      content: 'Deleting Quiz...'
+      content: this.translate.instant('DELETING')
     });
 
     deleting.present();
@@ -148,7 +150,7 @@ export class HomePage {
     this.selectedQuizs -= 1;
 
     let loading = this.loadingCtrl.create({
-      content: 'Exporting...'
+      content: this.translate.instant('EXPORTING')
     });
 
     loading.present();
@@ -202,11 +204,11 @@ export class HomePage {
     return new Promise((resolve, reject) => {
       this.file.moveFile(data.cordovaFilePath,  data.filePath, this.file.externalRootDirectory, data.filePath).then(() => {
         let message = this.alertCtrl.create({
-          title: 'Exported quiz to',
+          title: this.translate.instant('EXPORTED_QUIZ'),
           message: this.file.externalRootDirectory + data.filePath,
           buttons: [
             {
-              text: 'Ok',
+              text: this.translate.instant('OK'),
               role: 'ok',
             }
           ]
@@ -229,7 +231,7 @@ export class HomePage {
           var fileName: string = nativePath.split("/").pop();
           this.file.copyFile(this.file.externalRootDirectory, relativePath, this.file.cacheDirectory, fileName).then(() => {
             let loading = this.loadingCtrl.create({
-              content: 'Importing Quiz...'
+              content: this.translate.instant('IMPORTING')
             });
 
             loading.present();

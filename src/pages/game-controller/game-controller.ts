@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { NavController, NavParams, AlertController, LoadingController, PopoverController } from 'ionic-angular';
+import { TranslateService } from '@ngx-translate/core';
 
 import { GameState } from '../../models/game';
 
@@ -22,6 +23,7 @@ export class GameControllerPage {
     private popoverCtrl: PopoverController,
     private sanitizer:DomSanitizer,
     private gameControllerProv: GameControllerProvider,
+    public translate: TranslateService,
     params: NavParams) {
 
   }
@@ -36,11 +38,11 @@ export class GameControllerPage {
 
   showSetAnswerErrorAlert() {
     let message = this.alertCtrl.create({
-      title: 'Could no set answer',
-      message: 'Please try again',
+      title: this.translate.instant('SET_ANSWER_ERROR'),
+      message: this.translate.instant('TRY_AGAIN'),
       buttons: [
         {
-          text: 'Close',
+          text: this.translate.instant('CLOSE'),
           role: 'ok',
         }
       ]

@@ -63,7 +63,7 @@ export class AppComponent {
     private profilesProv: UserProfilesProvider,
     private quizsProv: QuizsProvider,
     private gameControllerProv: GameControllerProvider,
-    private translate: TranslateService) {
+    public translate: TranslateService) {
 
     //toBlob function for Edge support
     //https://stackoverflow.com/a/47487073/7890583
@@ -132,7 +132,7 @@ export class AppComponent {
     modal.onDidDismiss((data) => {
       if (data) {
         let loading = this.loadingCtrl.create({
-          content: 'Saving changes...'
+          content: this.translate.instant('SAVING')
         });
 
         loading.present();
@@ -179,18 +179,18 @@ export class AppComponent {
          this.joinGame(data.text.replace('https://quizpadapp.com/controller?id=', ''));
        } else {
          this.menuCtrl.close('menu-one');
-         this.showGeneralErrorAlert('Invalid QR code', 'The scanned QR code is not valid, please try again with a valid QuizPad QR code.');
+         this.showGeneralErrorAlert(this.translate.instant('INVALID_QR_CODE'), this.translate.instant('INVALID_QR_CODE_INFO'));
        }
      }
     }).catch((err) => {
       this.menuCtrl.close('menu-one');
-      this.showGeneralErrorAlert('Unable to open scanner', 'Unable to open scanner, please check that you allowed camera access.');
+      this.showGeneralErrorAlert(this.translate.instant('INVALID_SCANNER'), this.translate.instant('INVALID_SCANNER_INFO'));
     });
   }
 
   joinGame(gameID: string, alternativeNickname?: string) {
     let loading = this.loadingCtrl.create({
-      content: 'Joining game...'
+      content: this.translate.instant('JOINING')
     });
 
     loading.present();
@@ -205,33 +205,33 @@ export class AppComponent {
         if (error === 20) {
           this.showNicknameAlreadyUsedAlert(gameID);
         } else {
-          this.showGeneralErrorAlert('General error', 'Could not join game: ' + error + '.');
+          this.showGeneralErrorAlert(this.translate.instant('GENERAL_ERROR'), this.translate.instant('JOIN_GAME_ERROR') + ': ' + error + '.');
         }
       });
     }).catch((error) => {
       loading.dismiss();
-      this.showGeneralErrorAlert('General error', 'Unable to resize avatar.');
+      this.showGeneralErrorAlert(this.translate.instant('GENERAL_ERROR'), this.translate.instant('RESIZE_AVATAR_ERROR'));
     });
   }
 
   showNicknameAlreadyUsedAlert(gameID: string) {
     let alertMsg = this.alertCtrl.create({
-      title: 'Nickname already used',
-      message: 'Your nickname is already used by someone else, please change it just for now.',
+      title: this.translate.instant('NICKNAME_ALREADY_USED'),
+      message: this.translate.instant('NICKNAME_ALREADY_USED_INFO'),
       enableBackdropDismiss: false,
       inputs: [
         {
-          name: 'nickname',
-          placeholder: 'New nickname'
+          name: this.translate.instant('NICKNAME'),
+          placeholder: this.translate.instant('NICKNAME_NEW')
         }
       ],
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('CANCEL'),
           role: 'cancel',
         },
         {
-          text: 'Join',
+          text: this.translate.instant('JOIN'),
           handler: data => {
             this.joinGame(gameID, data.nickname);
           }
@@ -247,8 +247,8 @@ export class AppComponent {
       message: content,
       buttons: [
         {
-          text: 'Close',
-          role: 'ok',
+          text: this.translate.instant('CLOSE'),
+          role: this.translate.instant('OK'),
         }
       ]
     });

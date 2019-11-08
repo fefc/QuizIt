@@ -3,6 +3,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Platform, NavController, MenuController, ViewController, LoadingController, Slides } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
+import { TranslateService } from '@ngx-translate/core';
 
 import { UserProfile } from '../../models/user-profile';
 
@@ -31,7 +32,8 @@ export class StartPage {
     private imagePicker: ImagePicker,
     private androidPermissions: AndroidPermissions,
     private sanitizer:DomSanitizer,
-    private profilesProv: UserProfilesProvider) {
+    private profilesProv: UserProfilesProvider,
+    public translate: TranslateService) {
     this.profile = {
       uuid: '',
       nickname: '',
@@ -126,7 +128,7 @@ export class StartPage {
 
   createProfile() {
     let loading = this.loadingCtrl.create({
-      content: 'Creating profile...'
+      content: this.translate.instant('CREATING')
     });
 
     loading.present();

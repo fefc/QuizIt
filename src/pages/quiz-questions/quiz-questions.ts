@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, ModalController, LoadingController, AlertController, PopoverController, NavParams, Navbar, reorderArray } from 'ionic-angular';
+import { TranslateService } from '@ngx-translate/core';
 
 import { Quiz } from '../../models/quiz';
 import { Category } from '../../models/category';
@@ -36,6 +37,7 @@ export class QuizQuestionsPage {
     private alertCtrl: AlertController,
     private popoverCtrl: PopoverController,
     private quizsProv: QuizsProvider,
+    public translate: TranslateService,
     params: NavParams) {
       this.quiz = params.data.quiz;
       this.showReorderCategorys = false;
@@ -95,7 +97,7 @@ export class QuizQuestionsPage {
 
   renameCategory(category: Category) {
     let renameAlert = this.alertCtrl.create({
-      title: 'Rename category',
+      title: this.translate.instant('RENAME_CATEGORY'),
       inputs: [
         {
           name: 'categoryName',
@@ -105,11 +107,11 @@ export class QuizQuestionsPage {
       ],
       buttons: [
         {
-          text: 'Cancel',
+          text: this.translate.instant('CANCEL'),
           role: 'cancel',
         },
         {
-          text: 'Save',
+          text: this.translate.instant('SAVE'),
           handler: data => {
             if (data.categoryName.length > 3 && this.quiz.categorys.findIndex((category) => category.name === data.categoryName) === -1 ) {
 
@@ -124,7 +126,7 @@ export class QuizQuestionsPage {
               category.name = data.categoryName;
 
               let loading = this.loadingCtrl.create({
-                content: 'Saving...'
+                content: this.translate.instant('SAVING')
               });
 
               this.quizsProv.saveToStorage(this.quiz).then(() => {
@@ -137,11 +139,11 @@ export class QuizQuestionsPage {
             }
             else {
               let error = this.alertCtrl.create({
-                title: 'Error creating category',
-                message: 'Category name must be more than 3 characters long and should not already exist',
+                title: this.translate.instant('ERROR_CREATING_CATEGORY'),
+                message: this.translate.instant('ERROR_CREATING_CATEGORY_INFO'),
                 buttons: [
                   {
-                    text: 'Ok',
+                    text: this.translate.instant('OK'),
                     role: 'ok',
                   }
                 ]
@@ -159,7 +161,7 @@ export class QuizQuestionsPage {
     this.quiz.categorys = reorderArray(this.quiz.categorys, indexes);
 
     let loading = this.loadingCtrl.create({
-      content: 'Saving changes...'
+      content: this.translate.instant('SAVING')
     });
 
     loading.present();
@@ -176,15 +178,15 @@ export class QuizQuestionsPage {
     if (this.quiz.categorys.length > 1) {
       if (this.quiz.questions.filter((q) => q.category.name === category.name).length > 0) {
         let deleteAlert = this.alertCtrl.create({
-          title: 'Delete category',
-          message: 'Deleting the category will also delete all contained questions.',
+          title: this.translate.instant('DELETE_CATEGORY'),
+          message: this.translate.instant('DELETE_CATEGORY_INFO'),
           buttons: [
             {
-              text: 'Cancel',
+              text: this.translate.instant('CANCEL'),
               role: 'cancel',
             },
             {
-              text: 'Delete',
+              text: this.translate.instant('DELETE'),
               handler: () => {
                 this.deleteCategory(category);
               }
@@ -198,11 +200,11 @@ export class QuizQuestionsPage {
       }
     } else {
       let deleteAlert = this.alertCtrl.create({
-        title: 'Delete category',
-        message: 'It is impossible to delete the only exsisting category.',
+        title: this.translate.instant('ERROR_DELETING_CATEGORY'),
+        message: this.translate.instant('ERROR_DELETING_CATEGORY_INFO'),
         buttons: [
           {
-            text: 'Ok',
+            text: this.translate.instant('OK'),
             role: 'ok',
           }
         ]
@@ -219,7 +221,7 @@ export class QuizQuestionsPage {
     this.quiz.categorys.splice(index, 1);
 
     let loading = this.loadingCtrl.create({
-      content: 'Saving changes...'
+      content: this.translate.instant('SAVING')
     });
 
     loading.present();
@@ -239,7 +241,7 @@ export class QuizQuestionsPage {
     this.quiz.questions = reorderArray(this.quiz.questions, {from: realFrom, to: realTo});
 
     let loading = this.loadingCtrl.create({
-      content: 'Saving changes...'
+      content: this.translate.instant('SAVING')
     });
 
     loading.present();
@@ -270,7 +272,7 @@ export class QuizQuestionsPage {
     this.selectedQuestions = 0;
 
     let loading = this.loadingCtrl.create({
-      content: 'Saving changes...'
+      content: this.translate.instant('SAVING')
     });
 
     loading.present();
@@ -309,7 +311,7 @@ export class QuizQuestionsPage {
 
   saveChanges(question: Question){
     let loading = this.loadingCtrl.create({
-      content: 'Saving changes...'
+      content: this.translate.instant('SAVING')
     });
 
     loading.present();
@@ -355,7 +357,7 @@ export class QuizQuestionsPage {
     modal.onDidDismiss(data => {
       if (data) {
         let loading = this.loadingCtrl.create({
-          content: 'Saving settings...'
+          content: this.translate.instant('SAVING')
         });
 
         loading.present();

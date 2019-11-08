@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ViewController, ToastController, NavParams } from 'ionic-angular';
+import { TranslateService } from '@ngx-translate/core';
 
 import { QuizSettings } from '../../models/quiz-settings';
 import { DefaultQuizSettings } from '../../models/quiz-settings';
@@ -15,6 +16,7 @@ export class QuizSettingsPage {
 
   constructor(public viewCtrl: ViewController,
               public toastCtrl: ToastController,
+              public translate: TranslateService,
               params: NavParams) {
     this.showAdvancedCounter = 0;
 
@@ -171,7 +173,7 @@ export class QuizSettingsPage {
   showAdvanced() {
     if (this.showAdvancedCounter < 2) {
       let toast = this.toastCtrl.create({
-        message: 'Click ' + (2 - this.showAdvancedCounter) + ' more times to show advanced settings',
+        message: this.translate.instant('CLICK') + ' ' + (2 - this.showAdvancedCounter) + ' ' + this.translate.instant('TIMES_TO_SHOW_ADVANCED_SETTINGS'),
         duration: 2000
       });
       toast.present();
