@@ -25,6 +25,18 @@ page-start {
       line-height: 1.5;
   }
 
+  .forgot-password {
+    color: color($colors, primary);
+  }
+
+  .sign-in {
+    border-top: solid color($colors, fulllight) 1px;
+    padding-top: 40px;
+    margin-top: 20px;
+    margin-left: 40px;
+    margin-right: 40px;
+  }
+
   .slide-image {
     max-height: 50%;
     max-width: 60%;

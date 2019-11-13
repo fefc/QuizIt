@@ -34,7 +34,7 @@ export class UserProfilesProvider {
   }
 
   saveToStorage(profile: UserProfile) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       if (!profile.uuid) {
         //We have a new profile, so first we need to get a new uuid
         let uuid: string = this.uuidv4();
@@ -46,7 +46,8 @@ export class UserProfilesProvider {
         let newProfile: UserProfile = {
           uuid: uuid,
           nickname: profile.nickname,
-          avatar: profile.avatar
+          avatar: profile.avatar,
+          email: profile.email
         }
 
         if(this.profiles.length > 0) {

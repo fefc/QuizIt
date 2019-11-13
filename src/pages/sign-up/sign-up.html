@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      {{ 'SIGN_UP' | translate }}
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-label stacked>{{ 'EMAIL' | translate }}</ion-label>
+      <ion-input type="email" minlength="3" [(ngModel)]="email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>{{ 'PASSWORD' | translate }}</ion-label>
+      <ion-input type="password" minlength="3" [(ngModel)]="password"></ion-input>
+    </ion-item>
+    <p>{{ 'LOG_IN_INFO' | translate }}</p>
+  </ion-list>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar color="fulldark">
+    <ion-buttons end>
+      <button ion-button (click)="create()" [disabled]="!enableCreateButton()">{{ 'CREATE' | translate }}</button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

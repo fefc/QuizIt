@@ -13,24 +13,81 @@
 
 <ion-content>
   <ion-list>
-    <ion-item no-lines>
-      <ion-avatar>
-        <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
-        <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
-      </ion-avatar>
-      <ion-fab class="avatar-fab" (click)="openImagePicker()">
-      <button ion-fab>
-        <ion-icon name="camera"></ion-icon>
-      </button>
-    </ion-fab>
-    </ion-item>
-    <ion-item>
-      <ion-label stacked>{{ 'NICKNAME' | translate }}</ion-label>
-      <ion-input type="text" minlength="3" [(ngModel)]="profile.nickname"></ion-input>
-    </ion-item>
-    <p>
-      {{ 'NICKNAME_INFO' | translate }}
-    </p>
+    <ion-item-group>
+      <ion-item no-lines>
+        <ion-avatar>
+          <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
+          <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
+        </ion-avatar>
+        <ion-fab class="avatar-fab" (click)="openImagePicker()">
+        <button ion-fab>
+          <ion-icon name="camera"></ion-icon>
+        </button>
+      </ion-fab>
+      </ion-item>
+      <ion-item>
+        <ion-label stacked>{{ 'NICKNAME' | translate }}</ion-label>
+        <ion-input type="text" minlength="3" [(ngModel)]="profile.nickname"></ion-input>
+      </ion-item>
+      <p>
+        {{ 'NICKNAME_INFO' | translate }}
+      </p>
+    </ion-item-group>
+    <ion-item-group *ngIf="authProv.getUser()">
+      <ion-item-divider>
+        <ion-label>{{ 'ONLINE_ACCOUNT' | translate }}</ion-label>
+      </ion-item-divider>
+      <ion-item>
+        <ion-icon name="cloud" item-start></ion-icon>
+        <h2>{{ 'CONNECTED_WITH' | translate }}</h2>
+        <h3>{{ profile.email }}</h3>
+      </ion-item>
+      <ion-item tappable (tap)="updatePassword()">
+        <ion-icon name="lock" item-start></ion-icon>
+        <h2>{{ 'UPDATE_PASSWORD' | translate }}</h2>
+        <h3>{{ 'UPDATE_PASSWORD_INFO' | translate }}</h3>
+      </ion-item>
+      <ion-item tappable (tap)="resetPassword()">
+        <ion-icon name="refresh" item-start></ion-icon>
+        <h2>{{ 'RESET_PASSWORD' | translate }}</h2>
+        <h3>{{ 'RESET_PASSWORD_INFO_SHORT' | translate }}</h3>
+      </ion-item>
+      <ion-item tappable (tap)="logout()">
+        <ion-icon name="log-out" item-start></ion-icon>
+        <h2>{{ 'LOG_OUT' | translate }}</h2>
+        <h3>{{ 'LOG_OUT_INFO' | translate }}</h3>
+      </ion-item>
+      <ion-item tappable (tap)="deleteAccount()">
+        <ion-icon name="trash" item-start></ion-icon>
+        <h2>{{ 'DELETE_ACCOUNT' | translate }}</h2>
+        <h3>{{ 'DELETE_ACCOUNT_INFO' | translate }}</h3>
+      </ion-item>
+    </ion-item-group>
+    <ion-item-group *ngIf="!authProv.getUser()">
+      <ion-item-divider>
+        <ion-label>{{ 'ONLINE_ACCOUNT' | translate }}</ion-label>
+      </ion-item-divider>
+      <ion-item tappable (tap)="login()">
+        <ion-icon name="log-in" item-start></ion-icon>
+        <h2>{{ 'LOG_IN' | translate }}</h2>
+        <h3>{{ profile.email }}</h3>
+      </ion-item>
+    </ion-item-group>
+    <ion-item-group *ngIf="!profile.email">
+      <ion-item-divider>
+        <ion-label>{{ 'ONLINE_ACCOUNT' | translate }}</ion-label>
+      </ion-item-divider>
+      <ion-item tappable (tap)="firstTimeLogin()">
+        <ion-icon name="log-in" item-start></ion-icon>
+        <h2>{{ 'LOG_IN' | translate }}</h2>
+        <h3>{{ 'LOG_IN_INFO_SHORT' | translate }}</h3>
+      </ion-item>
+      <ion-item tappable (tap)="openSignUpPage()">
+        <ion-icon name="create" item-start></ion-icon>
+        <h2>{{ 'SIGN_UP' | translate }}</h2>
+        <h3>{{ 'SIGN_UP_INFO_SHORT' | translate }}</h3>
+      </ion-item>
+    </ion-item-group>
   </ion-list>
   <input #fileInput type="file" style="display: none" (change)="getBrowserImage()" accept="image/png, image/jpeg"/>
 </ion-content>
