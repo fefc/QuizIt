@@ -114,9 +114,9 @@
     <plugin name="cordova-plugin-barcodegenerator" spec="../cordova-plugins/BarcodeGenerator" />
     <plugin name="cordova-plugin-app-version" spec="../cordova-plugins/cordova-plugin-app-version" />
     <plugin name="cordova-plugin-file" spec="6.0.2" />
-    <engine name="browser" spec="5.0.4" />
-    <engine name="android" spec="8.0.0" />
     <plugin name="cordova-plugin-file-opener2" spec="../cordova-plugins/cordova-plugin-file-opener2" />
     <plugin name="cordova-plugin-telerik-imagepicker" spec="../cordova-plugins/ImagePicker" />
     <plugin name="com.jjdltc.cordova.plugin.zip" spec="../cordova-plugins/jjdltc-cordova-plugin-zip" />
+    <engine name="browser" spec="5.0.4" />
+    <engine name="android" spec="8.0.0" />
 </widget>
