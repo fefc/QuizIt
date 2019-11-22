@@ -56,7 +56,7 @@ export class QuizsProvider {
   }
 
   saveToStorage(quiz: Quiz) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!quiz.uuid) {
         //We have a new quiz, so first we need to get a new uuid
         let uuid: string = this.uuidv4();
@@ -114,26 +114,27 @@ export class QuizsProvider {
           }
 
           //Check attachements
-          var promises = [];
+          //var promises = [];  //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
+          try {
+            var attachementResults = [];
 
-          //First check question answers (pictures)
-          for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///") || a.startsWith("filesystem:")) !== -1))) {
-            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
-          }
+            //First check question answers (pictures)
+            for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///") || a.startsWith("filesystem:")) !== -1))) {
+              attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
+            }
 
-          //// TODO: Maybe do a cleaner code for that?
+            //// TODO: Maybe do a cleaner code for that?
 
-          //Second check question extras
-          for (let question of quiz.questions.filter((q) => (q.extras.findIndex((e) => e.startsWith("file:///") || e.startsWith("filesystem:")) !== -1))) {
-            promises.push(this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
-          }
+            //Second check question extras
+            for (let question of quiz.questions.filter((q) => (q.extras.findIndex((e) => e.startsWith("file:///") || e.startsWith("filesystem:")) !== -1))) {
+              attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
+            }
 
-          Promise.all(promises).then((results: Array<AttachementsResult>) => {
             //Update answers so that they contain only fileName and not fullPath
             let attachementIndex: number;
 
-            if (results) {
-              for (let result of results) {
+            if (attachementResults) {
+              for (let result of attachementResults) {
                 questionIndex = quiz.questions.findIndex((q) => q.uuid === result.questionUuid);
 
                 if (questionIndex !== -1) {
@@ -162,9 +163,10 @@ export class QuizsProvider {
             }).catch(() => {
               reject('Could not save quizs to storage.');
             });
-          }).catch(() => {
+          } catch(error) {
+            console.log(error);
             reject('Could not save attachements.');
-          });
+          };
         }
         else {
           reject('Could not find quiz.');
@@ -259,7 +261,8 @@ export class QuizsProvider {
         }).catch(() => {
           this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, false).then(() => {
             resolve();
-          }).catch(() => {
+          }).catch((error) => {
+            console.log(error);
             reject('Could not create question directory.');
           });
         });
@@ -268,10 +271,12 @@ export class QuizsProvider {
         this.file.createDir(this.file.dataDirectory, quizUuid, true).then(() => {
           this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, true).then(() => {
             resolve();
-          }).catch(() => {
+          }).catch((error) => {
+            console.log(error);
             reject('Could not create question directory.');
           });
-        }).catch(() => {
+        }).catch((error) => {
+          console.log(error)
           reject('Could not create quiz directory.');
         });
       });
@@ -279,7 +284,7 @@ export class QuizsProvider {
   }
 
   moveAttachementsFromCacheToDataDir(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise<AttachementsResult>(async (resolve, reject) => {
       //var promises = []; //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
       var destinationDir: string = this.file.dataDirectory + quizUuid + '/' + questionUuid;
       var sourceDir: string;
@@ -298,6 +303,7 @@ export class QuizsProvider {
           try {
             await this.file.moveFile(sourceDir, fileName, destinationDir, fileName);
           } catch (error) {
+            console.log(error);
            reject('Moving file from temporary to persistant failed');
           }
 
@@ -345,10 +351,16 @@ export class QuizsProvider {
     return new Promise((resolve, reject) => {
       this.createQuizDir(quiz.uuid).then(() => {
         this.file.writeFile(this.file.dataDirectory, quiz.uuid + '/database.json', JSON.stringify(quiz), { replace: true }).then(() => {
-          JJzip.zip(this.file.dataDirectory + quiz.uuid, {target: this.file.cacheDirectory, name: quiz.uuid}, (data) => {
+          let zipName: string;
+          let d: Date = new Date();
+
+          zipName = d.getDate().toString() + d.getMonth().toString() + d.getFullYear().toString() + '_' + d.getHours().toString() + d.getMinutes().toString();
+          zipName += '_' + quiz.title;
+
+          JJzip.zip(this.file.dataDirectory + quiz.uuid, {target: this.file.cacheDirectory, name: zipName}, (data) => {
             this.file.removeFile(this.file.dataDirectory, quiz.uuid + '/database.json').then(() => {
               if(data.success) {
-                resolve({cordovaFilePath: this.file.cacheDirectory, filePath: quiz.uuid + '.zip'});
+                resolve({cordovaFilePath: this.file.cacheDirectory, filePath: zipName + '.zip'});
               } else {
                 reject('Something when wrong by zipping');
               }
@@ -424,29 +436,53 @@ export class QuizsProvider {
                     }
                   }
 
-                  Promise.all(promises).then((results: Array<boolean>) => {
+                  //Same same for extras
+                  for (let question of importQuiz.questions.filter((q) => q.extras !== undefined)) {
+                    for (let i = 0; i < question.extras.length ; i++) {
+                      promises.push(this.file.checkFile(this.file.cacheDirectory, quizPath + question.uuid + '/' + question.extras[i]));
+                      //Set answer to full path, that will allow us to use copyAttachementsToDataDirectory method
+                      question.extras[i] = this.file.cacheDirectory + quizPath + question.uuid + '/' + question.extras[i];
+                    }
+                  }
+
+
+                  Promise.all(promises).then(async (results: Array<boolean>) => {
                     //Everything is okey, so we can copy the dir
                     if (this.quizs.findIndex((q) => q.uuid === importQuiz.uuid) === -1) {
                       //Move attachements
-                      var movePromises = [];
+                      //var movePromises = []; //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
+                      var moveResults = [];
+                      let questionIndex: number;
 
-                      for (let question of importQuiz.questions.filter((q) => q.type === QuestionType.rightPicture)) {
-                        movePromises.push(this.copyAttachementsToDataDirectory(importQuiz.uuid, question.uuid, AttachementType.answers, question.answers));
-                      }
+                      try {
+                        for (let question of importQuiz.questions.filter((q) => q.type === QuestionType.rightPicture)) {
+                          moveResults.push(await this.copyAttachementsToDataDirectory(importQuiz.uuid, question.uuid, AttachementType.answers, question.answers));
+                        }
 
-                      Promise.all(movePromises).then((results: Array<AttachementsResult>) => {
-                        let questionIndex: number;
+                        for (let question of importQuiz.questions.filter((q) => q.extras !== undefined)) {
+                          moveResults.push(await this.copyAttachementsToDataDirectory(importQuiz.uuid, question.uuid, AttachementType.extras, question.extras));
+                        }
 
                         //Update answers so that they contain only fileName and not fullPath
-                        if (results) {
-                          for (let result of results) {
+                        if (moveResults) {
+                          for (let result of moveResults) {
                             questionIndex = importQuiz.questions.findIndex((q) => q.uuid === result.questionUuid);
 
                             if (questionIndex !== -1) {
-                              for (let fileName of result.fileNames) {
-                                let answerIndex: number = importQuiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
+                              if (result.type === AttachementType.answers) {
+                                //set correct answers
+                                for (let fileName of result.fileNames) {
+                                  let attachementIndex: number = importQuiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
 
-                                importQuiz.questions[questionIndex].answers[answerIndex] = fileName;
+                                  importQuiz.questions[questionIndex].answers[attachementIndex] = fileName;
+                                }
+                              } else if (result.type === AttachementType.extras) {
+                                //set correct extras
+                                for (let fileName of result.fileNames) {
+                                  let attachementIndex: number = importQuiz.questions[questionIndex].extras.findIndex((e) => e.endsWith(fileName));
+
+                                  importQuiz.questions[questionIndex].extras[attachementIndex] = fileName;
+                                }
                               }
                             }
                           }
@@ -469,9 +505,9 @@ export class QuizsProvider {
                         }).catch(() => {
                           reject('Could not save quizs to storage.');
                         });
-                      }).catch(() => {
-                        reject('Could not save attachements.');
-                      });
+                      } catch(error) {
+                        reject('Could not save attachements. ' + error);
+                      };
                     } else {
                       reject('The quiz already exists in your database.');
                     }
