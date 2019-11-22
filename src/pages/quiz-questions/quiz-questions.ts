@@ -340,8 +340,9 @@ export class QuizQuestionsPage {
 
     this.quizsProv.saveToStorage(this.quiz).then(() => {
       loading.dismiss();
-    }).catch(() => {
+    }).catch((error) => {
       loading.dismiss();
+      console.log(error);
       alert('Unable to save Quiz.');
     });
   }
