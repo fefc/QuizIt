@@ -2,6 +2,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Platform, NavController, ModalController, AlertController, LoadingController, PopoverController } from 'ionic-angular';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { FileChooser } from '@ionic-native/file-chooser';
+import { FileOpener } from '@ionic-native/file-opener';
 import { FilePath } from '@ionic-native/file-path';
 import { File } from '@ionic-native/file';
 import { TranslateService } from '@ngx-translate/core';
@@ -37,6 +38,7 @@ export class HomePage {
     private popoverCtrl: PopoverController,
     private androidPermissions: AndroidPermissions,
     private fileChooser: FileChooser,
+    private fileOpener: FileOpener,
     private filePath: FilePath,
     private file: File,
     private quizsProv: QuizsProvider,
@@ -54,7 +56,7 @@ export class HomePage {
         if (data.index === 0) {
           this.openQuizNewPage();
         } else if (data.index === 1) {
-          setTimeout(() => this.import(), 0); //Wired trick to make it work in browser
+          setTimeout(() => this.import(), 0); //Wired trick to make it work in browser //DOES NOT WORK!
         }
       }
     });
@@ -157,15 +159,12 @@ export class HomePage {
 
     this.quizsProv.zip(quiz).then((data: any) => {
       if (this.platform.is('core')) {
-        this.file.readAsDataURL(data.cordovaFilePath, data.filePath).then((data) => {
-          window.location.href = "data:application/zip;" + data;
+        this.fileOpener.open(data.cordovaFilePath + data.filePath, 'application/zip').then(() => {
           loading.dismiss();
-          alert("Be a bit more patient, a download popup should show up.");
         }).catch((error) => {
           loading.dismiss();
-          alert("Something went wrong while exporting the quiz.");
+          alert("Something went wrong while exporting the quiz. " + error);
         });
-
       } else if (this.platform.is('android')) {
         this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
           .then(status => {
@@ -197,7 +196,7 @@ export class HomePage {
       }
     }).catch((err) => {
       alert(err);
-    })
+    });
   }
 
   exportFileToAndroidDownload(data) {
@@ -246,11 +245,13 @@ export class HomePage {
             alert(error);
           })
 
-        }).catch((err) => {
-          console.log(err);
+        }).catch((error) => {
+          console.log(error);
+          alert(error);
         });
-      }).catch((e) => {
-        console.log(e);
+      }).catch((error) => {
+        console.log(error);
+        alert(error);
       });
     } else if (this.platform.is('core')) {
         this.fileInput.nativeElement.click();
@@ -260,23 +261,31 @@ export class HomePage {
   }
 
   importBrowser() {
+    let loading = this.loadingCtrl.create({
+      content: this.translate.instant('IMPORTING')
+    });
+
+    loading.present();
+
     let file: any = this.fileInput.nativeElement.files[0];
 
-    console.log(file);
     var reader = new FileReader();
     reader.readAsArrayBuffer(file);
     reader.onload = (e: any) => {
       var fileName: string = file.name;
 
       this.file.writeFile(this.file.cacheDirectory, fileName, e.target.result, { replace: true }).then(() => {
-        alert("written file to cache, can be unzipped now");
-
         this.quizsProv.unzip(this.file.cacheDirectory, fileName).then(() => {
+          loading.dismiss();
         }).catch((error) => {
+          loading.dismiss();
+          console.log(error);
           alert(error);
         });
 
       }).catch((error) => {
+        loading.dismiss();
+        console.log(error);
         alert(error);
       });
     };

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ViewController } from 'ionic-angular';
+import { Platform, ViewController } from 'ionic-angular';
 
 @Component({
   styles: [`
@@ -9,14 +9,15 @@ import { ViewController } from 'ionic-angular';
   template: `
     <ion-list>
       <button ion-item (click)="close(0)">{{ 'NEW_QUIZ' | translate }}</button>
-      <button ion-item (click)="close(1)">{{ 'IMPORT_QUIZ' | translate }}</button>
+      <button *ngIf="!platform.is('core')" ion-item (click)="close(1)">{{ 'IMPORT_QUIZ' | translate }}</button>
       <!--<button ion-item (click)="close(2)">{{ 'SETTINGS' | translate }}</button>-->
     </ion-list>
   `
 })
 
 export class HomeMenu {
-  constructor(public viewCtrl: ViewController) {
+  constructor(private platform: Platform,
+              public viewCtrl: ViewController) {
 
   }
 

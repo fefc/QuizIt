@@ -11,6 +11,7 @@ import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { FileChooser } from '@ionic-native/file-chooser';
+import { FileOpener } from '@ionic-native/file-opener';
 import { FilePath } from '@ionic-native/file-path';
 import { Insomnia } from '@ionic-native/insomnia';
 import { AppVersion } from '@ionic-native/app-version';
@@ -113,6 +114,7 @@ export function createTranslateLoader(http: HttpClient) {
     ScreenOrientation,
     AndroidPermissions,
     FileChooser,
+    FileOpener,
     FilePath,
     Insomnia,
     AppVersion,
