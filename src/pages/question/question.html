@@ -15,7 +15,7 @@
   <ion-list>
     <ion-item>
       <ion-label stacked>{{ 'QUESTION' | translate }}</ion-label>
-      <ion-input type="text" placeholder="This is your question" [(ngModel)]="question.question"></ion-input>
+      <ion-input type="text" placeholder="{{ 'QUESTION_PLACEHOLDER' | translate }}" [(ngModel)]="question.question"></ion-input>
     </ion-item>
     <ion-item>
       <ion-label fixed>{{ 'CATEGORY' | translate }}</ion-label>
@@ -34,8 +34,8 @@
     </ion-item>
     <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
     <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-      <ion-label fixed>Answer {{answerNumber[i]}}</ion-label> <!-- TODO: translate -->
-      <ion-input type="text" placeholder="An answer" [(ngModel)]="question.answers[i]"></ion-input>
+      <ion-label fixed>{{ 'ANSWER_' + i.toString() | translate }}</ion-label>
+      <ion-input type="text" placeholder="" [(ngModel)]="question.answers[i]"></ion-input>
     </ion-item>
     <ion-item>
       <ion-label fixed>{{ 'RIGHT_ANSWER' | translate }}</ion-label>

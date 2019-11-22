@@ -25,7 +25,7 @@
   <p class="information" *ngIf="gameControllerProv.game.state === GameState.ended">{{ 'CTRL_END' | translate }}</p>
   <p class="information" *ngIf="gameControllerProv.game.state === GameState.quickedOut">{{ 'CTRL_KICKED' | translate }}</p>
   <button class="exit-button" *ngIf="gameControllerProv.game.state === GameState.ended || gameControllerProv.game.state === GameState.quickedOut" ion-button large (click)="exit()">
-    Exit
+    {{ 'EXIT' | translate }}
   </button>
   <div class="answers-container" *ngIf="gameControllerProv.game.state === GameState.classicQuestionDisplayed || gameControllerProv.game.state === GameState.pictureQuestionDisplayed">
     <div *ngIf="gameControllerProv.game.state === GameState.classicQuestionDisplayed" class="answers">

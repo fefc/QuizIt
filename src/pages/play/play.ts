@@ -7,6 +7,7 @@ import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
 import { Subscription } from "rxjs/Subscription";
+import { TranslateService } from '@ngx-translate/core';
 
 declare var BarcodeGenerator: any;
 
@@ -264,6 +265,7 @@ export class PlayPage {
               private sanitizer:DomSanitizer,
               private insomnia: Insomnia,
               private gameProv: GameProvider,
+              public translate: TranslateService,
               params: NavParams) {
 
     this.screenState = ScreenStateType.start;
@@ -705,19 +707,19 @@ export class PlayPage {
   getMenuButtons() {
     return [
       {
-        text: this.pause === false ? 'Pause (after this)' : 'Play',
+        text: this.pause === false ? this.translate.instant('Pause') : this.translate.instant('PLAY'),
         icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
         handler: () => {
           this.pause = !this.pause;
         }
       },{
-        text: 'Exit',
+        text: this.translate.instant('EXIT'),
         icon: !this.platform.is('ios') ? 'square' : null,
         handler: () => {
           this.exit();
         }
       },{
-        text: 'Close menu',
+        text: this.translate.instant('CLOSE'),
         icon: !this.platform.is('ios') ? 'close' : null,
         role: 'cancel',
       }
@@ -737,26 +739,6 @@ export class PlayPage {
       console.log("AndroidFullScreen is not supported: " + err);
     });
   }
-
-  /*setPlayerAnswer(player: Player, answer: number) {
-    this.ngZone.run(() => {
-      player.answer = answer;
-
-      if (!this.players.some((x) => x.answer === -1)) {
-        if(this.displayQuestionTimer) {
-          clearTimeout(this.displayQuestionTimer);
-          this.displayQuestionTimer = undefined;
-        }
-
-        if(this.switchPicturesTimer) {
-          clearTimeout(this.switchPicturesTimer);
-          this.switchPicturesTimer = undefined;
-        }
-
-        this.next();
-      }
-    });
-  }*/
 
   exit() {
     this.showMenuCounter = 0;

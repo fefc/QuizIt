@@ -64,13 +64,13 @@ export class AppComponent {
     private quizsProv: QuizsProvider,
     private gameControllerProv: GameControllerProvider,
     public translate: TranslateService) {
-      
+
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
 
       // Set default language
-      translate.setDefaultLang('fr');
+      translate.setDefaultLang('en');
 
       // Initialize Firebase
       firebase.initializeApp(FIREBASE_CONFIG);

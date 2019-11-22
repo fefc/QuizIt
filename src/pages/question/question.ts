@@ -19,7 +19,6 @@ const MAX_PICTURE_HEIGHT: number = 1080;
 })
 
 export class QuestionPage {
-  private answerNumber: Array<string> = ['one', 'two', 'three', 'four'];
   private maxPictures: number = 5;
   private QuestionType = QuestionType; //for use in Angluar html
   private categorys: Array<Category>;
@@ -109,7 +108,7 @@ export class QuestionPage {
         inputs: [
           {
             name: 'categoryName',
-            placeholder: 'Economics'
+            placeholder: this.translate.instant('RENAME_CATEGORY_PLACEHOLDER')
           }
         ],
         buttons: [

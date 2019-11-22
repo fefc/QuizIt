@@ -1,9 +1,8 @@
 <ion-content class="main" [ngStyle]="{'background-image': 'url(assets/imgs/backgrounds/' + backgroundImage + ')'}" (tap)="setShowMenu($event)">
 
   <!--General Texts and title Zone-->
-  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-title">
-    The quiz will start shortly...<br>
-    Play now by scanning the QR code!
+  <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-title"
+    [innerHTML]="'PLAY_JOIN_MESSAGE' | translate">
   </div>
 
   <img *ngIf="screenState === ScreenStateType.playersJoining" [src]="renderQrCode(qrCode)" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}"

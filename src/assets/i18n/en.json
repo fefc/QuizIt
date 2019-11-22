@@ -124,5 +124,25 @@
   "LOGGING_OUT": "Logging out...",
   "UPDATING": "Updating...",
   "RESETTING": "Resetting",
-  "ONLINE_ACCOUNT": "Online account"
+  "ONLINE_ACCOUNT": "Online account",
+  "PLAY": "Play",
+  "PAUSE": "Pause (after this)",
+  "TITLE_PLACEHOLDER": "What is your quiz about?",
+  "TIME_PER_QUESTION_PLACEHOLDER": "Available time for each question in ms",
+  "AMOUNT_OF_PICTURES_PLACEHOLDER": "Number of pictures you want to be displayed",
+  "WELCOME_MESSAGE_PLACEHOLDER": "A short welcome message",
+  "END_MESSAGE_PLACEHOLDER": "Message showing up at the end",
+  "COMMON_ANUMATION_PLACEHOLDER": "Time of usual animations in ms",
+  "PLAYER_ANSWER_ANIMATION_PLACEHOLDER": "Time of player answer animation in ms",
+  "EXTRA_DURATION_PLACEHOLDER": "Display time of the introduction in ms",
+  "DELAY_BETWEEN_QUESTIONS_PLACEHOLDER" : "Time before switching to next question in ms",
+  "DELAY_BEFORE_NEXT_BUTTON_PLACEHOLDER": "Time before showing the next button in ms",
+  "RENAME_CATEGORY_PLACEHOLDER": "Economics, culture, ...",
+  "QUESTION_PLACEHOLDER": "A good question makes a good quiz",
+  "ANSWER_0": "Answer one",
+  "ANSWER_1": "Answer two",
+  "ANSWER_2": "Answer three",
+  "ANSWER_3": "Answer four",
+  "PLAY_JOIN_MESSAGE": "The quiz will start shortly...<br>Play now by scanning the QR code!"
+
 }

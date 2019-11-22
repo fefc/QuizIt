@@ -101,7 +101,7 @@ export class QuizQuestionsPage {
       inputs: [
         {
           name: 'categoryName',
-          placeholder: 'Economics',
+          placeholder: this.translate.instant('RENAME_CATEGORY_PLACEHOLDER'),
           value: category.name
         }
       ],

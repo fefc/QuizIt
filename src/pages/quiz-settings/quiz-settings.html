@@ -25,7 +25,7 @@
       </ion-item-divider>-->
       <ion-item>
       <ion-label>{{ 'TITLE' | translate }}</ion-label>
-        <ion-input type="text" placeholder="Title of the quiz" [(ngModel)]="title"></ion-input>
+        <ion-input type="text" placeholder="{{ 'TITLE_PLACEHOLDER' | translate }}" [(ngModel)]="title"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label>{{ 'AUTO_PLAY' | translate }}</ion-label>
@@ -33,19 +33,19 @@
       </ion-item>
       <ion-item>
         <ion-label>{{ 'TIME_PER_QUESTION' | translate }}</ion-label>
-        <ion-input type="number" min="1" placeholder="Available time for each question in ms" [(ngModel)]="settings.timeBarAnimationDuration"></ion-input>
+        <ion-input type="number" min="1" placeholder="{{ 'TIME_PER_QUESTION_PLACEHOLDER' | translate }}" [(ngModel)]="settings.timeBarAnimationDuration"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label>{{ 'AMOUNT_OF_PICTURES' | translate }}</ion-label>
-        <ion-input type="number" min="1" placeholder="Number of pictures you want to be displayed" [(ngModel)]="settings.amountOfPicturesToShow"></ion-input>
+        <ion-input type="number" min="1" placeholder="{{ 'AMOUNT_OF_PICTURES_PLACEHOLDER' | translate }}" [(ngModel)]="settings.amountOfPicturesToShow"></ion-input>
       </ion-item>
       <ion-item>
       <ion-label>{{ 'WELCOME_MESSAGE' | translate }}</ion-label>
-        <ion-input type="text" placeholder="A short welcome message" [(ngModel)]="settings.startMessage"></ion-input>
+        <ion-input type="text" placeholder="{{ 'WELCOME_MESSAGE_PLACEHOLDER' | translate }}" [(ngModel)]="settings.startMessage"></ion-input>
       </ion-item>
       <ion-item>
       <ion-label>{{ 'END_MESSAGE' | translate }}</ion-label>
-        <ion-input type="text" placeholder="Message showing up at the end" [(ngModel)]="settings.endMessage"></ion-input>
+        <ion-input type="text" placeholder="{{ 'END_MESSAGE_PLACEHOLDER' | translate }}" [(ngModel)]="settings.endMessage"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label>{{ 'BACKGROUND' | translate }}</ion-label>
@@ -61,23 +61,23 @@
         </ion-item-divider>
         <ion-item>
           <ion-label>{{ 'COMMON_ANUMATION' | translate }}</ion-label>
-          <ion-input type="number" min="1" placeholder="Time of usual animations in ms" [(ngModel)]="settings.commonAnimationDuration"></ion-input>
+          <ion-input type="number" min="1" placeholder="{{ 'COMMON_ANUMATION_PLACEHOLDER' | translate }}" [(ngModel)]="settings.commonAnimationDuration"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label>{{ 'PLAYER_ANSWER_ANIMATION' | translate }}</ion-label>
-          <ion-input type="number" min="1" placeholder="Time of player answer animation in ms" [(ngModel)]="settings.playerAnswerAnimationDuration"></ion-input>
+          <ion-input type="number" min="1" placeholder="{{ 'PLAYER_ANSWER_ANIMATION_PLACEHOLDER' | translate }}" [(ngModel)]="settings.playerAnswerAnimationDuration"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label>{{ 'EXTRA_DURATION' | translate }}</ion-label>
-          <ion-input type="number" min="1" placeholder="Display time of the introduction in ms" [(ngModel)]="settings.extraDisplayDuration"></ion-input>
+          <ion-input type="number" min="1" placeholder="{{ 'EXTRA_DURATION_PLACEHOLDER' | translate }}" [(ngModel)]="settings.extraDisplayDuration"></ion-input>
         </ion-item>
         <ion-item *ngIf="settings.autoPlay">
           <ion-label>{{ 'DELAY_BETWEEN_QUESTIONS' | translate }}</ion-label>
-          <ion-input type="number" min="1" placeholder="Time before switching to next question in ms" [(ngModel)]="settings.showNextDelay"></ion-input>
+          <ion-input type="number" min="1" placeholder="{{ 'DELAY_BETWEEN_QUESTIONS_PLACEHOLDER' | translate }}" [(ngModel)]="settings.showNextDelay"></ion-input>
         </ion-item>
         <ion-item *ngIf="!settings.autoPlay">
           <ion-label>{{ 'DELAY_BEFORE_NEXT_BUTTON' | translate }}</ion-label>
-          <ion-input type="number" min="1" placeholder="Time before showing the next button in ms" [(ngModel)]="settings.showNextDelay"></ion-input>
+          <ion-input type="number" min="1" placeholder="{{ 'DELAY_BEFORE_NEXT_BUTTON_PLACEHOLDER' | translate }}" [(ngModel)]="settings.showNextDelay"></ion-input>
         </ion-item>
         </ion-item-group>
   </ion-list>
