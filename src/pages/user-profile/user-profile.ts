@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Platform, ModalController, ViewController, LoadingController, AlertController, NavParams } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
@@ -21,8 +21,6 @@ const MAX_PICTURE_HEIGHT: number = 64;
 
 export class UserProfilePage {
   private profile: UserProfile;
-
-  @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
 
   constructor(private platform: Platform,
               public modalCtrl: ModalController,
@@ -319,28 +317,14 @@ export class UserProfilePage {
         }
       });
     } else {
-      this.openBrowserImagePicker();
+      this.openMobileImagePicker();
     }
   }
 
-  openBrowserImagePicker(){
-    this.fileInput.nativeElement.click();
-  };
-
-  getBrowserImage() {
-    let file: any = this.fileInput.nativeElement.files[0];
-
-    this.resizeBrowserImage(file).then((e: any) => {
-      this.profile.avatar = e;
-    }).catch(() => {
-      alert('Could not resize image');
-    });
-  }
-
   openMobileImagePicker() {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, outputType: 1}).then((results) => {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 80, outputType: 1}).then((results) => {
       if (results.length === 1) {
-        this.profile.avatar = 'data:image/png;base64,' + results[0];
+        this.profile.avatar = 'data:image/jpeg;base64,' + results[0];
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -349,38 +333,5 @@ export class UserProfilePage {
 
   renderPicture(base64: string) {
     return this.sanitizer.bypassSecurityTrustUrl(base64);
-  }
-
-  resizeBrowserImage(file: any) {
-    return new Promise((resolve, reject) => {
-      var reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e: any) => {
-        //First resize the image
-        //https://zocada.com/compress-resize-images-javascript-browser/
-        let img = new Image();
-        img.src = e.target.result;
-        img.onload = (pic: any) => {
-          let canvas = document.createElement('canvas');
-
-          if (img.height > MAX_PICTURE_HEIGHT || img.width > MAX_PICTURE_WIDTH) {
-            if ((img.height / MAX_PICTURE_HEIGHT) > (img.width / MAX_PICTURE_WIDTH)) {
-              canvas.width = img.width / (img.height / MAX_PICTURE_HEIGHT)
-              canvas.height = MAX_PICTURE_HEIGHT;
-            } else {
-              canvas.width = MAX_PICTURE_WIDTH
-              canvas.height = img.height / (img.width / MAX_PICTURE_WIDTH) ;
-            }
-          } else {
-            canvas.width = img.width;
-            canvas.height = img.height;
-          }
-
-          let ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(ctx.canvas.toDataURL('image/jpeg', 0.8));
-        };
-      };
-    });
   }
 }

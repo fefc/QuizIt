@@ -58,13 +58,12 @@
     <button ion-fab mini><ion-icon name="image"></ion-icon></button>
     <ion-fab-list side="right">
       <!-- realIndex: https://github.com/ionic-team/ionic/issues/12297#issuecomment-329772167 -->
+      <!-- realIndex can be undefined when no one ever moved the slides -->
       <button ion-fab (click)="openImagePicker(maxPictures, false)" *ngIf="question.answers.length < maxPictures"><ion-icon name="add"></ion-icon></button>
-      <button ion-fab (click)="replacePicture(slides.realIndex)" *ngIf="question.answers.length > 0"><ion-icon name="create"></ion-icon></button>
-      <button ion-fab (click)="deletePicture(slides.realIndex)" *ngIf="question.answers.length > 0"><ion-icon name="trash"></ion-icon></button>
-      <button ion-fab (click)="rightPicture(slides.realIndex)" *ngIf="question.answers.length > 0"><ion-icon name="checkmark"></ion-icon></button>
+      <button ion-fab (click)="replacePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="create"></ion-icon></button>
+      <button ion-fab (click)="deletePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="trash"></ion-icon></button>
+      <button ion-fab (click)="rightPicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="checkmark"></ion-icon></button>
     </ion-fab-list>
-    <input #fileInput type="file" style="display: none" (change)="getBrowserPictures(maxPictures, false)" accept="image/png, image/jpeg" multiple/>
-    <input #fileInputReplace type="file" style="display: none" (change)="getBrowserReplacePicture()" accept="image/png, image/jpeg"/>
   </ion-fab>
 </ion-content>
 
@@ -74,7 +73,6 @@
       <button ion-button icon-start (click)="openImagePicker(1, true)" *ngIf="question.extras.length === 0"><ion-icon name="film"></ion-icon>{{ 'ADD_INTRO' | translate }}</button>
       <button ion-button icon-start (click)="deleteExtras()" *ngIf="question.extras.length > 0"><ion-icon name="trash"></ion-icon>{{ 'DELETE_INTRO' | translate }}</button>
     </ion-buttons>
-    <input #fileInputExtra type="file" style="display: none" (change)="getBrowserExtras()" accept="image/png, image/jpeg, image/gif, video/mp4, video/webm, video/ogg"/>
     <ion-buttons right>
       <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ newQuestion === true ? ('CREATE' | translate) : ('SAVE' | translate) }}</button>
     </ion-buttons>

@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, AlertController, NavParams, Slides, FabContainer } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
@@ -36,9 +36,6 @@ export class QuestionPage {
 
   @ViewChild(Slides) slides: Slides;
   @ViewChild('slidesFab') slidesFab : FabContainer;
-  @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
-  @ViewChild('fileInputReplace') fileInputReplace: ElementRef; //Picture selector for browser
-  @ViewChild('fileInputExtra') fileInputExtra: ElementRef; //Extra selector for browser
 
   private replacePictureIndex: number;
 
@@ -190,21 +187,13 @@ export class QuestionPage {
         }
       });
     } else {
-      this.openBrowserImagePicker(extra);
+      this.openMobileImagePicker(maximumImagesCount, extra);
     }
 
     if (extra === false) {
       this.slidesFab.close();
     }
   }
-
-  openBrowserImagePicker(extra: boolean){
-    if (extra) {
-      this.fileInputExtra.nativeElement.click();
-    } else {
-      this.fileInput.nativeElement.click();
-    }
-  };
 
   replacePicture(val: number) {
     if (this.platform.is('android')) {
@@ -222,15 +211,10 @@ export class QuestionPage {
         }
       });
     } else {
-      this.replacePictureBrowser(val);
+      this.replacePictureMobile(val);
     }
 
     this.slidesFab.close();
-  }
-
-  replacePictureBrowser(val: number) {
-    this.fileInputReplace.nativeElement.click();
-    this.replacePictureIndex = val;
   }
 
   //https://stackoverflow.com/a/52970316
@@ -243,7 +227,7 @@ export class QuestionPage {
       maxImages = maximumImagesCount - this.question.answers.length;
     }
 
-    this.imagePicker.getPictures({maximumImagesCount: maxImages, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
+    this.imagePicker.getPictures({maximumImagesCount: maxImages, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90, allow_video: extra}).then((results) => {
       let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
       let decodedURI: string = '';
 
@@ -268,7 +252,7 @@ export class QuestionPage {
   }
 
   replacePictureMobile(val: number) {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT}).then((results) => {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
       if (results.length === 1) {
         let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
         let decodedURI: string = decodeURIComponent(results[0]);
@@ -278,45 +262,6 @@ export class QuestionPage {
       }
     }).catch(() => {
       alert('Could not get images.');
-    });
-  }
-
-  getBrowserPictures(maximumImagesCount: number) {
-    let files: Array<any>;
-
-    files = this.fileInput.nativeElement.files;
-
-    if (files.length > maximumImagesCount - this.question.answers.length) {
-      alert("to many images");
-    } else {
-      for (let file of files) {
-        this.resizeBrowserImage(file).then((e: any) => {
-          this.saveBrowserFileToCache(e.target.result, this.uuidv4() + '.jpg').then((filePath: string) => {
-            this.question.answers.push(filePath);
-            this.pictures.push(undefined);
-            this.renderPicture(this.file.cacheDirectory, filePath.split('/').pop(), this.pictures.length - 1);
-          }).catch((error) => {
-            alert(error);
-          });
-        }).catch(() => {
-          alert('Could not resize image');
-        });
-      }
-    }
-  }
-
-  getBrowserReplacePicture() {
-    let file: any = this.fileInputReplace.nativeElement.files[0];
-
-    this.resizeBrowserImage(file).then((e: any) => {
-      this.saveBrowserFileToCache(e.target.result, this.uuidv4() + '.jpg').then((filePath: string) => {
-        this.question.answers[this.replacePictureIndex] = filePath;
-        this.renderPicture(this.file.cacheDirectory, filePath.split('/').pop(), this.replacePictureIndex);
-      }).catch((error) => {
-        alert(error);
-      });
-    }).catch(() => {
-      alert('Could not resize image');
     });
   }
 
@@ -340,49 +285,6 @@ export class QuestionPage {
     this.slidesFab.close();
   }
 
-  getBrowserExtras() {
-    let files: Array<any>;
-    files = this.fileInputExtra.nativeElement.files;
-
-    if (files.length !== 1) {
-      alert("to many medias");
-    } else {
-      for (let file of files) {
-        if (['video', 'gif'].some(type => file.type.includes(type))) {
-          //Videos or gif files are not to be resized
-          var reader = new FileReader();
-          reader.readAsArrayBuffer(file);
-          reader.onload = (e: any) => {
-            this.saveBrowserFileToCache(e.target.result, this.uuidv4() + '.' + file.type.split('/').pop()).then((filePath: string) => {
-              this.question.extras = [];
-              this.question.extras.push(filePath);
-
-              this.extras = [];
-              this.extras.push(filePath);
-            }).catch((error) => {
-              alert(error);
-            });
-          };
-        } else {
-          //Other files (png jpg) can be resized, so let's do it
-          this.resizeBrowserImage(file).then((e: any) => {
-            this.saveBrowserFileToCache(e.target.result, this.uuidv4() + '.jpg').then((filePath: string) => {
-              this.question.extras = [];
-              this.question.extras.push(filePath);
-
-              this.extras = [];
-              this.extras.push(filePath);
-            }).catch((error) => {
-              alert(error);
-            });
-          }).catch(() => {
-            alert('Could not resize image');
-          });
-        }
-      }
-    }
-  }
-
   deleteExtras() {
     this.question.extras = [];
     this.extras = [];
@@ -392,7 +294,7 @@ export class QuestionPage {
     let enable: boolean = true;
     if (this.question.question) {
       if (this.question.question.length > 0) {
-        if (this.question.rightAnswer !== -1) {
+        if (this.question.rightAnswer !== -1 && this.question.rightAnswer !== undefined) {
           for (let answer of this.question.answers) {
             if (answer.length === 0) {
               enable = false;
@@ -434,62 +336,6 @@ export class QuestionPage {
       this.slides.update();
     }).catch((error) => {
       console.log("Something went wrong when reading pictures.", error);
-    });
-  }
-
-  saveBrowserFileToCache(arrayBuffer, filename) {
-    return new Promise((resolve, reject) => {
-      this.file.writeFile(this.file.cacheDirectory, filename, arrayBuffer, { replace: true }).then(() => {
-        resolve(this.file.cacheDirectory + filename);
-      }).catch((error) => {
-        reject(error);
-      });
-    });
-  }
-
-  resizeBrowserImage(file: any) {
-    return new Promise((resolve, reject) => {
-      var reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e: any) => {
-        //First resize the image
-        //https://zocada.com/compress-resize-images-javascript-browser/
-        let img = new Image();
-        img.src = e.target.result;
-        img.onload = (pic: any) => {
-          let canvas = document.createElement('canvas');
-
-          if (img.height > MAX_PICTURE_HEIGHT || img.width > MAX_PICTURE_WIDTH) {
-            if ((img.height / MAX_PICTURE_HEIGHT) > (img.width / MAX_PICTURE_WIDTH)) {
-              canvas.width = img.width / (img.height / MAX_PICTURE_HEIGHT)
-              canvas.height = MAX_PICTURE_HEIGHT;
-            } else {
-              canvas.width = MAX_PICTURE_WIDTH
-              canvas.height = img.height / (img.width / MAX_PICTURE_WIDTH) ;
-            }
-          } else {
-            canvas.width = img.width;
-            canvas.height = img.height;
-          }
-
-          let ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          ctx.canvas.toBlob((blob) => {
-            var resizedReader = new FileReader();
-            resizedReader.readAsArrayBuffer(blob);
-            resizedReader.onload = (resizedE: any) => {
-              resolve(resizedE);
-            };
-          }, 'image/jpeg', 1);
-        };
-      };
-    });
-  }
-
-  uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
     });
   }
 }
