@@ -73,12 +73,11 @@
   </div>
 
   <!--Question & Timebar Zone-->
-  <div class="time-bar" *ngIf="displayTimeBar"
-        [@timeBarAnimation]="{value: '', params: {time: timeBarAnimationDuration}}">
-  </div>
-
   <div class="question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
-        [@questionAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].question}}
+        [@questionAnimation]="{value: '', params: {time: commonAnimationDuration}}" [attr.question]="currentQuestions[currentQuestion].question">
+    <div class="time-bar" *ngIf="displayTimeBar"
+      [@timeBarAnimation]="{value: '', params: {time: timeBarAnimationDuration}}">
+    </div>
   </div>
 
   <!-- Answers -->
@@ -93,11 +92,12 @@
     <div class="three" *ngIf="displayAnswers"
           [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
   </div>
-    <!--Picture answers Zone-->
-    <div class="picture" *ngIf="displayPictures"
+
+  <!--Picture answers Zone-->
+  <div class="picture" *ngIf="displayPictures"
           [@pictureInOutAnimation]="{value: '', params: {time: commonAnimationDuration}}"
           [@pictureTransitionAnimation]="{value: currentPictureCounter, params: {time: commonAnimationDuration}}">
-          <canvas [style.background-image]="currentPictures[this.gameProv.currentPicture]"></canvas>
+    <canvas [style.background-image]="currentPictures[this.gameProv.currentPicture]"></canvas>
   </div>
 
   <!-- Manual mode fabs -->
@@ -107,8 +107,8 @@
     </button>
   </ion-fab>
   <ion-fab center bottom *ngIf="showExit === true" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}">
-  <button ion-fab (click)="exit()" >
-    <ion-icon name="square"></ion-icon>
-  </button>
-</ion-fab>
+    <button ion-fab (click)="exit()" >
+      <ion-icon name="square"></ion-icon>
+    </button>
+  </ion-fab>
 </ion-content>

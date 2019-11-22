@@ -578,10 +578,11 @@ export class PlayPage {
       }
     }
     else if (this.screenState === ScreenStateType.displayQuestion) {
+      this.displayTimeBar = false; //First make sure to remove the TimeBar otherwise a small glitch appears
+
       await this.gameProv.updateState(GameState.loading);
 
       this.screenState = ScreenStateType.displayPlayersAnswer;
-      this.displayTimeBar = false;
 
       if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture
           && this.gameProv.currentPicture !== this.currentQuestions[this.currentQuestion].rightAnswer) {
