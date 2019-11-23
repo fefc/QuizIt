@@ -19,6 +19,7 @@ import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { Globalization } from '@ionic-native/globalization';
 
 import { AppComponent } from './app.component';
 
@@ -124,7 +125,8 @@ export function createTranslateLoader(http: HttpClient) {
     QuizsProvider,
     GameProvider,
     GameControllerProvider,
-    AuthenticationProvider
+    AuthenticationProvider,
+    Globalization
   ]
 })
 export class AppModule {}
