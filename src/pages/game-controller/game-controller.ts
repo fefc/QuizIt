@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { NavController, NavParams, AlertController, LoadingController, PopoverController } from 'ionic-angular';
+import { Insomnia } from '@ionic-native/insomnia';
 import { TranslateService } from '@ngx-translate/core';
 
 import { GameState } from '../../models/game';
@@ -22,10 +23,16 @@ export class GameControllerPage {
     private alertCtrl: AlertController,
     private popoverCtrl: PopoverController,
     private sanitizer:DomSanitizer,
+    private insomnia: Insomnia,
     private gameControllerProv: GameControllerProvider,
     private translate: TranslateService,
     params: NavParams) {
 
+      this.insomnia.keepAwake().then(() => {
+        console.log("Device will be keept awake");
+      }).catch(() => {
+        console.log("Could not set keepAwake.");
+      });
   }
 
   setAnswer(index: number) {
@@ -74,6 +81,12 @@ export class GameControllerPage {
 
   /* this will be executed when view is poped, either by exit() or by back button */
   ionViewWillUnload() {
+    this.insomnia.allowSleepAgain().then(() => {
+      console.log("Device can go sleep again.");
+    }).catch(() => {
+      console.log("Device could not be allowed to sleep again.");
+    });
+    
     this.gameControllerProv.leaveGame().catch(() => {
       console.log("Could not leave game properly");
     });
