@@ -40,7 +40,7 @@ export class StartPage {
     private sanitizer:DomSanitizer,
     private profilesProv: UserProfilesProvider,
     private authProv: AuthenticationProvider,
-    public translate: TranslateService) {
+    private translate: TranslateService) {
     this.profile = {
       uuid: '',
       nickname: '',

@@ -37,7 +37,7 @@ export class QuizQuestionsPage {
     private alertCtrl: AlertController,
     private popoverCtrl: PopoverController,
     private quizsProv: QuizsProvider,
-    public translate: TranslateService,
+    private translate: TranslateService,
     params: NavParams) {
       this.quiz = params.data.quiz;
       this.showReorderCategorys = false;

@@ -16,7 +16,7 @@ export class QuizSettingsPage {
 
   constructor(public viewCtrl: ViewController,
               public toastCtrl: ToastController,
-              public translate: TranslateService,
+              private translate: TranslateService,
               params: NavParams) {
     this.showAdvancedCounter = 0;
 

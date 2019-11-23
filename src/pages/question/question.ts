@@ -45,7 +45,7 @@ export class QuestionPage {
               private imagePicker: ImagePicker,
               private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
-              public translate: TranslateService,
+              private translate: TranslateService,
               params: NavParams) {
 
     this.newQuestion = true;

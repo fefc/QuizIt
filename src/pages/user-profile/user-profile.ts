@@ -31,7 +31,7 @@ export class UserProfilePage {
               private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
               private authProv: AuthenticationProvider,
-              public translate: TranslateService,
+              private translate: TranslateService,
               params: NavParams) {
     //lets make deep copies, so that we don't modfiy anything before user confirmation
     if (!params.data.profile) {

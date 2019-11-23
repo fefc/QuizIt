@@ -17,7 +17,7 @@ export class SignUpPage {
               private loadingCtrl: LoadingController,
               private alertCtrl: AlertController,
               private authProv: AuthenticationProvider,
-              public translate: TranslateService) {
+              private translate: TranslateService) {
     this.email = "";
     this.password = "";
   }

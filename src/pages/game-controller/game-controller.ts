@@ -23,7 +23,7 @@ export class GameControllerPage {
     private popoverCtrl: PopoverController,
     private sanitizer:DomSanitizer,
     private gameControllerProv: GameControllerProvider,
-    public translate: TranslateService,
+    private translate: TranslateService,
     params: NavParams) {
 
   }

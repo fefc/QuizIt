@@ -42,7 +42,7 @@ export class HomePage {
     private filePath: FilePath,
     private file: File,
     private quizsProv: QuizsProvider,
-    public translate: TranslateService) {
+    private translate: TranslateService) {
 
       this.selectedQuizs = 0;
   }

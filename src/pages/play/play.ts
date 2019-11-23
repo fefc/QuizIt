@@ -265,7 +265,7 @@ export class PlayPage {
               private sanitizer:DomSanitizer,
               private insomnia: Insomnia,
               private gameProv: GameProvider,
-              public translate: TranslateService,
+              private translate: TranslateService,
               params: NavParams) {
 
     this.screenState = ScreenStateType.start;
