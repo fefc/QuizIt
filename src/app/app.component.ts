@@ -74,6 +74,10 @@ export class AppComponent {
 
       // Set default language
       this.globalization.getPreferredLanguage().then((res) => {
+        res.value = res.value.toLowerCase();
+
+        if (res.value.includes('-')) res.value = res.value.split('-')[0];
+
         if (translate.getLangs().indexOf(res.value) !== -1) {
           translate.setDefaultLang(res.value);
         } else {
