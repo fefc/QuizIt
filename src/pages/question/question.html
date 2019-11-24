@@ -18,14 +18,14 @@
       <ion-input type="text" placeholder="{{ 'QUESTION_PLACEHOLDER' | translate }}" [(ngModel)]="question.question"></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label fixed>{{ 'CATEGORY' | translate }}</ion-label>
+      <ion-label>{{ 'CATEGORY' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.category.name" interface="popover" (ionChange)="categoryChange($event)">
         <ion-option *ngFor="let category of categorys" [value]="category.name">{{category.name}}</ion-option>
         <ion-option value="new">{{ 'NEW_CATEGORY' | translate }}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item>
-      <ion-label fixed>{{ 'TYPE' | translate }}</ion-label>
+      <ion-label>{{ 'TYPE' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.type" interface="popover" (ionChange)="typeChange($event)">
         <ion-option [value]="QuestionType.classic">{{ 'TYPE_CLASSIC' | translate }}</ion-option>
         <ion-option [value]="QuestionType.stopwatch">{{ 'TYPE_STOPWATCH' | translate }}</ion-option>
@@ -34,11 +34,11 @@
     </ion-item>
     <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
     <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-      <ion-label fixed>{{ 'ANSWER_' + i.toString() | translate }}</ion-label>
+      <ion-label>{{ 'ANSWER_' + i.toString() | translate }}</ion-label>
       <ion-input type="text" placeholder="" [(ngModel)]="question.answers[i]"></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label fixed>{{ 'RIGHT_ANSWER' | translate }}</ion-label>
+      <ion-label>{{ 'RIGHT_ANSWER' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.rightAnswer" interface="popover">
         <ion-option *ngFor="let answer of question.answers; let i = index" [value]="i">{{answer}}</ion-option>
       </ion-select>
