@@ -707,7 +707,7 @@ export class PlayPage {
   getMenuButtons() {
     return [
       {
-        text: this.pause === false ? this.translate.instant('Pause') : this.translate.instant('PLAY'),
+        text: this.pause === false ? this.translate.instant('PAUSE') : this.translate.instant('PLAY'),
         icon: !this.platform.is('ios') ? this.pause === false ? 'pause' : 'play' : null,
         handler: () => {
           this.pause = !this.pause;
