@@ -6,7 +6,7 @@
   </div>
 
   <img *ngIf="screenState === ScreenStateType.playersJoining" [src]="renderQrCode(qrCode)" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}"
-    class="qrcode" [ngClass]="{'qrcode-browser': platform.is('cordova')}">
+    class="qrcode" [ngClass]="{'qrcode-browser': platform.is('core')}">
 
   <div *ngIf="screenState === ScreenStateType.playersJoining" [@titleAnimation]="{value: '', params: {time: commonAnimationDuration}}" class="start-message">
     {{startMessage}}
