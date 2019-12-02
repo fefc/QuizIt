@@ -143,5 +143,7 @@
   "auth/user-disabled": "User has been disabled, contact us for more informations.",
   "auth/user-not-found": "User not found, have you already signed in?",
   "auth/weak-password": "Your password is too weak, please choose a safer password.",
-  "auth/wrong-password": "Wrong password, please try again."
+  "auth/wrong-password": "Wrong password, please try again.",
+  "QUESTION_TOO_LONG": "Your question becomes too long, try to simplify or rephrase it.",
+  "ANSWER_TOO_LONG": "Your answer becomes too long, try to simplify or rephrase it."
 }

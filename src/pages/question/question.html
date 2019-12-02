@@ -15,7 +15,7 @@
   <ion-list>
     <ion-item>
       <ion-label stacked>{{ 'QUESTION' | translate }}</ion-label>
-      <ion-input type="text" placeholder="{{ 'QUESTION_PLACEHOLDER' | translate }}" [(ngModel)]="question.question"></ion-input>
+      <ion-input type="text" maxlength="58" (ionChange)="questionMaxLengthReached(58)" placeholder="{{ 'QUESTION_PLACEHOLDER' | translate }}" [(ngModel)]="question.question"></ion-input>
     </ion-item>
     <ion-item>
       <ion-label>{{ 'CATEGORY' | translate }}</ion-label>
@@ -32,18 +32,18 @@
         <ion-option [value]="QuestionType.rightPicture">{{ 'TYPE_RIGHT_PICTURE' | translate }}</ion-option>
       </ion-select>
     </ion-item>
-    <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
-    <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-      <ion-label>{{ 'ANSWER_' + i.toString() | translate }}</ion-label>
-      <ion-input type="text" placeholder="" [(ngModel)]="question.answers[i]"></ion-input>
-    </ion-item>
-    <ion-item>
+    <ion-item-group *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch" reorder="true" (ionItemReorder)="reorderAnswers($event)">
+      <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
+        <ion-label>{{ 'ANSWER_' + i.toString() | translate }}</ion-label>
+        <ion-input type="text" maxlength="24" (ionChange)="answerMaxLengthReached(24, i)" placeholder="" [(ngModel)]="question.answers[i]"></ion-input>
+      </ion-item>
+    </ion-item-group>
+    <ion-item *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
       <ion-label>{{ 'RIGHT_ANSWER' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.rightAnswer" interface="popover">
         <ion-option *ngFor="let answer of question.answers; let i = index" [value]="i">{{answer}}</ion-option>
       </ion-select>
     </ion-item>
-    </div>
   </ion-list>
 
   <ion-slides *ngIf="question.type === QuestionType.rightPicture" centeredSlides pager>

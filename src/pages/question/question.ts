@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Platform, ViewController, AlertController, NavParams, Slides, FabContainer } from 'ionic-angular';
+import { Platform, ViewController, AlertController, ToastController, NavParams, Slides, FabContainer, reorderArray } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
@@ -41,6 +41,7 @@ export class QuestionPage {
   constructor(private platform: Platform,
               public viewCtrl: ViewController,
               private alertCtrl: AlertController,
+              private toastCtrl: ToastController,
               private file: File,
               private imagePicker: ImagePicker,
               private sanitizer:DomSanitizer,
@@ -99,6 +100,43 @@ export class QuestionPage {
 
   indexTracker(index: number, obj: any) {
     return index;
+  }
+
+  reorderAnswers(indexes:any) {
+    if (this.question.rightAnswer !== -1) {
+      let rightAnswer = this.question.answers[this.question.rightAnswer];
+
+      this.question.answers = reorderArray(this.question.answers, indexes);
+      this.question.rightAnswer = this.question.answers.indexOf(rightAnswer);
+    } else {
+      this.question.answers = reorderArray(this.question.answers, indexes);
+    }
+  }
+
+  questionMaxLengthReached(maxLength) {
+    if (this.question.question.length >= maxLength) {
+      let toast = this.toastCtrl.create({
+        message: this.translate.instant('QUESTION_TOO_LONG'),
+        showCloseButton: true,
+        closeButtonText: this.translate.instant('OK'),
+        position: 'bottom'
+      });
+
+      toast.present();
+    }
+  }
+
+  answerMaxLengthReached(maxLength, answerIndex) {
+    if (this.question.answers[answerIndex].length >= maxLength) {
+      let toast = this.toastCtrl.create({
+        message: this.translate.instant('ANSWER_TOO_LONG'),
+        showCloseButton: true,
+        closeButtonText: this.translate.instant('OK'),
+        position: 'bottom'
+      });
+
+      toast.present();
+    }
   }
 
   categoryChange(val: string) {

@@ -143,5 +143,7 @@
   "auth/user-disabled": "L'utilisateur a été désactivé, contactez-nous pour plus d'informations.",
   "auth/user-not-found": "Utilisateur non trouvé, avez-vous déjà créé un compte?",
   "auth/weak-password": "Votre mot de passe est trop faible, veuillez choisir un mot de passe plus sûr.",
-  "auth/wrong-password": "Mauvais mot de passe, veuillez réessayer."
+  "auth/wrong-password": "Mauvais mot de passe, veuillez réessayer.",
+  "QUESTION_TOO_LONG": "Votre question devient trop longue, essayez de la simplifier ou de la reformuler.",
+  "ANSWER_TOO_LONG": "Votre réponse devient trop longue, essayez de la simplifier ou du reformuler."
 }
