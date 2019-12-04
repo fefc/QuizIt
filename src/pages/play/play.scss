@@ -145,6 +145,16 @@ $fullDark: rgba(0, 0, 0, 0.9);
     border-radius: 2vh;
   }
 
+  .hidden-question {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: auto;
+    font-size: 6vh;
+    white-space: nowrap;
+    visibility: hidden;
+  }
+
   .question {
     position: absolute;
     top: 0;
@@ -164,7 +174,6 @@ $fullDark: rgba(0, 0, 0, 0.9);
     line-height: 12vh;
     margin: 4vh 2.25vw;
     padding: 0 0 0 2vw;
-    font-size: 6vh;
     color: #ccc;
     background-color: $dark;
     border: 0.3vh solid rgba(25, 25, 25, 0.9);

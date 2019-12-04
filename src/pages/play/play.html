@@ -72,7 +72,11 @@
   </div>
 
   <!--Question & Timebar Zone-->
+  <div class="hidden-question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer">
+    {{currentQuestions[currentQuestion].question}}
+  </div>
   <div class="question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
+        [ngStyle]="getQuestionFontSize()"
         [@questionAnimation]="{value: '', params: {time: commonAnimationDuration}}" [attr.question]="currentQuestions[currentQuestion].question">
     <div class="time-bar" *ngIf="displayTimeBar"
       [@timeBarAnimation]="{value: '', params: {time: timeBarAnimationDuration}}">

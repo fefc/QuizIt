@@ -687,6 +687,25 @@ export class PlayPage {
     return {'font-size': (avatar.offsetWidth / 5.0) + 'px'};
   }
 
+  getQuestionFontSize() {
+    let hiddenQuestion = (<HTMLElement> document.querySelector(".hidden-question")).offsetWidth;
+    //let question = parseInt(window.getComputedStyle(document.querySelector(".question"), ':after').width);
+    //Instead of getting Selector and style, use the same value as in scss, it will be more efficient
+    let question = this.vw(91.5);
+
+    if (hiddenQuestion > question) {
+      return {'font-size': (6 * (question / hiddenQuestion)) + 'vh'};
+    } else {
+      return {'font-size': '6vh'};
+    }
+  }
+
+  //Function to get view width like in scss
+  vw(v) {
+    var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    return (v * w) / 100;
+  }
+
   setShowMenu() {
     if (this.showMenuCounter === 0) {
       setTimeout(() => this.showMenuCounter = 0, 600);
