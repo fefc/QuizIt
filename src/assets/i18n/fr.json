@@ -1,6 +1,5 @@
 {
   "ABOUT": "A propos",
-  "ADD_INTRO": "Ajouter intro",
   "ADVANCED": "Avancées",
   "AMOUNT_OF_PICTURES": "Quantité de photos",
   "AMOUNT_OF_PICTURES_PLACEHOLDER": "Nombre de photos que vous souhaitez afficher",
@@ -37,7 +36,6 @@
   "DELETE_ACCOUNT_INFO": "Toutes vos données en ligne seront supprimées",
   "DELETE_CATEGORY": "Supprimer la catégorie",
   "DELETE_CATEGORY_INFO": "La suppression de la catégorie supprimera également toutes les questions contenues.",
-  "DELETE_INTRO": "Supprimer intro",
   "DELETING": "Suppression...",
   "DONE": "Fini",
   "DONE_START": "J'ai fini",
@@ -145,5 +143,7 @@
   "auth/weak-password": "Votre mot de passe est trop faible, veuillez choisir un mot de passe plus sûr.",
   "auth/wrong-password": "Mauvais mot de passe, veuillez réessayer.",
   "QUESTION_TOO_LONG": "Votre question devient trop longue, essayez de la simplifier ou de la reformuler.",
-  "ANSWER_TOO_LONG": "Votre réponse devient trop longue, essayez de la simplifier ou du reformuler."
+  "ANSWER_TOO_LONG": "Votre réponse devient trop longue, essayez de la simplifier ou du reformuler.",
+  "NO_INTRO_INFO": "Il y a actuellement une introduction à cette question, ajoutez-en une en cliquant sur '+'.",
+  "MANAGE_INTRO": "Gérer l'introduction"
 }

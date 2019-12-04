@@ -1,0 +1,27 @@
+page-question-extra {
+  .scroll-content {
+    //overflow-y: hidden !important;
+    padding-bottom: 0px !important; //important to API 21
+    display: flex;
+    flex-flow: column;
+  }
+
+  ion-content {
+    canvas, video {
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .information {
+      margin: auto 4vh;
+      text-align: center;
+      font-size: 1.6em;
+    }
+  }
+}

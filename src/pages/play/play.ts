@@ -14,7 +14,7 @@ declare var BarcodeGenerator: any;
 import { Quiz } from '../../models/quiz';
 import { DefaultQuizSettings } from '../../models/quiz-settings';
 import { Category } from '../../models/category';
-import { QuestionType } from '../../models/question';
+import { QuestionType, ExtraType } from '../../models/question';
 import { Question } from '../../models/question';
 import { Player } from '../../models/player';
 
@@ -34,12 +34,6 @@ enum ScreenStateType {
   hideQuestion,
   end,
   displayExtra,
-}
-
-enum ExtraType {
-  none,
-  picture,
-  video
 }
 
 @Component({

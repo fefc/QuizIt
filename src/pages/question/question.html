@@ -59,7 +59,7 @@
     <ion-fab-list side="right">
       <!-- realIndex: https://github.com/ionic-team/ionic/issues/12297#issuecomment-329772167 -->
       <!-- realIndex can be undefined when no one ever moved the slides -->
-      <button ion-fab (click)="openImagePicker(maxPictures, false)" *ngIf="question.answers.length < maxPictures"><ion-icon name="add"></ion-icon></button>
+      <button ion-fab (click)="openImagePicker(maxPictures)" *ngIf="question.answers.length < maxPictures"><ion-icon name="add"></ion-icon></button>
       <button ion-fab (click)="replacePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="create"></ion-icon></button>
       <button ion-fab (click)="deletePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="trash"></ion-icon></button>
       <button ion-fab (click)="rightPicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="checkmark"></ion-icon></button>
@@ -70,8 +70,7 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons left>
-      <button ion-button icon-start (click)="openImagePicker(1, true)" *ngIf="question.extras.length === 0"><ion-icon name="film"></ion-icon>{{ 'ADD_INTRO' | translate }}</button>
-      <button ion-button icon-start (click)="deleteExtras()" *ngIf="question.extras.length > 0"><ion-icon name="trash"></ion-icon>{{ 'DELETE_INTRO' | translate }}</button>
+      <button ion-button icon-start (click)="openQuestionExtraPage()"><ion-icon name="film"></ion-icon>{{ 'MANAGE_INTRO' | translate }}</button>
     </ion-buttons>
     <ion-buttons right>
       <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ newQuestion === true ? ('CREATE' | translate) : ('SAVE' | translate) }}</button>

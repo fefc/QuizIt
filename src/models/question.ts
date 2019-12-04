@@ -6,6 +6,12 @@ export enum QuestionType {
   rightPicture = 3
 }
 
+export enum ExtraType {
+  none,
+  picture,
+  video
+}
+
 export interface Question {
   readonly uuid: string,
   question: string,

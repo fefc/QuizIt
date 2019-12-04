@@ -43,6 +43,7 @@ import { QuizQuestionsMenuCategory } from '../pages/quiz-questions/menu-category
 import { QuizSettingsPage } from '../pages/quiz-settings/quiz-settings';
 
 import { QuestionPage } from '../pages/question/question';
+import { QuestionExtraPage } from '../pages/question-extra/question-extra';
 
 import { PlayPage } from '../pages/play/play';
 
@@ -67,6 +68,7 @@ export function createTranslateLoader(http: HttpClient) {
     QuizQuestionsMenuCategory,
     QuizSettingsPage,
     QuestionPage,
+    QuestionExtraPage,
     PlayPage,
     GameControllerPage,
     GameControllerMenu
@@ -98,6 +100,7 @@ export function createTranslateLoader(http: HttpClient) {
     QuizQuestionsMenuCategory,
     QuizSettingsPage,
     QuestionPage,
+    QuestionExtraPage,
     PlayPage,
     GameControllerPage,
     GameControllerMenu
