@@ -21,5 +21,6 @@ export interface Question {
   extras: Array<string>,
   category: Category;
   authorId: number,
-  selected?: boolean
+  selected?: boolean,
+  hide?: boolean
 }

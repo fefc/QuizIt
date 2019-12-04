@@ -77,6 +77,8 @@ export class QuizQuestionsPage {
         if (data.index === 0) {
           this.renameCategory(category);
         } else if (data.index === 1) {
+          this.showReorderCategorys = !this.showReorderCategorys;
+        } else if (data.index === 2) {
           this.deleteCategoryWithDialog(category);
         }
       }
@@ -260,11 +262,37 @@ export class QuizQuestionsPage {
       this.selectedQuestions += 1;
     }
     else {
-      question.selected = false;
+      question.selected = undefined;
       if (this.selectedQuestions > 0) {
         this.selectedQuestions -= 1;
       }
     }
+  }
+
+  enableUnhideIcon() {
+    return this.quiz.questions.some((q) => q.selected === true && q.hide === true) && !this.quiz.questions.some((q) => q.selected === true && !q.hide);
+  }
+
+  hideOrUnhideSelected() {
+    let newState: boolean = this.enableUnhideIcon() ? undefined : true;
+
+    for (let question of this.quiz.questions.filter((q) => q.selected === true)) {
+      question.hide = newState;
+      this.selectQuestion(question);
+    }
+
+    let loading = this.loadingCtrl.create({
+      content: this.translate.instant('SAVING')
+    });
+
+    loading.present();
+
+    this.quizsProv.saveToStorage(this.quiz).then(() => {
+      loading.dismiss();
+    }).catch(() => {
+      loading.dismiss();
+      alert('Unable to save Quiz.');
+    });
   }
 
   deleteSelected() {
