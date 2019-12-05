@@ -42,3 +42,23 @@ ion-icon {
         height: 100%;
     }
 }
+
+.alert-head {
+  .alert-title {
+    color: color($colors, fulllight);
+  }
+}
+
+.platform-core {
+  .alert-message {
+    overflow-y: auto;
+  }
+
+  .scroll-content {
+    overflow-y: auto;
+  }
+
+  page-start .slide-zoom {
+    overflow-y: auto;
+  }
+}
