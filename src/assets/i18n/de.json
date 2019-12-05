@@ -145,5 +145,6 @@
   "QUESTION_TOO_LONG": "Ihre Frage wird zu lang. Versuchen Sie, diese zu vereinfachen oder neu zu formulieren.",
   "ANSWER_TOO_LONG": "Ihre Antwort wird zu lang. Versuchen Sie, diese zu vereinfachen oder neu zu formulieren.",
   "NO_INTRO_INFO": "Derzeit gibt es eine Einführung zu dieser Frage. Fügen Sie eine hinzu, indem Sie auf '+' klicken.",
-  "MANAGE_INTRO": "Einführung verwalten"
+  "MANAGE_INTRO": "Einführung verwalten",
+  "DRAFT": "Entwurf"
 }

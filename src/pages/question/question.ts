@@ -319,6 +319,17 @@ export class QuestionPage {
     });
   }
 
+  enableDraftButton() {
+    let enable: boolean = false;
+    if (this.question.question) {
+      if (this.question.question.length > 0) {
+        enable = true;
+      }
+    }
+
+    return enable;
+  }
+
   enableSaveButton() {
     let enable: boolean = true;
     if (this.question.question) {
@@ -346,6 +357,10 @@ export class QuestionPage {
 
   save() {
     if (this.enableSaveButton()) {
+      this.question.draft = undefined;
+      this.viewCtrl.dismiss({question: this.question});
+    } else if (this.enableDraftButton()) {
+      this.question.draft = true;
       this.viewCtrl.dismiss({question: this.question});
     }
   }

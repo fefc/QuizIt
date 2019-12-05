@@ -364,6 +364,8 @@ export class QuizQuestionsPage {
       this.quiz.questions[questionIndex].extras = question.extras;
       this.quiz.questions[questionIndex].category = question.category;
       this.quiz.questions[questionIndex].authorId = question.authorId;
+      this.quiz.questions[questionIndex].draft = question.draft;
+      //hide does not need to be set here
     }
 
     this.quizsProv.saveToStorage(this.quiz).then(() => {

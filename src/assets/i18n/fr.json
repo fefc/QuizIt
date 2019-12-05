@@ -145,5 +145,6 @@
   "QUESTION_TOO_LONG": "Votre question devient trop longue, essayez de la simplifier ou de la reformuler.",
   "ANSWER_TOO_LONG": "Votre réponse devient trop longue, essayez de la simplifier ou du reformuler.",
   "NO_INTRO_INFO": "Il y a actuellement une introduction à cette question, ajoutez-en une en cliquant sur '+'.",
-  "MANAGE_INTRO": "Gérer l'introduction"
+  "MANAGE_INTRO": "Gérer l'introduction",
+  "DRAFT": "Brouillon"
 }

@@ -105,7 +105,8 @@ export class QuizsProvider {
               answers: quiz.questions[questionIndex].answers,
               extras: quiz.questions[questionIndex].extras,
               category: quiz.questions[questionIndex].category,
-              authorId: quiz.questions[questionIndex].authorId
+              authorId: quiz.questions[questionIndex].authorId,
+              draft: quiz.questions[questionIndex].draft
             }
 
             quiz.questions[questionIndex] = questionUUID;

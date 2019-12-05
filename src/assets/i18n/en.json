@@ -145,5 +145,6 @@
   "QUESTION_TOO_LONG": "Your question becomes too long, try to simplify or rephrase it.",
   "ANSWER_TOO_LONG": "Your answer becomes too long, try to simplify or rephrase it.",
   "NO_INTRO_INFO": "There is currently an introduction for this question, add one by clicking '+'.",
-  "MANAGE_INTRO": "Manage introduction"
+  "MANAGE_INTRO": "Manage introduction",
+  "DRAFT": "Draft"
 }

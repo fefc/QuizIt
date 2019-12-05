@@ -22,5 +22,6 @@ export interface Question {
   category: Category;
   authorId: number,
   selected?: boolean,
-  hide?: boolean
+  hide?: boolean,
+  draft?: boolean
 }

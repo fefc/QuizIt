@@ -70,10 +70,12 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons left>
-      <button ion-button icon-start (click)="openQuestionExtraPage()"><ion-icon name="film"></ion-icon>{{ 'MANAGE_INTRO' | translate }}</button>
+      <button ion-button icon-start (click)="openQuestionExtraPage()"><ion-icon name="videocam"></ion-icon>{{ 'MANAGE_INTRO' | translate }}</button>
     </ion-buttons>
     <ion-buttons right>
-      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ newQuestion === true ? ('CREATE' | translate) : ('SAVE' | translate) }}</button>
+      <button ion-button (click)="save()" [disabled]="!enableDraftButton()">
+        {{ enableSaveButton() === true ? (newQuestion === true ? ('CREATE' | translate) : ('SAVE' | translate)) : ('DRAFT' | translate) }}
+      </button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>
