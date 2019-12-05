@@ -238,7 +238,7 @@ export class QuizQuestionsPage {
 
   reorderQuestions(indexes:any, category: Category) {
     let realFrom: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.from]);
-    let realTo: number = indexes.from < indexes.to ? realFrom + indexes.to : realFrom - (indexes.from - indexes.to);
+    let realTo: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.to])
 
     this.quiz.questions = reorderArray(this.quiz.questions, {from: realFrom, to: realTo});
 
