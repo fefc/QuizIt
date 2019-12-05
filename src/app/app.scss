@@ -61,4 +61,8 @@ ion-icon {
   page-start .slide-zoom {
     overflow-y: auto;
   }
+
+  .select-popover ion-list {
+    margin: 0;
+  }
 }
