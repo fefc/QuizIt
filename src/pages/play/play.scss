@@ -21,7 +21,7 @@ $fullDark: rgba(0, 0, 0, 0.9);
   }
 
   .scroll-content {
-    overflow-y: hidden;
+    overflow-y: hidden !important;
   }
 
   .menu {
@@ -292,19 +292,23 @@ $fullDark: rgba(0, 0, 0, 0.9);
 
   .players {
     position: absolute;
-    top: 24.5vh;
+    top: 22.5vh;
     right: 2.5vw;
-    height: 72vh;
+    height: 76vh;
     display: flex;
     flex-direction: column;
 
+    .player:last-child {
+      margin-bottom: 0;
+    }
+
     .player {
       flex-grow: 1;
-      max-height: 12vh;
+      min-height: 0;
+      max-height: 10.5vh;
       width: 100%;
       height: 100%;
-      padding-bottom: 1.5vh;
-      margin: 0 0 0 auto;
+      margin: 0 0 1.5vh auto;
 
       display: flex;
       flex-flow: row;
