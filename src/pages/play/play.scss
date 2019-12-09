@@ -282,10 +282,15 @@ $fullDark: rgba(0, 0, 0, 0.9);
         border-radius: 1.5vh;
         vertical-align: top;
 
-        .nickname {
-          font-size: 1em;
-          margin: 0.9vh 1vw;
+        .nickname, .points {
+          font-size: 0.25em;
+          margin: 0.35em 1vw 0.25em 1vw;
           color: #ccc;
+        }
+
+        .points {
+          font-size: 0.20em;
+          margin-bottom: 0;
         }
       }
 

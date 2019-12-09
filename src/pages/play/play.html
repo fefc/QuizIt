@@ -23,7 +23,7 @@
   </div>
 
   <!--Player Avatar, nickname & points Zone-->
-  <div id="players" class="players" *ngIf="displayPlayers" [@playersContainerAnimation]>
+  <div id="players" class="players" *ngIf="displayPlayers" [style.font-size]="getInfoHeight() + 'px'" [@playersContainerAnimation]>
     <div class="player" *ngFor="let player of gameProv.players; let i = index"
     [@playerPositionAnimation]="{value: player.animations.actualPosition,
       params: {
@@ -38,8 +38,8 @@
         <ion-icon name="remove-circle"></ion-icon>
       </button>
       <div class="info">
-        <div class="nickname" [ngStyle]="getNicknameFontSize()">{{player.nickname}}</div>
-        <div class="nickname" [ngStyle]="getPointsFontSize()" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.stats.points}}</div>
+        <div class="nickname">{{player.nickname}}</div>
+        <div class="points" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.stats.points}}</div>
       </div>
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1"
