@@ -648,7 +648,6 @@ export class PlayPage {
 
   getPlayerHeight() {
     let player = <HTMLElement> document.getElementById('players').firstElementChild;
-<<<<<<< HEAD
 
     if (player) {
       let style = window.getComputedStyle(player);
@@ -659,13 +658,6 @@ export class PlayPage {
     } else {
       return 0;
     }
-=======
-    let style = window.getComputedStyle(player);
-
-    return ['height', 'padding-top', 'padding-bottom', 'margin-top', 'margin-bottom']
-        .map((key) => parseFloat(style.getPropertyValue(key)))
-        .reduce((prev, cur) => prev + cur);
->>>>>>> d82a59d7986902e11d2c42050f3e386cebd9b8ab
   }
 
   getPlayerActualYTranslation(player: Player) {
@@ -683,7 +675,6 @@ export class PlayPage {
     }
   }
 
-<<<<<<< HEAD
   getInfoHeight() {
     let player = <HTMLElement> document.getElementById('players').firstElementChild;
 
@@ -696,25 +687,11 @@ export class PlayPage {
     } else {
       return 0;
     }
-=======
-  getNicknameFontSize() {
-    let avatar = <HTMLElement> document.querySelector('.avatar');
-    return {'font-size': (avatar.offsetWidth / 3.5) + 'px'};
-  }
-
-  getPointsFontSize() {
-    let avatar = <HTMLElement> document.querySelector('.avatar');
-    return {'font-size': (avatar.offsetWidth / 5.0) + 'px'};
->>>>>>> d82a59d7986902e11d2c42050f3e386cebd9b8ab
   }
 
   getQuestionFontSize() {
     let hiddenQuestion = (<HTMLElement> document.getElementById('hidden-question')).offsetWidth;
-<<<<<<< HEAD
     //let question = parseInt(window.getComputedStyle(document.getElementById('hidden-question'), ':after').width);
-=======
-    //let question = parseInt(window.getComputedStyle(document.querySelector('.question'), ':after').width);
->>>>>>> d82a59d7986902e11d2c42050f3e386cebd9b8ab
     //Instead of getting Selector and style, use the same value as in scss, it will be more efficient
     let question = this.vw(91.5);
 
