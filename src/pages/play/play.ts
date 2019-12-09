@@ -6,7 +6,7 @@ import { File } from '@ionic-native/file';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
-import { Subscription } from "rxjs/Subscription";
+import { Subscription } from 'rxjs/Subscription';
 import { TranslateService } from '@ngx-translate/core';
 
 declare var BarcodeGenerator: any;
@@ -82,18 +82,18 @@ enum ScreenStateType {
       trigger(
       'pictureInOutAnimation' , [
         transition(':enter', [
-          style({transform: 'rotate3d(1, 1, 0, -90deg)', transformOrigin: "0 92.5vh", opacity: 0}),
+          style({transform: 'rotate3d(1, 1, 0, -90deg)', transformOrigin: '0 92.5vh', opacity: 0}),
           animate('{{time}}ms', style({transform: 'none', opacity: 1}))
         ], { params: { time: 600 } }),
         transition(':leave', [
-          style({transform: 'none', transformOrigin: "72vw 92.5vh", opacity: 1}),
+          style({transform: 'none', transformOrigin: '72vw 92.5vh', opacity: 1}),
           animate('{{time}}ms', style({transform: 'rotate3d(1, 0, 1, -90deg)', opacity: 0}))
         ], { params: { time: 600 } }),
       ]),
       trigger(
       'pictureTransitionAnimation', [
         transition(':increment', [
-          style({transform: 'rotate3d(0, 0, 0, 0) scale(1)', transformOrigin: "50%"}),
+          style({transform: 'rotate3d(0, 0, 0, 0) scale(1)', transformOrigin: '50%'}),
           animate('{{time}}ms',
             keyframes([
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
@@ -103,7 +103,7 @@ enum ScreenStateType {
           )
         ], { params: { time: 600 } }),
         transition(':decrement', [
-          style({transform: 'rotate3d(0, 0, 0, 180deg) scale(1)', transformOrigin: "50%"}),
+          style({transform: 'rotate3d(0, 0, 0, 180deg) scale(1)', transformOrigin: '50%'}),
           animate('{{time}}ms',
             keyframes([
               style({transform: 'rotate3d(0, 1, 0, 0deg) scale(1)'}),
@@ -139,7 +139,7 @@ enum ScreenStateType {
       trigger(
       'playerPointsAnimation', [
         transition(':increment', [
-          style({transform: 'scale(1)', transformOrigin: "0 50%"}),
+          style({transform: 'scale(1)', transformOrigin: '0 50%'}),
           animate('{{time}}ms',
             keyframes([
               style({transform: 'scale(1)', offset: 0}),
@@ -149,7 +149,7 @@ enum ScreenStateType {
           )
         ], { params: { time: 600 } }),
         transition(':decrement', [
-          style({transform: 'scale(1)', transformOrigin: "0 50%"}),
+          style({transform: 'scale(1)', transformOrigin: '0 50%'}),
           animate('{{time}}ms',
             keyframes([
               style({transform: 'scale(1)', offset: 0}),
@@ -185,11 +185,11 @@ enum ScreenStateType {
       trigger(
       'extraAnimation' , [
         transition(':enter', [
-          style({transform: 'rotate3d(1, 1, 0, -90deg)', transformOrigin: "0 92.5vh", opacity: 0}),
+          style({transform: 'rotate3d(1, 1, 0, -90deg)', transformOrigin: '0 92.5vh', opacity: 0}),
           animate('{{time}}ms', style({transform: 'none', opacity: 1}))
         ], { params: { time: 600 } }),
         transition(':leave', [
-          style({transform: 'none', transformOrigin: "72vw 92.5vh", opacity: 1}),
+          style({transform: 'none', transformOrigin: '72vw 92.5vh', opacity: 1}),
           animate('{{time}}ms', style({transform: 'rotate3d(1, 0, 1, -90deg)', opacity: 0}))
         ], { params: { time: 600 } }),
       ]),
@@ -369,7 +369,7 @@ export class PlayPage {
               backgroundColor: '#FFFFFF'},
             (base64: string) => {
             //The barcode has been Successfully created, everything is ready now
-            this.qrCode = "data:image/png;base64, " + base64;
+            this.qrCode = 'data:image/png;base64, ' + base64;
 
             this.currentQuestion = 0;
             this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
@@ -397,9 +397,9 @@ export class PlayPage {
             });
 
             this.insomnia.keepAwake().then(() => {
-              console.log("Device will be keept awake");
+              console.log('Device will be keept awake');
             }).catch(() => {
-              console.log("Could not set keepAwake.");
+              console.log('Could not set keepAwake.');
             });
 
             let toast = this.toastCtrl.create({
@@ -538,13 +538,13 @@ export class PlayPage {
               this.next();
             }
           }).catch(() => {
-            console.log("Something went wrong when reading pictures.");
+            console.log('Something went wrong when reading pictures.');
 
             this.screenState = ScreenStateType.loadNextQuestion;
             this.hidePlayers();
           });
         }).catch(() => {
-          console.log("Something went wrong when reading extras.");
+          console.log('Something went wrong when reading extras.');
 
           this.screenState = ScreenStateType.loadNextQuestion;
           this.hidePlayers();
@@ -560,7 +560,7 @@ export class PlayPage {
       setTimeout(() => this.displayTimeBar = true, this.commonAnimationDuration);
 
       this.gameProv.updateState(this.currentQuestions[this.currentQuestion].type === QuestionType.rightPicture ? GameState.pictureQuestionDisplayed : GameState.classicQuestionDisplayed).catch(() => {
-        console.log("Update game state did not worked properly.");
+        console.log('Update game state did not worked properly.');
       });
 
       this.displayPlayers = true;
@@ -647,8 +647,12 @@ export class PlayPage {
   }
 
   getPlayerHeight() {
-    let player = <HTMLElement> document.querySelector(".player");
-    return player.offsetHeight;
+    let player = <HTMLElement> document.getElementById('players').firstElementChild;
+    let style = window.getComputedStyle(player);
+
+    return ['height', 'padding-top', 'padding-bottom', 'margin-top', 'margin-bottom']
+        .map((key) => parseFloat(style.getPropertyValue(key)))
+        .reduce((prev, cur) => prev + cur);
   }
 
   getPlayerActualYTranslation(player: Player) {
@@ -662,28 +666,23 @@ export class PlayPage {
   saveActualYTranslation(e, i) {
     if (this.gameProv.players[i]) {
       e.element.setAttribute('style',
-        "transform: translateY(" + (this.gameProv.players[i].animations.actualPosition - this.gameProv.players[i].animations.initialPosition)  * this.getPlayerHeight() +"px)");
+        'transform: translateY(' + (this.gameProv.players[i].animations.actualPosition - this.gameProv.players[i].animations.initialPosition)  * this.getPlayerHeight() +'px)');
     }
   }
 
-  getAvatarWidth() {
-    let avatar = <HTMLElement> document.querySelector(".avatar");
-    return {'margin-right': avatar.offsetWidth + 'px'};
-  }
-
   getNicknameFontSize() {
-    let avatar = <HTMLElement> document.querySelector(".avatar");
+    let avatar = <HTMLElement> document.querySelector('.avatar');
     return {'font-size': (avatar.offsetWidth / 3.5) + 'px'};
   }
 
   getPointsFontSize() {
-    let avatar = <HTMLElement> document.querySelector(".avatar");
+    let avatar = <HTMLElement> document.querySelector('.avatar');
     return {'font-size': (avatar.offsetWidth / 5.0) + 'px'};
   }
 
   getQuestionFontSize() {
-    let hiddenQuestion = (<HTMLElement> document.querySelector(".hidden-question")).offsetWidth;
-    //let question = parseInt(window.getComputedStyle(document.querySelector(".question"), ':after').width);
+    let hiddenQuestion = (<HTMLElement> document.getElementById('hidden-question')).offsetWidth;
+    //let question = parseInt(window.getComputedStyle(document.querySelector('.question'), ':after').width);
     //Instead of getting Selector and style, use the same value as in scss, it will be more efficient
     let question = this.vw(91.5);
 
@@ -743,13 +742,13 @@ export class PlayPage {
     this.androidFullScreen.isSupported().then(() => {
       this.androidFullScreen.isImmersiveModeSupported().then(() => {
         this.androidFullScreen.immersiveMode().catch((err) => {
-          console.log("Could not enable immersiveMode: " + err);
+          console.log('Could not enable immersiveMode: ' + err);
         })
       }).catch(err => {
-        console.log("ImmersiveMode is not supported: " + err);
+        console.log('ImmersiveMode is not supported: ' + err);
       });
     }).catch((err) => {
-      console.log("AndroidFullScreen is not supported: " + err);
+      console.log('AndroidFullScreen is not supported: ' + err);
     });
   }
 
@@ -769,9 +768,9 @@ export class PlayPage {
     this.allPlayersAnsweredSubscription.unsubscribe();
 
     this.insomnia.allowSleepAgain().then(() => {
-      console.log("Device can go sleep again.");
+      console.log('Device can go sleep again.');
     }).catch(() => {
-      console.log("Device could not be allowed to sleep again.");
+      console.log('Device could not be allowed to sleep again.');
     });
 
     if (this.platform.is('android')) {
@@ -787,10 +786,10 @@ export class PlayPage {
       /* Exit immersiveMode */
       this.androidFullScreen.isSupported().then(() => {
           this.androidFullScreen.showSystemUI().catch((err) => {
-            console.log("Could not disable immersiveMode: " + err);
+            console.log('Could not disable immersiveMode: ' + err);
           });
       }).catch((err) => {
-        console.log("AndroidFullScreen is not supported: " + err);
+        console.log('AndroidFullScreen is not supported: ' + err);
       });
     }
   }

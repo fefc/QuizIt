@@ -23,7 +23,7 @@
   </div>
 
   <!--Player Avatar, nickname & points Zone-->
-  <div class="players" *ngIf="displayPlayers" [@playersContainerAnimation]>
+  <div id="players" class="players" *ngIf="displayPlayers" [@playersContainerAnimation]>
     <div class="player" *ngFor="let player of gameProv.players; let i = index"
     [@playerPositionAnimation]="{value: player.animations.actualPosition,
       params: {
@@ -37,21 +37,21 @@
       <button *ngIf="screenState === ScreenStateType.playersJoining" ion-button icon-only class="remove-button" (click)="gameProv.deletePlayer(i)">
         <ion-icon name="remove-circle"></ion-icon>
       </button>
-      <div class="info" [ngStyle]="getAvatarWidth()">
+      <div class="info">
         <div class="nickname" [ngStyle]="getNicknameFontSize()">{{player.nickname}}</div>
         <div class="nickname" [ngStyle]="getPointsFontSize()" [@playerPointsAnimation]="{value: player.points, params: {time: commonAnimationDuration}}">{{player.stats.points}}</div>
       </div>
       <div class="avatar-container">
         <canvas class="avatar" width="1" height="1"
-                [ngClass]="{'player-answered': player.answer > -1 && screenState === ScreenStateType.displayQuestion}"
+
+                [ngClass]="{'answered': player.answer > -1 && screenState === ScreenStateType.displayQuestion,
+                                'zero': player.answer === 0 && screenState === ScreenStateType.displayPlayersAnswer && displayAnswers,
+                                 'one': player.answer === 1 && screenState === ScreenStateType.displayPlayersAnswer && displayAnswers,
+                                 'two': player.answer === 2 && screenState === ScreenStateType.displayPlayersAnswer && displayAnswers,
+                               'three': player.answer === 3 && screenState === ScreenStateType.displayPlayersAnswer && displayAnswers}"
+
                 [style.background-image]="renderAvatar(player.avatar)"></canvas>
         <canvas class="player-answer" width="1" height="1"
-
-                [ngClass]="{'zero':  player.answer === 0 && displayAnswers,
-                            'one':   player.answer === 1 && displayAnswers,
-                            'two':   player.answer === 2 && displayAnswers,
-                            'three': player.answer === 3 && displayAnswers}"
-
                 [ngStyle]="player.answer === currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/right-answer.png)'}
                         || player.answer !== currentQuestions[currentQuestion].rightAnswer && {'background-image': 'url(assets/imgs/wrong-answer.png)'}"
 
@@ -72,7 +72,7 @@
   </div>
 
   <!--Question & Timebar Zone-->
-  <div class="hidden-question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer">
+  <div id="hidden-question" class="hidden-question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer">
     {{currentQuestions[currentQuestion].question}}
   </div>
   <div class="question" *ngIf="screenState === ScreenStateType.displayQuestion || screenState === ScreenStateType.displayPlayersAnswer"
