@@ -87,9 +87,6 @@ export class QuizsProvider {
         //Saving an exsisting quiz, lets just make sure it's in the list
         let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
         if (quizIndex !== -1) {
-          //We never save "selected" so lets make sure its undefined
-          quiz.selected = undefined;
-
           //Check questions uuid, if there is one not set, generate one
           let questionIndex: number = quiz.questions.findIndex((q) => !q.uuid);
 
@@ -108,8 +105,7 @@ export class QuizsProvider {
               answers: quiz.questions[questionIndex].answers,
               extras: quiz.questions[questionIndex].extras,
               category: quiz.questions[questionIndex].category,
-              authorId: quiz.questions[questionIndex].authorId,
-              draft: quiz.questions[questionIndex].draft
+              authorId: quiz.questions[questionIndex].authorId
             }
 
             quiz.questions[questionIndex] = questionUUID;

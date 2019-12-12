@@ -1,5 +1,6 @@
 {
   "ABOUT": "Über",
+  "ADD_INTRO": "Einführung hinzufügen",
   "ADVANCED": "Fortgeschritten",
   "AMOUNT_OF_PICTURES": "Anzahl an Bildern",
   "AMOUNT_OF_PICTURES_PLACEHOLDER": "Anzahl der Bilder, die angezeigt werden",
@@ -36,6 +37,7 @@
   "DELETE_ACCOUNT_INFO": "Alle Ihre Online-Daten werden gelöscht",
   "DELETE_CATEGORY": "Kategorie löschen",
   "DELETE_CATEGORY_INFO": "Durch Löschen der Kategorie werden auch alle darin enthaltenen Fragen gelöscht.",
+  "DELETE_INTRO": "Einleitung löschen",
   "DELETING": "Löschen...",
   "DONE": "Fertig",
   "DONE_START": "Fertig",
@@ -141,10 +143,5 @@
   "auth/user-disabled": "Benutzer wurde deaktiviert, kontaktieren Sie uns für weitere Informationen.",
   "auth/user-not-found": "Benutzer nicht gefunden, hast du dich schon angemeldet?",
   "auth/weak-password": "Ihr Passwort ist zu schwach. Bitte wählen Sie ein sichereres Passwort.",
-  "auth/wrong-password": "Falsches Passwort, bitte versuchen Sie es erneut.",
-  "QUESTION_TOO_LONG": "Ihre Frage wird zu lang. Versuchen Sie, diese zu vereinfachen oder neu zu formulieren.",
-  "ANSWER_TOO_LONG": "Ihre Antwort wird zu lang. Versuchen Sie, diese zu vereinfachen oder neu zu formulieren.",
-  "NO_INTRO_INFO": "Derzeit gibt es eine Einführung zu dieser Frage. Fügen Sie eine hinzu, indem Sie auf '+' klicken.",
-  "MANAGE_INTRO": "Einführung verwalten",
-  "DRAFT": "Entwurf"
+  "auth/wrong-password": "Falsches Passwort, bitte versuchen Sie es erneut."
 }
