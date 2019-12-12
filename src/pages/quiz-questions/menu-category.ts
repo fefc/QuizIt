@@ -9,7 +9,8 @@ import { ViewController } from 'ionic-angular';
   template: `
     <ion-list>
       <button ion-item (click)="close(0)">{{ 'RENAME' | translate }}</button>
-      <button ion-item (click)="close(1)">{{ 'DELETE' | translate }}</button>
+      <button ion-item (click)="close(1)">{{ 'REORDER_CATEGORIES' | translate }}</button>
+      <button ion-item (click)="close(2)">{{ 'DELETE' | translate }}</button>
     </ion-list>
   `
 })

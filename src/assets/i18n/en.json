@@ -1,6 +1,5 @@
 {
   "ABOUT": "About",
-  "ADD_INTRO": "Add intro",
   "ADVANCED": "Advanced",
   "AMOUNT_OF_PICTURES": "Amount of pictures",
   "AMOUNT_OF_PICTURES_PLACEHOLDER": "Number of pictures you want to be displayed",
@@ -37,7 +36,6 @@
   "DELETE_ACCOUNT_INFO": "All your online datas will be deleted",
   "DELETE_CATEGORY": "Delete category",
   "DELETE_CATEGORY_INFO": "Deleting the category will also delete all contained questions.",
-  "DELETE_INTRO": "Delete intro",
   "DELETING": "Deleting...",
   "DONE": "Done",
   "DONE_START": "I'm done",
@@ -143,5 +141,10 @@
   "auth/user-disabled": "User has been disabled, contact us for more informations.",
   "auth/user-not-found": "User not found, have you already signed in?",
   "auth/weak-password": "Your password is too weak, please choose a safer password.",
-  "auth/wrong-password": "Wrong password, please try again."
+  "auth/wrong-password": "Wrong password, please try again.",
+  "QUESTION_TOO_LONG": "Your question becomes too long, try to simplify or rephrase it.",
+  "ANSWER_TOO_LONG": "Your answer becomes too long, try to simplify or rephrase it.",
+  "NO_INTRO_INFO": "There is currently an introduction for this question, add one by clicking '+'.",
+  "MANAGE_INTRO": "Manage introduction",
+  "DRAFT": "Draft"
 }

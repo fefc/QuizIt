@@ -6,6 +6,12 @@ export enum QuestionType {
   rightPicture = 3
 }
 
+export enum ExtraType {
+  none,
+  picture,
+  video
+}
+
 export interface Question {
   readonly uuid: string,
   question: string,
@@ -15,5 +21,7 @@ export interface Question {
   extras: Array<string>,
   category: Category;
   authorId: number,
-  selected?: boolean
+  selected?: boolean,
+  hide?: boolean,
+  draft?: boolean
 }

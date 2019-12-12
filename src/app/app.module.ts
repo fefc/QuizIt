@@ -27,10 +27,8 @@ import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
 import { GameProvider } from '../providers/game/game';
 import { GameControllerProvider } from '../providers/game-controller/game-controller';
-import { AuthenticationProvider } from '../providers/authentication/authentication';
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
-import { SignUpPage } from '../pages/sign-up/sign-up';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
@@ -45,6 +43,7 @@ import { QuizQuestionsMenuCategory } from '../pages/quiz-questions/menu-category
 import { QuizSettingsPage } from '../pages/quiz-settings/quiz-settings';
 
 import { QuestionPage } from '../pages/question/question';
+import { QuestionExtraPage } from '../pages/question-extra/question-extra';
 
 import { PlayPage } from '../pages/play/play';
 
@@ -61,7 +60,6 @@ export function createTranslateLoader(http: HttpClient) {
     StartPage,
     AboutPage,
     UserProfilePage,
-    SignUpPage,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -70,6 +68,7 @@ export function createTranslateLoader(http: HttpClient) {
     QuizQuestionsMenuCategory,
     QuizSettingsPage,
     QuestionPage,
+    QuestionExtraPage,
     PlayPage,
     GameControllerPage,
     GameControllerMenu
@@ -93,7 +92,6 @@ export function createTranslateLoader(http: HttpClient) {
     StartPage,
     AboutPage,
     UserProfilePage,
-    SignUpPage,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -102,6 +100,7 @@ export function createTranslateLoader(http: HttpClient) {
     QuizQuestionsMenuCategory,
     QuizSettingsPage,
     QuestionPage,
+    QuestionExtraPage,
     PlayPage,
     GameControllerPage,
     GameControllerMenu
@@ -125,7 +124,6 @@ export function createTranslateLoader(http: HttpClient) {
     QuizsProvider,
     GameProvider,
     GameControllerProvider,
-    AuthenticationProvider,
     Globalization
   ]
 })
