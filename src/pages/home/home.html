@@ -35,8 +35,7 @@
 
 <ion-content>
   <ion-list>
-    <!-- set tap event after press to avoid multi execution. See https://forum.ionicframework.com/t/using-tap-and-press-on-same-element-both-gesture-events-are-fired/76406/4 -->
-    <ion-item tappable *ngFor="let quiz of quizsProv.quizs" (press)="selectQuiz(quiz)" (tap)="openQuizQuestionsPage($event, quiz)">
+    <ion-item tappable *ngFor="let quiz of quizsProv.quizs" (tap)="openQuizQuestionsPage($event, quiz)" (press)="selectQuiz(quiz)">
         <ion-icon *ngIf="quiz.selected" name="checkbox" color="primary" item-end></ion-icon>
         <h2>{{ quiz.title }}</h2>
         <p>
@@ -45,7 +44,7 @@
           <ion-badge color="fulldark"><ion-icon name="images"></ion-icon> {{ getQuestionTypeCount(quiz, QuestionType.rightPicture) }}</ion-badge>
         </p>
         <ion-buttons item-end *ngIf="selectedQuizs === 0">
-          <button color="fulldark" ion-button icon-only data-stop-propagation (click)="startQuiz(quiz)">
+          <button color="fulldark" ion-button icon-only data-stop-propagation (tap)="startQuiz(quiz)">
             <ion-icon name="play"></ion-icon>
           </button>
         </ion-buttons>

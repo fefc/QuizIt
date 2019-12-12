@@ -16,7 +16,7 @@
           <ion-icon name="clipboard" item-start></ion-icon>
           {{ 'QUIZZES' | translate }}
         </ion-item>
-        <ion-item *ngIf="!(platform.is('core') || platform.is('mobileweb'))" tappable (tap)="openBarcodeScannerPage()">
+        <ion-item *ngIf="!platform.is('cordova')" tappable (tap)="openBarcodeScannerPage()">
           <ion-icon name="game-controller-b" item-start></ion-icon>
           {{ 'JOIN_GAME' | translate }}
         </ion-item>

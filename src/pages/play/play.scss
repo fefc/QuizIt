@@ -21,7 +21,60 @@ $fullDark: rgba(0, 0, 0, 0.9);
   }
 
   .scroll-content {
-    overflow-y: hidden !important;
+    overflow-y: hidden;
+  }
+
+  .menu {
+    position: absolute;
+    top: 20%;
+    bottom: 20%;
+    left: 20%;
+    right: 20%;
+
+    border-radius: 2vh;
+    background-color: $fullDark;
+
+    font-size: 1.5em;
+
+    z-index: 999;
+
+    .menu-title {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      height: 100%;
+
+      tr {
+        height: 50%;
+
+        td {
+          vertical-align: top;
+          text-align: center;
+          padding: 50px;
+
+          ion-fab {
+            margin-left: -28px;
+            margin-top: -28px;
+          }
+        }
+      }
+
+      .fab-line {
+        td {
+          vertical-align: bottom;
+          padding: 0px;
+        }
+      }
+    }
+  }
+
+  .webpage {
+    right: 0;
   }
 
   .start-title {
@@ -92,16 +145,6 @@ $fullDark: rgba(0, 0, 0, 0.9);
     border-radius: 2vh;
   }
 
-  .hidden-question {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: auto;
-    font-size: 6vh;
-    white-space: nowrap;
-    visibility: hidden;
-  }
-
   .question {
     position: absolute;
     top: 0;
@@ -121,6 +164,7 @@ $fullDark: rgba(0, 0, 0, 0.9);
     line-height: 12vh;
     margin: 4vh 2.25vw;
     padding: 0 0 0 2vw;
+    font-size: 6vh;
     color: #ccc;
     background-color: $dark;
     border: 0.3vh solid rgba(25, 25, 25, 0.9);
@@ -239,19 +283,19 @@ $fullDark: rgba(0, 0, 0, 0.9);
 
   .players {
     position: absolute;
-    top: 22.5vh;
+    top: 24.5vh;
     right: 2.5vw;
-    height: 77.5vh;
+    height: 72vh;
     display: flex;
     flex-direction: column;
 
     .player {
       flex-grow: 1;
-      min-height: 0;
-      max-height: 10.5vh;
+      max-height: 12vh;
       width: 100%;
       height: 100%;
-      margin: 0 0 1.5vh auto;
+      padding-bottom: 1.5vh;
+      margin: 0 0 0 auto;
 
       display: flex;
       flex-flow: row;
@@ -282,26 +326,19 @@ $fullDark: rgba(0, 0, 0, 0.9);
         border-radius: 1.5vh;
         vertical-align: top;
 
-        .nickname, .points {
-          font-size: 0.25em;
-          margin: 0.35em 1vw 0.25em 1vw;
+        .nickname {
+          font-size: 1em;
+          margin: 0.9vh 1vw;
           color: #ccc;
-        }
-
-        .points {
-          font-size: 0.20em;
-          margin-bottom: 0;
         }
       }
 
       .avatar-container {
         position: relative;
         height: 100%;
-        display: flex;
-        justify-content: flex-end;
 
         .avatar {
-          position: relative;
+          position: absolute;
           top: 0;
           right: 0;
 
@@ -324,6 +361,14 @@ $fullDark: rgba(0, 0, 0, 0.9);
           transition: all 300ms ease-in-out;
         }
 
+        .player-answered {
+          border: 0.5vh solid rgba(200, 200, 200, 0.9);
+          box-shadow:
+            -0.25vh 0.25vh  0.25vh 0.25vh rgba(0, 0, 0, .3),
+            inset -0.05vh 0.05vh 0.25vh 0.25vh rgba(125, 125, 125, 0.9),
+            inset 0.25vh -0.25vh 0.25vh 0.25vh rgba(125, 125, 125, 0.2);
+        }
+
         .player-answer {
           position: absolute;
           top: 0;
@@ -338,14 +383,6 @@ $fullDark: rgba(0, 0, 0, 0.9);
           background-size: 70%;
 
           border-radius: 1.5vh;
-        }
-
-        .answered {
-          border: 0.5vh solid rgba(200, 200, 200, 0.9);
-          box-shadow:
-            -0.25vh 0.25vh  0.25vh 0.25vh rgba(0, 0, 0, .3),
-            inset -0.05vh 0.05vh 0.25vh 0.25vh rgba(125, 125, 125, 0.9),
-            inset 0.25vh -0.25vh 0.25vh 0.25vh rgba(125, 125, 125, 0.2);
         }
 
         .zero {

@@ -77,8 +77,6 @@ export class QuizQuestionsPage {
         if (data.index === 0) {
           this.renameCategory(category);
         } else if (data.index === 1) {
-          this.showReorderCategorys = !this.showReorderCategorys;
-        } else if (data.index === 2) {
           this.deleteCategoryWithDialog(category);
         }
       }
@@ -238,7 +236,7 @@ export class QuizQuestionsPage {
 
   reorderQuestions(indexes:any, category: Category) {
     let realFrom: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.from]);
-    let realTo: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.to])
+    let realTo: number = indexes.from < indexes.to ? realFrom + indexes.to : realFrom - (indexes.from - indexes.to);
 
     this.quiz.questions = reorderArray(this.quiz.questions, {from: realFrom, to: realTo});
 
@@ -262,37 +260,11 @@ export class QuizQuestionsPage {
       this.selectedQuestions += 1;
     }
     else {
-      question.selected = undefined;
+      question.selected = false;
       if (this.selectedQuestions > 0) {
         this.selectedQuestions -= 1;
       }
     }
-  }
-
-  enableUnhideIcon() {
-    return this.quiz.questions.some((q) => q.selected === true && q.hide === true) && !this.quiz.questions.some((q) => q.selected === true && !q.hide);
-  }
-
-  hideOrUnhideSelected() {
-    let newState: boolean = this.enableUnhideIcon() ? undefined : true;
-
-    for (let question of this.quiz.questions.filter((q) => q.selected === true)) {
-      question.hide = newState;
-      this.selectQuestion(question);
-    }
-
-    let loading = this.loadingCtrl.create({
-      content: this.translate.instant('SAVING')
-    });
-
-    loading.present();
-
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
-      loading.dismiss();
-    }).catch(() => {
-      loading.dismiss();
-      alert('Unable to save Quiz.');
-    });
   }
 
   deleteSelected() {
@@ -364,8 +336,6 @@ export class QuizQuestionsPage {
       this.quiz.questions[questionIndex].extras = question.extras;
       this.quiz.questions[questionIndex].category = question.category;
       this.quiz.questions[questionIndex].authorId = question.authorId;
-      this.quiz.questions[questionIndex].draft = question.draft;
-      //hide does not need to be set here
     }
 
     this.quizsProv.saveToStorage(this.quiz).then(() => {

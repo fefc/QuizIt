@@ -15,35 +15,35 @@
   <ion-list>
     <ion-item>
       <ion-label stacked>{{ 'QUESTION' | translate }}</ion-label>
-      <ion-input type="text" maxlength="58" (ionChange)="questionMaxLengthReached(58)" placeholder="{{ 'QUESTION_PLACEHOLDER' | translate }}" [(ngModel)]="question.question"></ion-input>
+      <ion-input type="text" placeholder="{{ 'QUESTION_PLACEHOLDER' | translate }}" [(ngModel)]="question.question"></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label>{{ 'CATEGORY' | translate }}</ion-label>
+      <ion-label fixed>{{ 'CATEGORY' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.category.name" interface="popover" (ionChange)="categoryChange($event)">
         <ion-option *ngFor="let category of categorys" [value]="category.name">{{category.name}}</ion-option>
         <ion-option value="new">{{ 'NEW_CATEGORY' | translate }}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item>
-      <ion-label>{{ 'TYPE' | translate }}</ion-label>
+      <ion-label fixed>{{ 'TYPE' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.type" interface="popover" (ionChange)="typeChange($event)">
         <ion-option [value]="QuestionType.classic">{{ 'TYPE_CLASSIC' | translate }}</ion-option>
         <ion-option [value]="QuestionType.stopwatch">{{ 'TYPE_STOPWATCH' | translate }}</ion-option>
         <ion-option [value]="QuestionType.rightPicture">{{ 'TYPE_RIGHT_PICTURE' | translate }}</ion-option>
       </ion-select>
     </ion-item>
-    <ion-item-group *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch" reorder="true" (ionItemReorder)="reorderAnswers($event)">
-      <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-        <ion-label>{{ 'ANSWER_' + i.toString() | translate }}</ion-label>
-        <ion-input type="text" maxlength="24" (ionChange)="answerMaxLengthReached(24, i)" placeholder="" [(ngModel)]="question.answers[i]"></ion-input>
-      </ion-item>
-    </ion-item-group>
-    <ion-item *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
-      <ion-label>{{ 'RIGHT_ANSWER' | translate }}</ion-label>
+    <div *ngIf="question.type === QuestionType.classic || question.type === QuestionType.stopwatch">
+    <ion-item *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
+      <ion-label fixed>{{ 'ANSWER_' + i.toString() | translate }}</ion-label>
+      <ion-input type="text" placeholder="" [(ngModel)]="question.answers[i]"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label fixed>{{ 'RIGHT_ANSWER' | translate }}</ion-label>
       <ion-select [(ngModel)]="question.rightAnswer" interface="popover">
         <ion-option *ngFor="let answer of question.answers; let i = index" [value]="i">{{answer}}</ion-option>
       </ion-select>
     </ion-item>
+    </div>
   </ion-list>
 
   <ion-slides *ngIf="question.type === QuestionType.rightPicture" centeredSlides pager>
@@ -59,7 +59,7 @@
     <ion-fab-list side="right">
       <!-- realIndex: https://github.com/ionic-team/ionic/issues/12297#issuecomment-329772167 -->
       <!-- realIndex can be undefined when no one ever moved the slides -->
-      <button ion-fab (click)="openImagePicker(maxPictures)" *ngIf="question.answers.length < maxPictures"><ion-icon name="add"></ion-icon></button>
+      <button ion-fab (click)="openImagePicker(maxPictures, false)" *ngIf="question.answers.length < maxPictures"><ion-icon name="add"></ion-icon></button>
       <button ion-fab (click)="replacePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="create"></ion-icon></button>
       <button ion-fab (click)="deletePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="trash"></ion-icon></button>
       <button ion-fab (click)="rightPicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="checkmark"></ion-icon></button>
@@ -70,12 +70,11 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons left>
-      <button ion-button icon-start (click)="openQuestionExtraPage()"><ion-icon name="videocam"></ion-icon>{{ 'MANAGE_INTRO' | translate }}</button>
+      <button ion-button icon-start (click)="openImagePicker(1, true)" *ngIf="question.extras.length === 0"><ion-icon name="film"></ion-icon>{{ 'ADD_INTRO' | translate }}</button>
+      <button ion-button icon-start (click)="deleteExtras()" *ngIf="question.extras.length > 0"><ion-icon name="trash"></ion-icon>{{ 'DELETE_INTRO' | translate }}</button>
     </ion-buttons>
     <ion-buttons right>
-      <button ion-button (click)="save()" [disabled]="!enableDraftButton()">
-        {{ enableSaveButton() === true ? (newQuestion === true ? ('CREATE' | translate) : ('SAVE' | translate)) : ('DRAFT' | translate) }}
-      </button>
+      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ newQuestion === true ? ('CREATE' | translate) : ('SAVE' | translate) }}</button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

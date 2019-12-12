@@ -9,7 +9,7 @@ import { Platform, ViewController } from 'ionic-angular';
   template: `
     <ion-list>
       <button ion-item (click)="close(0)">{{ 'NEW_QUIZ' | translate }}</button>
-      <button *ngIf="!(platform.is('core') || platform.is('mobileweb'))" ion-item (click)="close(1)">{{ 'IMPORT_QUIZ' | translate }}</button>
+      <button *ngIf="!platform.is('core')" ion-item (click)="close(1)">{{ 'IMPORT_QUIZ' | translate }}</button>
       <!--<button ion-item (click)="close(2)">{{ 'SETTINGS' | translate }}</button>-->
     </ion-list>
   `
