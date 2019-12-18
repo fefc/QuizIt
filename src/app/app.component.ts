@@ -34,13 +34,13 @@ const BARECODE_SCANNER_OPTIONS: BarcodeScannerOptions = {
 };
 
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDR9qWel2I2_PCpZwn_crw-SH-uAug5zIw",
-  authDomain: "quizpad-ff712.firebaseapp.com",
-  databaseURL: "https://quizpad-ff712.firebaseio.com",
-  projectId: "quizpad-ff712",
-  storageBucket: "quizpad-ff712.appspot.com",
-  messagingSenderId: "699661197913",
-  appId: "1:699661197913:web:2abeed2df8580fa9"
+  apiKey: "AIzaSyDmh327-FUVK-AMc92f4p7cR5ze4D7SoeE",
+  authDomain: "quizpaddev.firebaseapp.com",
+  databaseURL: "https://quizpaddev.firebaseio.com",
+  projectId: "quizpaddev",
+  storageBucket: "quizpaddev.appspot.com",
+  messagingSenderId: "362454844307",
+  appId: "1:362454844307:web:eb20bf8206ae88a4"
 };
 
 @Component({

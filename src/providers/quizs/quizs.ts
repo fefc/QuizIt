@@ -1,10 +1,18 @@
+import * as firebase from "firebase/app";
+import 'firebase/firestore';
+import 'firebase/functions';
+
 import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
 import { File } from '@ionic-native/file';
 
+import { AuthenticationProvider } from '../authentication/authentication';
+
 declare var JJzip: any;
 
 import { Quiz } from '../../models/quiz';
+import { QuizSettings } from '../../models/quiz-settings';
+
 import { Question } from '../../models/question';
 import { QuestionType } from '../../models/question';
 
@@ -29,8 +37,232 @@ interface AttachementsResult {
 export class QuizsProvider {
   public quizs: Array<Quiz>;
 
-  constructor(private storage: Storage, private file: File) {
+  constructor(private storage: Storage, private file: File, private authProv: AuthenticationProvider) {
     this.quizs = new Array<Quiz>();
+  }
+
+  getSettingsPropertiesChanges(quiz: Quiz, title: string, settings: QuizSettings) {
+    let savedSettings: QuizSettings = quiz.settings;
+    let changes: any = {};
+
+    if (savedSettings && quiz.uuid) {
+      //title is considered as part of settings, simplifies firebase updates
+      if (title !== quiz.title) changes['title'] = title;
+
+      //An update on settings
+      if (settings.commonAnimationDuration !== undefined && settings.commonAnimationDuration !== savedSettings.commonAnimationDuration) changes['settings.commonAnimationDuration'] = settings.commonAnimationDuration;
+      if (settings.timeBarAnimationDuration !== undefined && settings.timeBarAnimationDuration !== savedSettings.timeBarAnimationDuration) changes['settings.timeBarAnimationDuration'] = settings.timeBarAnimationDuration;
+      if (settings.playerAnswerAnimationDuration !== undefined && settings.playerAnswerAnimationDuration !== savedSettings.playerAnswerAnimationDuration) changes['settings.playerAnswerAnimationDuration'] = settings.playerAnswerAnimationDuration;
+      if (settings.showNextDelay !== undefined && settings.showNextDelay !== savedSettings.showNextDelay) changes['settings.showNextDelay'] = settings.showNextDelay;
+      if (settings.amountOfPicturesToShow !== undefined && settings.amountOfPicturesToShow !== savedSettings.amountOfPicturesToShow) changes['settings.amountOfPicturesToShow'] = settings.amountOfPicturesToShow;
+      if (settings.autoPlay !== undefined && settings.autoPlay !== savedSettings.autoPlay) changes['settings.autoPlay'] = settings.autoPlay;
+      if (settings.startMessage !== undefined && settings.startMessage !== savedSettings.startMessage) changes['settings.startMessage'] = settings.startMessage;
+      if (settings.endMessage !== undefined && settings.endMessage !== savedSettings.endMessage) changes['settings.endMessage'] = settings.endMessage;
+      if (settings.backgroundImage !== undefined && settings.backgroundImage !== savedSettings.backgroundImage) changes['settings.backgroundImage'] = settings.backgroundImage;
+      if (settings.extraDisplayDuration !== undefined && settings.extraDisplayDuration !== savedSettings.extraDisplayDuration) changes['settings.extraDisplayDuration'] = settings.extraDisplayDuration;
+
+    } else {
+      //title is considered as part of settings, simplifies firebase updates
+      changes['title'] = title;
+
+      //A creation of a quiz and so settings as well
+      if (settings.commonAnimationDuration !== undefined) changes['settings.commonAnimationDuration'] = settings.commonAnimationDuration;
+      if (settings.timeBarAnimationDuration !== undefined) changes['settings.timeBarAnimationDuration'] = settings.timeBarAnimationDuration;
+      if (settings.playerAnswerAnimationDuration !== undefined) changes['settings.playerAnswerAnimationDuration'] = settings.playerAnswerAnimationDuration;
+      if (settings.showNextDelay !== undefined) changes['settings.showNextDelay'] = settings.showNextDelay;
+      if (settings.amountOfPicturesToShow !== undefined) changes['settings.amountOfPicturesToShow'] = settings.amountOfPicturesToShow;
+      if (settings.autoPlay !== undefined) changes['settings.autoPlay'] = settings.autoPlay;
+      if (settings.startMessage !== undefined) changes['settings.startMessage'] = settings.startMessage;
+      if (settings.endMessage !== undefined) changes['settings.endMessage'] = settings.endMessage;
+      if (settings.backgroundImage !== undefined) changes['settings.backgroundImage'] = settings.backgroundImage;
+      if (settings.extraDisplayDuration !== undefined) changes['settings.extraDisplayDuration'] = settings.extraDisplayDuration;
+    }
+
+    if (Object.keys(changes).length === 0) return undefined;
+    else return changes;
+  }
+
+  getQuestionPropertiesChanges(quiz: Quiz, question: Question) {
+    let savedQuestion: Question = quiz.questions.find((q) => q.uuid === question.uuid);
+    let changes: any = {};
+
+    if (savedQuestion) {
+      //An update on a question
+      if (question.question !== savedQuestion.question) changes.question = question.question;
+      if (question.type !== savedQuestion.type) changes.type = question.type;
+      if (question.rightAnswer !== savedQuestion.rightAnswer) changes.rightAnswer = question.rightAnswer;
+      if (JSON.stringify(question.answers) !== JSON.stringify(savedQuestion.answers)) changes.answers = question.answers;
+      if (JSON.stringify(question.extras) !== JSON.stringify(savedQuestion.extras)) changes.extras = question.extras;
+      if (JSON.stringify(question.category) !== JSON.stringify(savedQuestion.category)) changes.category = question.category;
+    } else {
+      //A creation of a question
+      changes.question = question.question;
+      changes.type = question.type;
+      changes.rightAnswer = question.rightAnswer;
+      changes.answers = question.answers;
+      changes.extras = question.extras;
+      changes.category = question.category;
+    }
+
+    if (Object.keys(changes).length === 0) return undefined;
+    else return changes;
+  }
+
+  createQuizOnline(quiz: Quiz) {
+    return new Promise((resolve, reject) => {
+      firebase.firestore().collection('Q').add({title: quiz.title, categorys: quiz.categorys, settings: quiz.settings}).then((newQuizRef) => {
+        let batch = firebase.firestore().batch();
+
+        let userQuizRef = firebase.firestore().collection('U').doc(this.authProv.getUser().uid).collection('Q').doc(newQuizRef.id);
+        batch.set(userQuizRef, {});
+
+        let quizUserRef = newQuizRef.collection('U').doc(this.authProv.getUser().uid);
+        batch.set(quizUserRef, {});
+
+        // Commit the batch
+        return batch.commit().then(() => {
+
+          let newQuiz: Quiz = {
+            uuid: newQuizRef.id,
+            title: quiz.title,
+            creationDate: quiz.creationDate,
+            categorys: quiz.categorys,
+            questions: quiz.questions,
+            settings: quiz.settings
+          }
+
+          this.saveToStorage(newQuiz).then(() => {
+            resolve();
+          }).catch((error) => {
+            console.log(error);
+            reject(error);
+          });
+        }).catch((error) => {
+          console.log(error);
+          reject("Could not update players online");
+        });
+      }).catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+  saveSettingsOnline(quiz: Quiz, title: string, settings: QuizSettings) {
+    return new Promise((resolve, reject) => {
+      let changes = this.getSettingsPropertiesChanges(quiz, title, settings);
+
+      if (changes) {
+        firebase.firestore().collection('Q').doc(quiz.uuid).update(changes).then(() => {
+
+          quiz.title = title;
+          quiz.settings = settings;
+
+          this.saveToStorage(quiz).then(() => {
+            resolve();
+          }).catch((error) => {
+            reject(error);
+          });
+        }).catch((error) => {
+          reject(error);
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  saveCategorysOnline(quiz: Quiz) {
+    return new Promise((resolve, reject) => {
+      firebase.firestore().collection('Q').doc(quiz.uuid).update({categorys: quiz.categorys}).then(() => {
+        this.saveToStorage(quiz).then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  }
+
+  createQuestionOnline(quiz: Quiz, question: Question) {
+    return new Promise((resolve, reject) => {
+      firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').add(this.getQuestionPropertiesChanges(quiz, question)).then((data) => {
+
+        let questionUUID: Question = {
+          uuid: data.id,
+          question: question.question,
+          type: question.type,
+          rightAnswer: question.rightAnswer,
+          answers: question.answers,
+          extras: question.extras,
+          category: question.category,
+          authorId: question.authorId
+        }
+
+        quiz.questions.push(questionUUID);
+
+        this.saveToStorage(quiz).then(() => {
+          resolve();
+        }).catch((error) => {
+          console.log(error);
+          reject(error);
+        });
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  }
+
+  saveQuestionOnline(quiz: Quiz, question: Question) {
+    return new Promise<string>((resolve, reject) => {
+      let changes = this.getQuestionPropertiesChanges(quiz, question);
+
+      if (changes) {
+        firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid).update(changes).then(() => {
+
+          let oldQuestion: Question = quiz.questions.find((q) => q.uuid === question.uuid);
+
+          if (oldQuestion) {
+            oldQuestion = question;
+          }
+
+          this.saveToStorage(quiz).then(() => {
+            resolve();
+          }).catch((error) => {
+            reject(error);
+          });
+        }).catch((error) => {
+          reject(error);
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  deleteQuestionsOnline(quiz: Quiz) {
+    return new Promise<string>((resolve, reject) => {
+      let batch = firebase.firestore().batch();
+
+      for (let question of quiz.questions.filter((q) => q.selected === true)) {
+        let questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
+        batch.delete(questionRef);
+      }
+
+      // Commit the batch
+      return batch.commit().then(() => {
+        quiz.questions = quiz.questions.filter((q) => q.selected !== true);
+        this.saveToStorage(quiz).then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      }).catch(() => {
+        reject("Could not update players online");
+      });
+    });
   }
 
   loadFromStorage() {
@@ -57,121 +289,68 @@ export class QuizsProvider {
 
   saveToStorage(quiz: Quiz) {
     return new Promise(async (resolve, reject) => {
-      if (!quiz.uuid) {
-        //We have a new quiz, so first we need to get a new uuid
-        let uuid: string = this.uuidv4();
+      let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
 
-        while (this.quizs.findIndex((q) => q.uuid === uuid) !== -1) {
-          uuid = this.uuidv4();
-        }
-
-        let newQuiz: Quiz = {
-          uuid: uuid,
-          title: quiz.title,
-          creationDate: quiz.creationDate,
-          categorys: quiz.categorys,
-          questions: quiz.questions,
-          settings: quiz.settings
-        }
-
-        this.quizs.push(newQuiz);
-        this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-          quiz = this.quizs[this.quizs.length - 1];
-          resolve(newQuiz);
-        }).catch(() => {
-          this.quizs.pop();
-          reject('Could not save quizs to storage.');
-        });
+      if (quizIndex === -1) {
+        this.quizs.push(quiz);
       }
-      else {
-        //Saving an exsisting quiz, lets just make sure it's in the list
-        let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
-        if (quizIndex !== -1) {
-          //Check questions uuid, if there is one not set, generate one
-          let questionIndex: number = quiz.questions.findIndex((q) => !q.uuid);
 
-          while (questionIndex !== -1) {
-            let uuid: string = this.uuidv4();
+      quizIndex = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
 
-            while (quiz.questions.findIndex((q) => q.uuid === uuid) !== -1) {
-              uuid = this.uuidv4();
-            }
+      //Check attachements
+      //var promises = [];  //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
+      try {
+        var attachementResults = [];
 
-            let questionUUID: Question = {
-              uuid: uuid,
-              question: quiz.questions[questionIndex].question,
-              type: quiz.questions[questionIndex].type,
-              rightAnswer: quiz.questions[questionIndex].rightAnswer,
-              answers: quiz.questions[questionIndex].answers,
-              extras: quiz.questions[questionIndex].extras,
-              category: quiz.questions[questionIndex].category,
-              authorId: quiz.questions[questionIndex].authorId
-            }
+        //First check question answers (pictures)
+        for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///") || a.startsWith("filesystem:")) !== -1))) {
+          attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
+        }
 
-            quiz.questions[questionIndex] = questionUUID;
+        //// TODO: Maybe do a cleaner code for that?
 
-            questionIndex = quiz.questions.findIndex((q) => !q.uuid);
-          }
+        //Second check question extras
+        for (let question of quiz.questions.filter((q) => (q.extras.findIndex((e) => e.startsWith("file:///") || e.startsWith("filesystem:")) !== -1))) {
+          attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
+        }
 
-          //Check attachements
-          //var promises = [];  //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
-          try {
-            var attachementResults = [];
+        //Update answers so that they contain only fileName and not fullPath
+        let attachementIndex: number;
 
-            //First check question answers (pictures)
-            for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///") || a.startsWith("filesystem:")) !== -1))) {
-              attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
-            }
+        if (attachementResults) {
+          for (let result of attachementResults) {
+            let questionIndex = quiz.questions.findIndex((q) => q.uuid === result.questionUuid);
 
-            //// TODO: Maybe do a cleaner code for that?
+            if (questionIndex !== -1) {
+              if (result.type === AttachementType.answers) {
+                //set correct answers
+                for (let fileName of result.fileNames) {
+                  attachementIndex = quiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
 
-            //Second check question extras
-            for (let question of quiz.questions.filter((q) => (q.extras.findIndex((e) => e.startsWith("file:///") || e.startsWith("filesystem:")) !== -1))) {
-              attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
-            }
+                  quiz.questions[questionIndex].answers[attachementIndex] = fileName;
+                }
+              } else if (result.type === AttachementType.extras) {
+                //set correct extras
+                for (let fileName of result.fileNames) {
+                  attachementIndex = quiz.questions[questionIndex].extras.findIndex((e) => e.endsWith(fileName));
 
-            //Update answers so that they contain only fileName and not fullPath
-            let attachementIndex: number;
-
-            if (attachementResults) {
-              for (let result of attachementResults) {
-                questionIndex = quiz.questions.findIndex((q) => q.uuid === result.questionUuid);
-
-                if (questionIndex !== -1) {
-                  if (result.type === AttachementType.answers) {
-                    //set correct answers
-                    for (let fileName of result.fileNames) {
-                      attachementIndex = quiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
-
-                      quiz.questions[questionIndex].answers[attachementIndex] = fileName;
-                    }
-                  } else if (result.type === AttachementType.extras) {
-                    //set correct extras
-                    for (let fileName of result.fileNames) {
-                      attachementIndex = quiz.questions[questionIndex].extras.findIndex((e) => e.endsWith(fileName));
-
-                      quiz.questions[questionIndex].extras[attachementIndex] = fileName;
-                    }
-                  }
-
+                  quiz.questions[questionIndex].extras[attachementIndex] = fileName;
                 }
               }
-            }
 
-            this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-              resolve();
-            }).catch(() => {
-              reject('Could not save quizs to storage.');
-            });
-          } catch(error) {
-            console.log(error);
-            reject('Could not save attachements.');
-          };
+            }
+          }
         }
-        else {
-          reject('Could not find quiz.');
-        }
-      }
+
+        this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+          resolve();
+        }).catch(() => {
+          reject('Could not save quizs to storage.');
+        });
+      } catch(error) {
+        console.log(error);
+        reject('Could not save attachements.');
+      };
     });
   }
 

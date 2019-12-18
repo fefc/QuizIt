@@ -129,7 +129,7 @@ export class QuizQuestionsPage {
                 content: this.translate.instant('SAVING')
               });
 
-              this.quizsProv.saveToStorage(this.quiz).then(() => {
+              this.quizsProv.saveCategorysOnline(this.quiz).then(() => {
                 loading.dismiss();
               }).catch(() => {
                 loading.dismiss();
@@ -166,7 +166,7 @@ export class QuizQuestionsPage {
 
     loading.present();
 
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
+    this.quizsProv.saveCategorysOnline(this.quiz).then(() => {
       loading.dismiss();
     }).catch(() => {
       loading.dismiss();
@@ -268,7 +268,6 @@ export class QuizQuestionsPage {
   }
 
   deleteSelected() {
-    this.quiz.questions = this.quiz.questions.filter((q) => q.selected !== true);
     this.selectedQuestions = 0;
 
     let loading = this.loadingCtrl.create({
@@ -277,7 +276,7 @@ export class QuizQuestionsPage {
 
     loading.present();
 
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
+    this.quizsProv.deleteQuestionsOnline(this.quiz).then(() => {
       loading.dismiss();
     }).catch(() => {
       loading.dismiss();
@@ -291,7 +290,19 @@ export class QuizQuestionsPage {
       modal.present();
       modal.onDidDismiss(data => {
         if (data) {
-          this.saveChanges(data.question);
+          let loading = this.loadingCtrl.create({
+            content: this.translate.instant('SAVING')
+          });
+
+          loading.present();
+
+          this.quizsProv.saveQuestionOnline(this.quiz, data.question).then(() => {
+            loading.dismiss();
+          }).catch((error) => {
+            loading.dismiss();
+            console.log(error);
+            alert('Unable to save Quiz.');
+          });
         }
       });
     } else {
@@ -304,7 +315,19 @@ export class QuizQuestionsPage {
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {
-        this.saveChanges(data.question);
+        let loading = this.loadingCtrl.create({
+          content: this.translate.instant('SAVING')
+        });
+
+        loading.present();
+
+        this.quizsProv.createQuestionOnline(this.quiz, data.question).then(() => {
+          loading.dismiss();
+        }).catch((error) => {
+          loading.dismiss();
+          console.log(error);
+          alert('Unable to save Quiz.');
+        });
       }
     });
   }
@@ -362,11 +385,8 @@ export class QuizQuestionsPage {
         });
 
         loading.present();
-
-        this.quiz.title = data.title;
-        this.quiz.settings = data.settings;
-
-        this.quizsProv.saveToStorage(this.quiz).then(() => {
+        
+        this.quizsProv.saveSettingsOnline(this.quiz, data.title, data.settings).then(() => {
           loading.dismiss();
         }).catch(() => {
           loading.dismiss();
