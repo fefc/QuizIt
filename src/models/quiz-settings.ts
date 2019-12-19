@@ -12,14 +12,14 @@ export namespace DefaultQuizSettings {
 }
 
 export interface QuizSettings {
-  commonAnimationDuration?: number,
-  timeBarAnimationDuration?: number,
-  playerAnswerAnimationDuration?: number,
-  showNextDelay?: number,
-  amountOfPicturesToShow?: number,
-  autoPlay?: boolean,
-  startMessage?: string,
-  endMessage?: string,
-  backgroundImage?: string,
-  extraDisplayDuration?: number,
+  commonAnimationDuration: number,
+  timeBarAnimationDuration: number,
+  playerAnswerAnimationDuration: number,
+  showNextDelay: number,
+  amountOfPicturesToShow: number,
+  autoPlay: boolean,
+  startMessage: string,
+  endMessage: string,
+  backgroundImage: string,
+  extraDisplayDuration: number,
 }

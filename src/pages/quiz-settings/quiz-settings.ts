@@ -30,47 +30,18 @@ export class QuizSettingsPage {
       //lets make deep copies, so that we don't modfiy anything before user confirmation
       this.settings = JSON.parse(JSON.stringify(params.data.settings));
     } else {
-      this.settings = {};
-    }
-
-    if (this.settings.commonAnimationDuration === undefined) {
-      this.settings.commonAnimationDuration = DefaultQuizSettings.COMMON_ANIMATION_DURATION;
-    }
-
-    if (this.settings.timeBarAnimationDuration === undefined) {
-      this.settings.timeBarAnimationDuration = DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION;
-    }
-
-    if (this.settings.playerAnswerAnimationDuration === undefined) {
-      this.settings.playerAnswerAnimationDuration = DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION;
-    }
-
-    if (this.settings.showNextDelay === undefined) {
-      this.settings.showNextDelay = DefaultQuizSettings.SHOW_NEXT_DELAY;
-    }
-
-    if (this.settings.amountOfPicturesToShow === undefined) {
-      this.settings.amountOfPicturesToShow = DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW;
-    }
-
-    if (this.settings.autoPlay === undefined) {
-      this.settings.autoPlay = DefaultQuizSettings.AUTO_PLAY;
-    }
-
-    if (this.settings.startMessage === undefined) {
-      this.settings.startMessage = DefaultQuizSettings.START_MESSAGE;
-    }
-
-    if (this.settings.endMessage === undefined) {
-      this.settings.endMessage = DefaultQuizSettings.END_MESSAGE;
-    }
-
-    if (this.settings.backgroundImage === undefined) {
-      this.settings.backgroundImage = DefaultQuizSettings.BACKGROUND_IMAGE;
-    }
-
-    if (this.settings.extraDisplayDuration === undefined) {
-      this.settings.extraDisplayDuration = DefaultQuizSettings.EXTRA_DISPLAY_DURATION;
+      this.settings = {
+        commonAnimationDuration: DefaultQuizSettings.COMMON_ANIMATION_DURATION,
+        timeBarAnimationDuration: DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION,
+        playerAnswerAnimationDuration: DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION,
+        showNextDelay: DefaultQuizSettings.SHOW_NEXT_DELAY,
+        amountOfPicturesToShow: DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW,
+        autoPlay: DefaultQuizSettings.AUTO_PLAY,
+        startMessage: DefaultQuizSettings.START_MESSAGE,
+        endMessage: DefaultQuizSettings.END_MESSAGE,
+        backgroundImage: DefaultQuizSettings.BACKGROUND_IMAGE,
+        extraDisplayDuration: DefaultQuizSettings.EXTRA_DISPLAY_DURATION
+      };
     }
   }
 
@@ -110,47 +81,18 @@ export class QuizSettingsPage {
 
   save() {
     if (this.enableSaveButton()) {
-      let newSettings: QuizSettings = {};
-
-      if (this.settings.commonAnimationDuration !== DefaultQuizSettings.COMMON_ANIMATION_DURATION) {
-        newSettings.commonAnimationDuration = Number(this.settings.commonAnimationDuration);
-      }
-
-      if (this.settings.timeBarAnimationDuration !== DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION) {
-        newSettings.timeBarAnimationDuration = Number(this.settings.timeBarAnimationDuration);
-      }
-
-      if (this.settings.playerAnswerAnimationDuration !== DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION) {
-        newSettings.playerAnswerAnimationDuration = Number(this.settings.playerAnswerAnimationDuration);
-      }
-
-      if (this.settings.showNextDelay !== DefaultQuizSettings.SHOW_NEXT_DELAY) {
-        newSettings.showNextDelay = Number(this.settings.showNextDelay);
-      }
-
-      if (this.settings.amountOfPicturesToShow !== DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW) {
-        newSettings.amountOfPicturesToShow = Number(this.settings.amountOfPicturesToShow);
-      }
-
-      if (this.settings.autoPlay !== DefaultQuizSettings.AUTO_PLAY) {
-        newSettings.autoPlay = Boolean(this.settings.autoPlay);
-      }
-
-      if (this.settings.startMessage !== DefaultQuizSettings.START_MESSAGE) {
-        newSettings.startMessage = this.settings.startMessage;
-      }
-
-      if (this.settings.endMessage !== DefaultQuizSettings.END_MESSAGE) {
-        newSettings.endMessage = this.settings.endMessage;
-      }
-
-      if (this.settings.backgroundImage !== DefaultQuizSettings.BACKGROUND_IMAGE) {
-        newSettings.backgroundImage = this.settings.backgroundImage;
-      }
-
-      if (this.settings.extraDisplayDuration !== DefaultQuizSettings.EXTRA_DISPLAY_DURATION) {
-        newSettings.extraDisplayDuration = Number(this.settings.extraDisplayDuration);
-      }
+      let newSettings: QuizSettings = {
+        commonAnimationDuration: Number(this.settings.commonAnimationDuration),
+        timeBarAnimationDuration: Number(this.settings.timeBarAnimationDuration),
+        playerAnswerAnimationDuration: Number(this.settings.playerAnswerAnimationDuration),
+        showNextDelay: Number(this.settings.showNextDelay),
+        amountOfPicturesToShow: Number(this.settings.amountOfPicturesToShow),
+        autoPlay: Boolean(this.settings.autoPlay),
+        startMessage: this.settings.startMessage,
+        endMessage: this.settings.endMessage,
+        backgroundImage: this.settings.backgroundImage,
+        extraDisplayDuration: Number(this.settings.extraDisplayDuration)
+      };
 
       this.viewCtrl.dismiss({title: this.title, settings: newSettings});
     }

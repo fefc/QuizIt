@@ -10,10 +10,10 @@ export interface Question {
   readonly uuid: string,
   question: string,
   type: QuestionType,
+  categoryUuid: string,
   rightAnswer: number,
   answers: Array<string>,
   extras: Array<string>,
-  category: Category;
   authorId: number,
   selected?: boolean
 }

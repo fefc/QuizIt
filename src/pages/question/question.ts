@@ -61,7 +61,7 @@ export class QuestionPage {
         rightAnswer: -1,
         answers: ['','','',''],
         extras: [],
-        category: {name: this.categorys[0].name},
+        categoryUuid: this.categorys[0].uuid,
         authorId: -1
       };
 
@@ -102,7 +102,7 @@ export class QuestionPage {
   }
 
   categoryChange(val: string) {
-    if (val === "new") {
+    if (val === 'newVal') {
       let alert = this.alertCtrl.create({
         title: this.translate.instant('NEW_CATEGORY'),
         inputs: [
@@ -116,18 +116,26 @@ export class QuestionPage {
             text: this.translate.instant('CANCEL'),
             role: 'cancel',
             handler: data => {
-              this.question.category.name = this.categorys[0].name;
+              this.question.categoryUuid = this.categorys[0].uuid;
             }
           },
           {
             text: this.translate.instant('CREATE'),
             handler: data => {
               if (data.categoryName.length > 3 && this.categorys.findIndex((category) => category.name === data.categoryName) === -1 ) {
-                this.categorys.push({name: data.categoryName});
-                this.question.category.name = data.categoryName;
+
+                let indexOfNew: number = this.categorys.findIndex((category) => category.uuid === 'new');
+
+                if (indexOfNew === -1){
+                  this.categorys.push({uuid: 'new', name: data.categoryName});
+                } else {
+                  this.categorys[indexOfNew].name = data.categoryName;
+                }
+
+                this.question.categoryUuid = 'new';
               }
               else {
-                this.question.category.name = this.categorys[0].name;
+                this.question.categoryUuid = this.categorys[0].uuid;
 
                 let error = this.alertCtrl.create({
                   title: this.translate.instant('ERROR_CREATING_CATEGORY'),
@@ -321,7 +329,10 @@ export class QuestionPage {
           this.question.answers[i] = this.question.answers[i].replace(this.attachementDir, '');
         }
       }
-      this.viewCtrl.dismiss({question: this.question});
+      this.viewCtrl.dismiss({
+        question: this.question,
+        newCategory: (this.question.categoryUuid === 'new') ? this.categorys.find((category) => category.uuid === 'new') : undefined
+      });
     }
   }
 

@@ -15,6 +15,7 @@ import { QuizSettings } from '../../models/quiz-settings';
 
 import { Question } from '../../models/question';
 import { QuestionType } from '../../models/question';
+import { Category } from '../../models/category';
 
 enum AttachementType {
   answers,
@@ -90,18 +91,18 @@ export class QuizsProvider {
       //An update on a question
       if (question.question !== savedQuestion.question) changes.question = question.question;
       if (question.type !== savedQuestion.type) changes.type = question.type;
+      if (question.categoryUuid !== savedQuestion.categoryUuid) changes.categoryUuid = question.categoryUuid;
       if (question.rightAnswer !== savedQuestion.rightAnswer) changes.rightAnswer = question.rightAnswer;
       if (JSON.stringify(question.answers) !== JSON.stringify(savedQuestion.answers)) changes.answers = question.answers;
       if (JSON.stringify(question.extras) !== JSON.stringify(savedQuestion.extras)) changes.extras = question.extras;
-      if (JSON.stringify(question.category) !== JSON.stringify(savedQuestion.category)) changes.category = question.category;
     } else {
       //A creation of a question
       changes.question = question.question;
       changes.type = question.type;
+      changes.categoryUuid = question.categoryUuid;
       changes.rightAnswer = question.rightAnswer;
       changes.answers = question.answers;
       changes.extras = question.extras;
-      changes.category = question.category;
     }
 
     if (Object.keys(changes).length === 0) return undefined;
@@ -110,7 +111,7 @@ export class QuizsProvider {
 
   createQuizOnline(quiz: Quiz) {
     return new Promise((resolve, reject) => {
-      firebase.firestore().collection('Q').add({title: quiz.title, categorys: quiz.categorys, settings: quiz.settings}).then((newQuizRef) => {
+      firebase.firestore().collection('Q').add({title: quiz.title, settings: quiz.settings}).then((newQuizRef) => {
         let batch = firebase.firestore().batch();
 
         let userQuizRef = firebase.firestore().collection('U').doc(this.authProv.getUser().uid).collection('Q').doc(newQuizRef.id);
@@ -118,6 +119,17 @@ export class QuizsProvider {
 
         let quizUserRef = newQuizRef.collection('U').doc(this.authProv.getUser().uid);
         batch.set(quizUserRef, {});
+
+        for (let i = 0; i < quiz.categorys.length ; i++) {
+          let quizCategoryRef = newQuizRef.collection('C').doc();
+
+          quiz.categorys[i] = {
+            uuid: quizCategoryRef.id,
+            name: quiz.categorys[i].name
+          };
+
+          batch.set(quizCategoryRef, {name: quiz.categorys[i].name});
+        }
 
         // Commit the batch
         return batch.commit().then(() => {
@@ -130,6 +142,8 @@ export class QuizsProvider {
             questions: quiz.questions,
             settings: quiz.settings
           }
+
+          console.log(newQuiz);
 
           this.saveToStorage(newQuiz).then(() => {
             resolve();
@@ -145,6 +159,12 @@ export class QuizsProvider {
         console.log(error);
         reject(error);
       });
+    });
+  }
+
+  deleteQuizOnline(quiz: Quiz) {
+    return new Promise((resolve, reject) => {
+      reject('not implemented');
     });
   }
 
@@ -172,9 +192,9 @@ export class QuizsProvider {
     });
   }
 
-  saveCategorysOnline(quiz: Quiz) {
+  saveCategorysOnline(quiz: Quiz, category: Category) {
     return new Promise((resolve, reject) => {
-      firebase.firestore().collection('Q').doc(quiz.uuid).update({categorys: quiz.categorys}).then(() => {
+      firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc(category.uuid).update({name: category.name}).then(() => {
         this.saveToStorage(quiz).then(() => {
           resolve();
         }).catch((error) => {
@@ -186,46 +206,65 @@ export class QuizsProvider {
     });
   }
 
-  createQuestionOnline(quiz: Quiz, question: Question) {
+  deleteCategoryOnline(quiz: Quiz, category: Category) {
     return new Promise((resolve, reject) => {
-      firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').add(this.getQuestionPropertiesChanges(quiz, question)).then((data) => {
-
-        let questionUUID: Question = {
-          uuid: data.id,
-          question: question.question,
-          type: question.type,
-          rightAnswer: question.rightAnswer,
-          answers: question.answers,
-          extras: question.extras,
-          category: question.category,
-          authorId: question.authorId
-        }
-
-        quiz.questions.push(questionUUID);
-
-        this.saveToStorage(quiz).then(() => {
-          resolve();
-        }).catch((error) => {
-          console.log(error);
-          reject(error);
-        });
-      }).catch((error) => {
-        reject(error);
-      });
+      reject('not implemented');
     });
   }
 
-  saveQuestionOnline(quiz: Quiz, question: Question) {
-    return new Promise<string>((resolve, reject) => {
+  saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category) {
+    return new Promise((resolve, reject) => {
+      let batch = firebase.firestore().batch();
+
+      if (newCategory) {
+        let newCatRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc();
+        batch.set(newCatRef, {name: newCategory.name});
+
+        newCategory = {
+          uuid: newCatRef.id,
+          name: newCategory.name
+        };
+
+        question.categoryUuid = newCatRef.id;
+      }
+
       let changes = this.getQuestionPropertiesChanges(quiz, question);
 
       if (changes) {
-        firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid).update(changes).then(() => {
+        let questionRef;
 
-          let oldQuestion: Question = quiz.questions.find((q) => q.uuid === question.uuid);
+        if (question.uuid) {
+          questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
+          batch.update(questionRef, changes);
+        }
+        else {
+          questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
+          batch.set(questionRef, changes);
+        }
 
-          if (oldQuestion) {
-            oldQuestion = question;
+        // Commit the batch
+        return batch.commit().then(() => {
+
+          let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
+
+          if (newCategory) quiz.categorys.push(newCategory);
+
+          if (oldQuestion !== -1) {
+            quiz.questions[oldQuestion] = question;
+          }
+          else {
+            let questionUUID: Question = {
+              uuid: questionRef.id,
+              question: question.question,
+              type: question.type,
+              categoryUuid: question.categoryUuid,
+              rightAnswer: question.rightAnswer,
+              answers: question.answers,
+              extras: question.extras,
+              authorId: question.authorId
+            }
+
+            quiz.questions.push(questionUUID);
           }
 
           this.saveToStorage(quiz).then(() => {
@@ -234,7 +273,8 @@ export class QuizsProvider {
             reject(error);
           });
         }).catch((error) => {
-          reject(error);
+          console.log(error);
+          reject("Could not update players online");
         });
       } else {
         resolve();

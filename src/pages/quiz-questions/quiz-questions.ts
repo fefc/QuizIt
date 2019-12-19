@@ -58,7 +58,7 @@ export class QuizQuestionsPage {
     popover.onDidDismiss((data) => {
       if (data) {
         if (data.index === 0) {
-          this.openNewQuestionPage();
+          this.openQuestionPage();
         } else if (data.index === 1) {
           this.showReorderCategorys = !this.showReorderCategorys;
         } else if (data.index === 2) {
@@ -113,23 +113,14 @@ export class QuizQuestionsPage {
         {
           text: this.translate.instant('SAVE'),
           handler: data => {
-            if (data.categoryName.length > 3 && this.quiz.categorys.findIndex((category) => category.name === data.categoryName) === -1 ) {
-
-              // renaome questions reference first
-              let questionIndex: number = this.quiz.questions.findIndex((question) => question.category.name === category.name);
-
-              while (questionIndex !== -1) {
-                this.quiz.questions[questionIndex].category.name = data.categoryName;
-                questionIndex = this.quiz.questions.findIndex((question) => question.category.name === category.name);
-              }
-
+            if (data.categoryName.length > 3 && this.quiz.categorys.findIndex((category) => category.name === data.categoryName) === -1) {
               category.name = data.categoryName;
 
               let loading = this.loadingCtrl.create({
                 content: this.translate.instant('SAVING')
               });
 
-              this.quizsProv.saveCategorysOnline(this.quiz).then(() => {
+              this.quizsProv.saveCategorysOnline(this.quiz, category).then(() => {
                 loading.dismiss();
               }).catch(() => {
                 loading.dismiss();
@@ -166,17 +157,17 @@ export class QuizQuestionsPage {
 
     loading.present();
 
-    this.quizsProv.saveCategorysOnline(this.quiz).then(() => {
+    /*this.quizsProv.saveCategorysOnline(this.quiz).then(() => {
       loading.dismiss();
     }).catch(() => {
       loading.dismiss();
       alert('Unable to save Quiz.');
-    });
+    });*/
   }
 
   deleteCategoryWithDialog(category: Category) {
     if (this.quiz.categorys.length > 1) {
-      if (this.quiz.questions.filter((q) => q.category.name === category.name).length > 0) {
+      if (this.quiz.questions.filter((q) => q.categoryUuid === category.uuid).length > 0) {
         let deleteAlert = this.alertCtrl.create({
           title: this.translate.instant('DELETE_CATEGORY'),
           message: this.translate.instant('DELETE_CATEGORY_INFO'),
@@ -215,9 +206,9 @@ export class QuizQuestionsPage {
   }
 
   deleteCategory(category: Category) {
-    let index = this.quiz.categorys.findIndex((c) => c.name === category.name);
+    let index = this.quiz.categorys.findIndex((c) => c.uuid === category.uuid);
 
-    this.quiz.questions = this.quiz.questions.filter((q) => q.category.name !== category.name);
+    this.quiz.questions = this.quiz.questions.filter((q) => q.categoryUuid !== category.uuid);
     this.quiz.categorys.splice(index, 1);
 
     let loading = this.loadingCtrl.create({
@@ -284,9 +275,13 @@ export class QuizQuestionsPage {
     });
   }
 
-  openQuestionPage(question: Question) {
+  openQuestionPage(question?: Question) {
     if (this.selectedQuestions === 0) {
-      let modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys, question: question});
+      let modal;
+
+      if (question) modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys, question: question});
+      else modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys});
+
       modal.present();
       modal.onDidDismiss(data => {
         if (data) {
@@ -296,7 +291,7 @@ export class QuizQuestionsPage {
 
           loading.present();
 
-          this.quizsProv.saveQuestionOnline(this.quiz, data.question).then(() => {
+          this.quizsProv.saveQuestionOnline(this.quiz, data.question, data.newCategory).then(() => {
             loading.dismiss();
           }).catch((error) => {
             loading.dismiss();
@@ -310,29 +305,7 @@ export class QuizQuestionsPage {
     }
   }
 
-  openNewQuestionPage() {
-    let modal = this.modalCtrl.create(QuestionPage, {quizUuid: this.quiz.uuid, categorys: this.quiz.categorys});
-    modal.present();
-    modal.onDidDismiss(data => {
-      if (data) {
-        let loading = this.loadingCtrl.create({
-          content: this.translate.instant('SAVING')
-        });
-
-        loading.present();
-
-        this.quizsProv.createQuestionOnline(this.quiz, data.question).then(() => {
-          loading.dismiss();
-        }).catch((error) => {
-          loading.dismiss();
-          console.log(error);
-          alert('Unable to save Quiz.');
-        });
-      }
-    });
-  }
-
-  saveChanges(question: Question){
+  /*saveChanges(question: Question){
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('SAVING')
     });
@@ -340,7 +313,7 @@ export class QuizQuestionsPage {
     loading.present();
 
     //Make sure the category exists, if not add it
-    if (this.quiz.categorys.findIndex((category) => category.name === question.category.name) === -1) {
+    if (this.quiz.categorys.findIndex((category) => category.uuid === question.categoryUuid) === -1) {
       this.quiz.categorys.push({
         name: question.category.name
       });
@@ -368,10 +341,10 @@ export class QuizQuestionsPage {
       console.log(error);
       alert('Unable to save Quiz.');
     });
-  }
+  }*/
 
   getQuestionsFromCategory(category: Category) {
-    return this.quiz.questions.filter((question) => question.category.name === category.name);
+    return this.quiz.questions.filter((question) => question.categoryUuid === category.uuid);
   }
 
 
@@ -385,7 +358,7 @@ export class QuizQuestionsPage {
         });
 
         loading.present();
-        
+
         this.quizsProv.saveSettingsOnline(this.quiz, data.title, data.settings).then(() => {
           loading.dismiss();
         }).catch(() => {

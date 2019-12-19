@@ -17,15 +17,26 @@ export class QuizNewPage {
     uuid: '',
     title: '',
     creationDate: -1,
+    settings: {
+      commonAnimationDuration: DefaultQuizSettings.COMMON_ANIMATION_DURATION,
+      timeBarAnimationDuration: DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION,
+      playerAnswerAnimationDuration: DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION,
+      showNextDelay: DefaultQuizSettings.SHOW_NEXT_DELAY,
+      amountOfPicturesToShow: DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW,
+      autoPlay: DefaultQuizSettings.AUTO_PLAY,
+      startMessage: DefaultQuizSettings.START_MESSAGE,
+      endMessage: DefaultQuizSettings.END_MESSAGE,
+      backgroundImage: DefaultQuizSettings.BACKGROUND_IMAGE,
+      extraDisplayDuration: DefaultQuizSettings.EXTRA_DISPLAY_DURATION,
+    },
     categorys: [
       {
+        uuid: '',
         name: 'uncategorized',
       }
     ],
     questions: [],
   };
-
-  private background: string = this.backgrounds[0];
 
   @ViewChild(Slides) slides: Slides;
 
@@ -34,7 +45,7 @@ export class QuizNewPage {
   }
 
   slideChanged() {
-    this.background = this.backgrounds[this.slides.getActiveIndex()];
+    this.newQuiz.settings.backgroundImage = this.backgrounds[this.slides.getActiveIndex()];
   }
 
   enableCreateButton() {
@@ -50,20 +61,6 @@ export class QuizNewPage {
   create() {
     if (this.enableCreateButton()) {
       this.newQuiz.creationDate = Math.floor(Date.now() / 1000);
-
-      this.newQuiz.settings = {
-        commonAnimationDuration: DefaultQuizSettings.COMMON_ANIMATION_DURATION,
-        timeBarAnimationDuration: DefaultQuizSettings.TIMEBAR_ANIMATION_DURATION,
-        playerAnswerAnimationDuration: DefaultQuizSettings.PLAYER_ANSWER_ANIMATION_DURATION,
-        showNextDelay: DefaultQuizSettings.SHOW_NEXT_DELAY,
-        amountOfPicturesToShow: DefaultQuizSettings.AMOUNT_OF_PICUTRES_TO_SHOW,
-        autoPlay: DefaultQuizSettings.AUTO_PLAY,
-        startMessage: DefaultQuizSettings.START_MESSAGE,
-        endMessage: DefaultQuizSettings.END_MESSAGE,
-        backgroundImage: this.background,
-        extraDisplayDuration: DefaultQuizSettings.EXTRA_DISPLAY_DURATION,
-      }
-
       this.viewCtrl.dismiss(this.newQuiz);
     }
   }
