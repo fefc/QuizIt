@@ -19,7 +19,7 @@ export interface Question {
   rightAnswer: number,
   answers: Array<string>,
   extras: Array<string>,
-  category: Category;
+  categoryUuid: string,
   authorId: number,
   selected?: boolean,
   hide?: boolean,

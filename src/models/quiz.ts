@@ -8,8 +8,8 @@ export interface Quiz {
   readonly uuid: string,
   title: string,
   creationDate: number,
-  selected?: boolean,
-  settings?: QuizSettings,
+  settings: QuizSettings,
   categorys: Array<Category>,
-  questions: Array<Question>
+  questions: Array<Question>,
+  selected?: boolean,
 }

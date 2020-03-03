@@ -19,9 +19,9 @@
     </ion-item>
     <ion-item>
       <ion-label>{{ 'CATEGORY' | translate }}</ion-label>
-      <ion-select [(ngModel)]="question.category.name" interface="popover" (ionChange)="categoryChange($event)">
-        <ion-option *ngFor="let category of categorys" [value]="category.name">{{category.name}}</ion-option>
-        <ion-option value="new">{{ 'NEW_CATEGORY' | translate }}</ion-option>
+      <ion-select [(ngModel)]="question.categoryUuid" interface="popover" (ionChange)="categoryChange($event)">
+        <ion-option *ngFor="let category of categorys" [value]="category.uuid">{{category.name}}</ion-option>
+        <ion-option value="newVal">{{ 'NEW_CATEGORY' | translate }}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item>

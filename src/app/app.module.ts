@@ -27,8 +27,10 @@ import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
 import { GameProvider } from '../providers/game/game';
 import { GameControllerProvider } from '../providers/game-controller/game-controller';
+import { AuthenticationProvider } from '../providers/authentication/authentication';
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
+import { SignUpPage } from '../pages/sign-up/sign-up';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
@@ -60,6 +62,7 @@ export function createTranslateLoader(http: HttpClient) {
     StartPage,
     AboutPage,
     UserProfilePage,
+    SignUpPage,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -92,6 +95,7 @@ export function createTranslateLoader(http: HttpClient) {
     StartPage,
     AboutPage,
     UserProfilePage,
+    SignUpPage,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -124,6 +128,7 @@ export function createTranslateLoader(http: HttpClient) {
     QuizsProvider,
     GameProvider,
     GameControllerProvider,
+    AuthenticationProvider,
     Globalization
   ]
 })
