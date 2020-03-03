@@ -93,6 +93,8 @@ export class QuizsProvider {
       if (question.type !== savedQuestion.type) changes.type = question.type;
       if (question.categoryUuid !== savedQuestion.categoryUuid) changes.categoryUuid = question.categoryUuid;
       if (question.rightAnswer !== savedQuestion.rightAnswer) changes.rightAnswer = question.rightAnswer;
+      if (question.draft !== savedQuestion.draft) changes.draft = question.draft;
+      if (question.hide !== savedQuestion.hide) changes.hide = question.hide;
       if (JSON.stringify(question.answers) !== JSON.stringify(savedQuestion.answers)) changes.answers = question.answers;
       if (JSON.stringify(question.extras) !== JSON.stringify(savedQuestion.extras)) changes.extras = question.extras;
     } else {
@@ -101,6 +103,8 @@ export class QuizsProvider {
       changes.type = question.type;
       changes.categoryUuid = question.categoryUuid;
       changes.rightAnswer = question.rightAnswer;
+      changes.draft = question.draft;
+      changes.hide = question.hide;
       changes.answers = question.answers;
       changes.extras = question.extras;
     }
@@ -259,6 +263,8 @@ export class QuizsProvider {
               type: question.type,
               categoryUuid: question.categoryUuid,
               rightAnswer: question.rightAnswer,
+              draft: question.draft,
+              hide: question.hide,
               answers: question.answers,
               extras: question.extras,
               authorId: question.authorId

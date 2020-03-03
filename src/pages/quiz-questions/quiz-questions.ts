@@ -253,7 +253,7 @@ export class QuizQuestionsPage {
       this.selectedQuestions += 1;
     }
     else {
-      question.selected = undefined;
+      question.selected = false;
       if (this.selectedQuestions > 0) {
         this.selectedQuestions -= 1;
       }
@@ -265,7 +265,7 @@ export class QuizQuestionsPage {
   }
 
   hideOrUnhideSelected() {
-    let newState: boolean = this.enableUnhideIcon() ? undefined : true;
+    let newState: boolean = this.enableUnhideIcon() ? false : true;
 
     for (let question of this.quiz.questions.filter((q) => q.selected === true)) {
       question.hide = newState;

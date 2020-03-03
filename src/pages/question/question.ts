@@ -365,7 +365,7 @@ export class QuestionPage {
 
   save() {
     if (this.enableSaveButton()) {
-      this.question.draft = undefined;
+      this.question.draft = false;
       this.viewCtrl.dismiss({question: this.question});
     } else if (this.enableDraftButton()) {
       this.question.draft = true;
