@@ -63,6 +63,8 @@ export class QuestionPage {
         question: '',
         type: QuestionType.classic,
         rightAnswer: -1,
+        draft: true,
+        hide: false,
         answers: ['','','',''],
         extras: [],
         categoryUuid: this.categorys[0].uuid,
