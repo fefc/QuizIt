@@ -151,7 +151,9 @@ export class QuizQuestionsPage {
   }
 
   reorderCategorys(indexes:any) {
-    this.quiz.categorys = reorderArray(this.quiz.categorys, indexes);
+    // TODO: Implement
+    alert('Not implemented yet');
+    /*this.quiz.categorys = reorderArray(this.quiz.categorys, indexes);
 
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('SAVING')
@@ -159,7 +161,7 @@ export class QuizQuestionsPage {
 
     loading.present();
 
-    /*this.quizsProv.saveToStorage(this.quiz).then(() => {
+    this.quizsProv.saveToStorage(this.quiz).then(() => {
       loading.dismiss();
     }).catch(() => {
       loading.dismiss();
@@ -208,7 +210,9 @@ export class QuizQuestionsPage {
   }
 
   deleteCategory(category: Category) {
-    let index = this.quiz.categorys.findIndex((c) => c.uuid === category.uuid);
+    // TODO: implement
+    alert('not implemented yet');
+    /*let index = this.quiz.categorys.findIndex((c) => c.uuid === category.uuid);
 
     this.quiz.questions = this.quiz.questions.filter((q) => q.categoryUuid !== category.uuid);
     this.quiz.categorys.splice(index, 1);
@@ -224,11 +228,13 @@ export class QuizQuestionsPage {
     }).catch(() => {
       loading.dismiss();
       alert('Unable to save Quiz.');
-    });
+    });*/
   }
 
   reorderQuestions(indexes:any, category: Category) {
-    let realFrom: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.from]);
+    // TODO: implement
+    alert('not implemented yet');
+    /*let realFrom: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.from]);
     let realTo: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.to])
 
     this.quiz.questions = reorderArray(this.quiz.questions, {from: realFrom, to: realTo});
@@ -244,7 +250,7 @@ export class QuizQuestionsPage {
     }).catch(() => {
       loading.dismiss();
       alert('Unable to save Quiz.');
-    });
+    });*/
   }
 
   selectQuestion(question: Question) {
@@ -266,8 +272,9 @@ export class QuizQuestionsPage {
 
   hideOrUnhideSelected() {
     let newState: boolean = this.enableUnhideIcon() ? false : true;
+    let copyOfQuestions: Array<Question> = JSON.parse(JSON.stringify(this.quiz.questions));
 
-    for (let question of this.quiz.questions.filter((q) => q.selected === true)) {
+    for (let question of copyOfQuestions.filter((q) => q.selected === true)) {
       question.hide = newState;
       this.selectQuestion(question);
     }
@@ -278,12 +285,19 @@ export class QuizQuestionsPage {
 
     loading.present();
 
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
+    this.quizsProv.saveQuestionsOnline(this.quiz, copyOfQuestions).then(() => {
       loading.dismiss();
     }).catch(() => {
       loading.dismiss();
       alert('Unable to save Quiz.');
     });
+    
+    /*this.quizsProv.saveToStorage(this.quiz).then(() => {
+      loading.dismiss();
+    }).catch(() => {
+      loading.dismiss();
+      alert('Unable to save Quiz.');
+    });*/
   }
 
   deleteSelected() {
@@ -333,50 +347,9 @@ export class QuizQuestionsPage {
     }
   }
 
-  /*saveChanges(question: Question){
-    let loading = this.loadingCtrl.create({
-      content: this.translate.instant('SAVING')
-    });
-
-    loading.present();
-
-    //Make sure the category exists, if not add it
-    if (this.quiz.categorys.findIndex((category) => category.uuid === question.categoryUuid) === -1) {
-      this.quiz.categorys.push({
-        name: question.category.name
-      });
-    }
-
-    //Make sure question exists, if not add it
-    let questionIndex: number = this.quiz.questions.findIndex((q) => q.uuid === question.uuid);
-    if ( questionIndex === -1) {
-      this.quiz.questions.push(question);
-    }
-    else {
-      this.quiz.questions[questionIndex].question = question.question;
-      this.quiz.questions[questionIndex].type = question.type;
-      this.quiz.questions[questionIndex].rightAnswer = question.rightAnswer;
-      this.quiz.questions[questionIndex].answers = question.answers;
-      this.quiz.questions[questionIndex].extras = question.extras;
-      this.quiz.questions[questionIndex].category = question.category;
-      this.quiz.questions[questionIndex].authorId = question.authorId;
-      this.quiz.questions[questionIndex].draft = question.draft;
-      //hide does not need to be set here
-    }
-
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
-      loading.dismiss();
-    }).catch((error) => {
-      loading.dismiss();
-      console.log(error);
-      alert('Unable to save Quiz.');
-    });
-  }*/
-
   getQuestionsFromCategory(category: Category) {
     return this.quiz.questions.filter((question) => question.categoryUuid === category.uuid);
   }
-
 
   openQuizSettingsPage() {
     let modal = this.modalCtrl.create(QuizSettingsPage, {title: this.quiz.title, settings: this.quiz.settings});

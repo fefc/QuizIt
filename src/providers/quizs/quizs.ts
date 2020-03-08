@@ -311,6 +311,50 @@ export class QuizsProvider {
     });
   }
 
+  saveQuestionsOnline(quiz: Quiz, questions: Array<Question>) {
+    return new Promise((resolve, reject) => {
+      let batch = firebase.firestore().batch();
+
+      for (let question of questions) {
+        let changes = this.getQuestionPropertiesChanges(quiz, question);
+
+        if (changes) {
+          let questionRef;
+
+          if (question.uuid) {
+            questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
+            batch.update(questionRef, changes);
+          }
+          else {
+            reject('cant batch update new questions');
+          }
+        }
+      }
+
+      // Commit the batch
+      return batch.commit().then(() => {
+        for (let question of questions) {
+          let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
+
+          if (oldQuestion !== -1) {
+            quiz.questions[oldQuestion] = question;
+          }
+          else {
+            reject('cant batch update new questions');
+          }
+        }
+        this.saveToStorage(quiz).then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      }).catch((error) => {
+        console.log(error);
+        reject("Could not update players online");
+      });
+    });
+  }
+
   loadFromStorage() {
     return new Promise((resolve, reject) => {
       this.storage.keys().then(keys => {
