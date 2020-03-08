@@ -232,25 +232,32 @@ export class QuizQuestionsPage {
   }
 
   reorderQuestions(indexes:any, category: Category) {
-    // TODO: implement
-    alert('not implemented yet');
-    /*let realFrom: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.from]);
-    let realTo: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.to])
+    if (this.quiz.questions.length > 1) {
+      let realFrom: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.from]);
+      let realTo: number = this.quiz.questions.indexOf(this.getQuestionsFromCategory(category)[indexes.to])
 
-    this.quiz.questions = reorderArray(this.quiz.questions, {from: realFrom, to: realTo});
+      let copyOfQuestions: Array<Question>;
+      copyOfQuestions = JSON.parse(JSON.stringify(reorderArray(this.quiz.questions, {from: realFrom, to: realTo})));
 
-    let loading = this.loadingCtrl.create({
-      content: this.translate.instant('SAVING')
-    });
+      copyOfQuestions[0].afterQuestionUuid = 'first';
 
-    loading.present();
+      for (let i = 1; i < copyOfQuestions.length; i++) {
+        copyOfQuestions[i].afterQuestionUuid = copyOfQuestions[i - 1].uuid;
+      }
 
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
-      loading.dismiss();
-    }).catch(() => {
-      loading.dismiss();
-      alert('Unable to save Quiz.');
-    });*/
+      let loading = this.loadingCtrl.create({
+        content: this.translate.instant('SAVING')
+      });
+
+      loading.present();
+
+      this.quizsProv.saveQuestionsOnline(this.quiz, copyOfQuestions).then(() => {
+        loading.dismiss();
+      }).catch(() => {
+        loading.dismiss();
+        alert('Unable to save Quiz.');
+      });
+    }
   }
 
   selectQuestion(question: Question) {
@@ -291,13 +298,6 @@ export class QuizQuestionsPage {
       loading.dismiss();
       alert('Unable to save Quiz.');
     });
-    
-    /*this.quizsProv.saveToStorage(this.quiz).then(() => {
-      loading.dismiss();
-    }).catch(() => {
-      loading.dismiss();
-      alert('Unable to save Quiz.');
-    });*/
   }
 
   deleteSelected() {
@@ -332,6 +332,10 @@ export class QuizQuestionsPage {
           });
 
           loading.present();
+
+          if (data.question.afterQuestionUuid === '') {
+            data.question.afterQuestionUuid = (this.quiz.questions.length > 0 ? this.quiz.questions[this.quiz.questions.length - 1].uuid : 'first');
+          }
 
           this.quizsProv.saveQuestionOnline(this.quiz, data.question, data.newCategory).then(() => {
             loading.dismiss();

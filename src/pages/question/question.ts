@@ -60,6 +60,7 @@ export class QuestionPage {
     if (!params.data.question) {
       this.question = {
         uuid: '',
+        afterQuestionUuid: '',
         question: '',
         type: QuestionType.classic,
         rightAnswer: -1,

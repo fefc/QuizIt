@@ -89,6 +89,7 @@ export class QuizsProvider {
 
     if (savedQuestion) {
       //An update on a question
+      if (question.afterQuestionUuid != savedQuestion.afterQuestionUuid) changes.afterQuestionUuid = question.afterQuestionUuid;
       if (question.question !== savedQuestion.question) changes.question = question.question;
       if (question.type !== savedQuestion.type) changes.type = question.type;
       if (question.categoryUuid !== savedQuestion.categoryUuid) changes.categoryUuid = question.categoryUuid;
@@ -99,6 +100,7 @@ export class QuizsProvider {
       if (JSON.stringify(question.extras) !== JSON.stringify(savedQuestion.extras)) changes.extras = question.extras;
     } else {
       //A creation of a question
+      changes.afterQuestionUuid = question.afterQuestionUuid;
       changes.question = question.question;
       changes.type = question.type;
       changes.categoryUuid = question.categoryUuid;
@@ -259,6 +261,7 @@ export class QuizsProvider {
           else {
             let questionUUID: Question = {
               uuid: questionRef.id,
+              afterQuestionUuid: question.afterQuestionUuid,
               question: question.question,
               type: question.type,
               categoryUuid: question.categoryUuid,
