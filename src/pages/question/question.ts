@@ -171,8 +171,9 @@ export class QuestionPage {
                 let indexOfNew: number = this.categorys.findIndex((category) => category.uuid === 'new');
 
                 if (indexOfNew === -1){
-                  this.categorys.push({uuid: 'new', name: data.categoryName});
+                  this.categorys.push({uuid: 'new', afterCategoryUuid: this.categorys[this.categorys.length - 1].uuid, name: data.categoryName});
                 } else {
+                  this.categorys[indexOfNew].afterCategoryUuid = this.categorys[this.categorys.length - 1].uuid;
                   this.categorys[indexOfNew].name = data.categoryName;
                 }
 
@@ -367,12 +368,18 @@ export class QuestionPage {
   }
 
   save() {
+    let newCategory: Category = undefined;
+
+    if (this.question.categoryUuid === 'new') {
+      newCategory = this.categorys.find((category) => category.uuid === 'new');
+    }
+
     if (this.enableSaveButton()) {
       this.question.draft = false;
-      this.viewCtrl.dismiss({question: this.question});
+      this.viewCtrl.dismiss({question: this.question, newCategory: newCategory});
     } else if (this.enableDraftButton()) {
       this.question.draft = true;
-      this.viewCtrl.dismiss({question: this.question});
+      this.viewCtrl.dismiss({question: this.question, newCategory: newCategory});
     }
   }
 

@@ -116,13 +116,16 @@ export class QuizQuestionsPage {
           text: this.translate.instant('SAVE'),
           handler: data => {
             if (data.categoryName.length > 3 && this.quiz.categorys.findIndex((category) => category.name === data.categoryName) === -1) {
-              category.name = data.categoryName;
+              let newCategoryData: Category = JSON.parse(JSON.stringify(category));
+              newCategoryData.name = data.categoryName;
 
               let loading = this.loadingCtrl.create({
                 content: this.translate.instant('SAVING')
               });
 
-              this.quizsProv.saveCategorysOnline(this.quiz, category).then(() => {
+              loading.present();
+
+              this.quizsProv.saveCategorysOnline(this.quiz, [newCategoryData]).then(() => {
                 loading.dismiss();
               }).catch(() => {
                 loading.dismiss();
@@ -151,22 +154,30 @@ export class QuizQuestionsPage {
   }
 
   reorderCategorys(indexes:any) {
-    // TODO: Implement
-    alert('Not implemented yet');
-    /*this.quiz.categorys = reorderArray(this.quiz.categorys, indexes);
+    if (this.quiz.categorys.length > 1) {
+      let copyOfCategorys: Array<Category>;
+      copyOfCategorys = JSON.parse(JSON.stringify(reorderArray(this.quiz.categorys, indexes)));
 
-    let loading = this.loadingCtrl.create({
-      content: this.translate.instant('SAVING')
-    });
+      copyOfCategorys[0].afterCategoryUuid = 'first';
 
-    loading.present();
+      for (let i = 1; i < copyOfCategorys.length; i++) {
+        copyOfCategorys[i].afterCategoryUuid = copyOfCategorys[i - 1].uuid;
+      }
 
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
-      loading.dismiss();
-    }).catch(() => {
-      loading.dismiss();
-      alert('Unable to save Quiz.');
-    });*/
+      let loading = this.loadingCtrl.create({
+        content: this.translate.instant('SAVING')
+      });
+
+      loading.present();
+
+      this.quizsProv.saveCategorysOnline(this.quiz, copyOfCategorys).then(() => {
+        loading.dismiss();
+      }).catch((error) => {
+        loading.dismiss();
+        console.log(error);
+        alert('Unable to save Quiz. ' + error);
+      });
+    }
   }
 
   deleteCategoryWithDialog(category: Category) {
@@ -210,25 +221,19 @@ export class QuizQuestionsPage {
   }
 
   deleteCategory(category: Category) {
-    // TODO: implement
-    alert('not implemented yet');
-    /*let index = this.quiz.categorys.findIndex((c) => c.uuid === category.uuid);
-
-    this.quiz.questions = this.quiz.questions.filter((q) => q.categoryUuid !== category.uuid);
-    this.quiz.categorys.splice(index, 1);
-
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('SAVING')
     });
 
     loading.present();
 
-    this.quizsProv.saveToStorage(this.quiz).then(() => {
+    this.quizsProv.deleteCategoryOnline(this.quiz, category).then(() => {
       loading.dismiss();
-    }).catch(() => {
+    }).catch((error) => {
       loading.dismiss();
+      console.log(error);
       alert('Unable to save Quiz.');
-    });*/
+    });
   }
 
   reorderQuestions(indexes:any, category: Category) {

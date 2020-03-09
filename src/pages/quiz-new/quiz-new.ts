@@ -32,6 +32,7 @@ export class QuizNewPage {
     categorys: [
       {
         uuid: '',
+        afterCategoryUuid: 'first',
         name: 'uncategorized',
       }
     ],

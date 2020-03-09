@@ -83,13 +83,31 @@ export class QuizsProvider {
     else return changes;
   }
 
+  getCategoryPropertiesChanges(quiz: Quiz, category: Category) {
+    let savedCategory: Category = quiz.categorys.find((c) => c.uuid === category.uuid);
+    let changes: any = {};
+
+    if (savedCategory) {
+      //An update on a category
+      if (category.afterCategoryUuid !== savedCategory.afterCategoryUuid) changes.afterCategoryUuid = category.afterCategoryUuid;
+      if (category.name !== savedCategory.name) changes.name = category.name;
+    } else {
+      //A creation of a category
+      changes.afterCategoryUuid = category.afterCategoryUuid;
+      changes.name = category.name;
+    }
+
+    if (Object.keys(changes).length === 0) return undefined;
+    else return changes;
+  }
+
   getQuestionPropertiesChanges(quiz: Quiz, question: Question) {
     let savedQuestion: Question = quiz.questions.find((q) => q.uuid === question.uuid);
     let changes: any = {};
 
     if (savedQuestion) {
       //An update on a question
-      if (question.afterQuestionUuid != savedQuestion.afterQuestionUuid) changes.afterQuestionUuid = question.afterQuestionUuid;
+      if (question.afterQuestionUuid !== savedQuestion.afterQuestionUuid) changes.afterQuestionUuid = question.afterQuestionUuid;
       if (question.question !== savedQuestion.question) changes.question = question.question;
       if (question.type !== savedQuestion.type) changes.type = question.type;
       if (question.categoryUuid !== savedQuestion.categoryUuid) changes.categoryUuid = question.categoryUuid;
@@ -131,6 +149,7 @@ export class QuizsProvider {
 
           quiz.categorys[i] = {
             uuid: quizCategoryRef.id,
+            afterCategoryUuid: i > 0 ? quiz.categorys[i - 1].afterCategoryUuid : 'first',
             name: quiz.categorys[i].name
           };
 
@@ -198,23 +217,67 @@ export class QuizsProvider {
     });
   }
 
-  saveCategorysOnline(quiz: Quiz, category: Category) {
+  saveCategorysOnline(quiz: Quiz, categorys: Array<Category>) {
     return new Promise((resolve, reject) => {
-      firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc(category.uuid).update({name: category.name}).then(() => {
+      let batch = firebase.firestore().batch();
+
+      for (let category of categorys) {
+        let changes = this.getCategoryPropertiesChanges(quiz, category);
+
+        if (changes) {
+          let categoryRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc(category.uuid);
+          batch.update(categoryRef, changes);
+        }
+      }
+
+      // Commit the batch
+      return batch.commit().then(() => {
+        for (let category of categorys) {
+          let oldCategory: number = quiz.categorys.findIndex((c) => c.uuid === category.uuid);
+
+          if (oldCategory !== -1) {
+            quiz.categorys[oldCategory] = category;
+          }
+          else {
+            reject('cant batch update new categorys');
+          }
+        }
         this.saveToStorage(quiz).then(() => {
           resolve();
         }).catch((error) => {
           reject(error);
         });
       }).catch((error) => {
-        reject(error);
+        console.log(error);
+        reject("Could not update players online");
       });
     });
   }
 
   deleteCategoryOnline(quiz: Quiz, category: Category) {
-    return new Promise((resolve, reject) => {
-      reject('not implemented');
+    return new Promise<string>((resolve, reject) => {
+      let batch = firebase.firestore().batch();
+
+      for (let question of quiz.questions.filter((q) => q.categoryUuid === category.uuid)) {
+        let questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
+        batch.delete(questionRef);
+      }
+
+      let categoryRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc(category.uuid);
+      batch.delete(categoryRef);
+
+      // Commit the batch
+      return batch.commit().then(() => {
+        quiz.questions = quiz.questions.filter((q) => q.categoryUuid !== category.uuid);
+        quiz.categorys = quiz.categorys.filter((c) => c.uuid !== category.uuid);
+        this.saveToStorage(quiz).then(() => {
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      }).catch(() => {
+        reject('Could not delete category and associated questions online.');
+      });
     });
   }
 
@@ -223,15 +286,17 @@ export class QuizsProvider {
       let batch = firebase.firestore().batch();
 
       if (newCategory) {
+        console.log(newCategory);
         let newCatRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc();
-        batch.set(newCatRef, {name: newCategory.name});
+        batch.set(newCatRef, {afterCategoryUuid: newCategory.afterCategoryUuid, name: newCategory.name});
 
         newCategory = {
           uuid: newCatRef.id,
+          afterCategoryUuid: newCategory.afterCategoryUuid,
           name: newCategory.name
         };
 
-        question.categoryUuid = newCatRef.id;
+        question.categoryUuid = newCategory.uuid;
       }
 
       let changes = this.getQuestionPropertiesChanges(quiz, question);
