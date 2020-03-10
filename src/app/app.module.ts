@@ -34,6 +34,7 @@ import { SignUpPage } from '../pages/sign-up/sign-up';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
+import { GeneralErrorPage } from '../pages/general-error/general-error';
 
 import { HomePage } from '../pages/home/home';
 import { HomeMenu } from '../pages/home/menu';
@@ -61,6 +62,7 @@ export function createTranslateLoader(http: HttpClient) {
     AppComponent,
     StartPage,
     AboutPage,
+    GeneralErrorPage,
     UserProfilePage,
     SignUpPage,
     HomePage,
@@ -94,6 +96,7 @@ export function createTranslateLoader(http: HttpClient) {
   entryComponents: [
     StartPage,
     AboutPage,
+    GeneralErrorPage,
     UserProfilePage,
     SignUpPage,
     HomePage,

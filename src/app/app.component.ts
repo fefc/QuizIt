@@ -7,15 +7,19 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { BarcodeScanner, BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
 import { TranslateService } from '@ngx-translate/core';
 import { Globalization } from '@ionic-native/globalization';
+import { Subscription } from "rxjs/Subscription";
 import * as firebase from "firebase/app";
 
 import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
 import { GameProvider } from '../providers/game/game';
 import { GameControllerProvider } from '../providers/game-controller/game-controller';
+import { AuthenticationProvider } from '../providers/authentication/authentication';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
+import { GeneralErrorPage } from '../pages/general-error/general-error';
+
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 import { HomePage } from '../pages/home/home';
 import { GameControllerPage } from '../pages/game-controller/game-controller';
@@ -46,12 +50,12 @@ const FIREBASE_CONFIG = {
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  providers: [UserProfilesProvider, QuizsProvider, GameProvider, GameControllerProvider]
+  providers: [UserProfilesProvider, QuizsProvider, GameProvider, GameControllerProvider, AuthenticationProvider]
 })
 export class AppComponent {
   @ViewChild('content') nav;
 
-  rootPage:any;
+  private authStateChangesSubscription: Subscription;
 
   constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
     public menuCtrl: MenuController,
@@ -64,6 +68,7 @@ export class AppComponent {
     private profilesProv: UserProfilesProvider,
     private quizsProv: QuizsProvider,
     private gameControllerProv: GameControllerProvider,
+    private authProv: AuthenticationProvider,
     private translate: TranslateService,
     private globalization: Globalization) {
 
@@ -87,9 +92,6 @@ export class AppComponent {
         translate.setDefaultLang('en');
       });
 
-      // Initialize Firebase
-      firebase.initializeApp(FIREBASE_CONFIG);
-
       //Eventually lock screen orientation on some devices
       if (platform.is('android')) {
         //width is dependent on screen orientation
@@ -98,18 +100,41 @@ export class AppComponent {
         this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
         //}
       }
-      this.profilesProv.loadFromStorage().then(() => {
-        if (this.profilesProv.profiles.length > 0) {
-          this.quizsProv.loadFromStorage().then(() => {
-            //statusBar.styleDefault();
-            this.rootPage = HomePage;
-          });
-        } else {
-          this.rootPage = StartPage;
-          this.menuCtrl.enable(false, 'menu-one');
-        }
+
+      //Initialize root element
+      this.nav.setRoot(HomePage);
+
+      //Initialize Firebase
+      firebase.initializeApp(FIREBASE_CONFIG);
+
+      firebase.firestore().enablePersistence().then(() => {
+        this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
+          if (loggedIn) {
+            this.profilesProv.loadFromStorage().then(() => {
+              if (this.profilesProv.profiles.length > 0) {
+                this.quizsProv.loadFromOnline().then(() => {
+                  //statusBar.styleDefault();
+                  this.openHomePage();
+                  splashScreen.hide();
+                });
+              } else {
+                this.openStartPage();
+                this.menuCtrl.enable(false, 'menu-one');
+                splashScreen.hide();
+              }
+            }).catch((error) => {
+              this.openGeneralErrorPage(error);
+              splashScreen.hide();
+            });
+          } else {
+            alert('You are not logged in');
+          }
+        }, (error) => {
+          console.log(error);
+        });
+      }).catch((error) => {
+        this.openGeneralErrorPage(error);
         splashScreen.hide();
-      }).catch(() => {
       });
     });
   }
@@ -151,6 +176,14 @@ export class AppComponent {
     }
   }
 
+  openStartPage() {
+    this.menuCtrl.close('menu-one');
+
+    if (this.nav.getActive().component !== StartPage) {
+      this.nav.setRoot(StartPage);
+    }
+  }
+
   openBarcodeScannerPage() {
     //this.menuCtrl.close('menu-one');
     //To not close menu, so that if barcode scanning is cancelled it does not close the app
@@ -163,6 +196,12 @@ export class AppComponent {
 
     let modal = this.modalCtrl.create(AboutPage);
     modal.present();
+  }
+
+  openGeneralErrorPage(message: string) {
+    this.menuCtrl.close('menu-one');
+    this.menuCtrl.enable(false, 'menu-one');
+    this.nav.setRoot(GeneralErrorPage, {message: message});
   }
 
   startScanning() {

@@ -4,6 +4,7 @@ import 'firebase/functions';
 
 import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
+import { reorderArray } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 
 import { AuthenticationProvider } from '../authentication/authentication';
@@ -423,9 +424,172 @@ export class QuizsProvider {
     });
   }
 
+  loadFromOnline() {
+    return new Promise((resolve, reject) => {
+      firebase.firestore().collection('U').doc(this.authProv.getUser().uid).collection('Q').get().then((userQuizsSnapshot) => {
+
+        let quizs: Array<Quiz> = new Array<Quiz>();
+
+        let quizPromises = [];
+        let categoryPromises = [];
+        let questionPromises = [];
+
+        userQuizsSnapshot.forEach((userQuizDoc) => {
+           quizPromises.push(firebase.firestore().collection('Q').doc(userQuizDoc.id).get());
+        });
+
+        Promise.all(quizPromises).then((quizsSnapshot) => {
+          quizsSnapshot.forEach((quizDoc) => {
+            let quizData = quizDoc.data();
+
+            let quiz: Quiz = {
+              uuid: quizDoc.id,
+              title: quizData.title,
+              creationDate: 0,
+              settings: quizData.settings,
+              categorys: [],
+              questions: [],
+            };
+
+            quizs.push(quiz);
+            categoryPromises.push(this.loadCategorysFromOnline(quiz.uuid));
+            questionPromises.push(this.loadQuestionsFromOnline(quiz.uuid));
+          });
+
+          Promise.all(categoryPromises).then((quizCategorys) => {
+            for (let i = 0; i < quizs.length; i++) {
+              quizs[i].categorys = quizCategorys[i];
+            }
+            Promise.all(questionPromises).then((quizQuestions) => {
+              for (let i = 0; i < quizs.length; i++) {
+                quizs[i].questions = quizQuestions[i];
+              }
+
+              this.quizs = quizs;
+
+              resolve();
+            }).catch((error) =>  {
+              reject('Could not get quizQuestions');
+            });
+          }).catch((error) => {
+            reject('Could not get quizCategorys');
+          });
+        }).catch((error) => {
+          reject('Could not get quizsSnapshots.');
+        });
+      }).catch((error) => {
+        console.log(error);
+        reject('Could not get quizes');
+      });
+    });
+  }
+
+  loadQuestionsFromOnline(quizUuid: string) {
+    return new Promise((resolve, reject) => {
+      let promises = [];
+
+      let questions: Array<Question> = new Array<Question>();
+
+      let questionsUuid: Array<string> = new Array<string>();
+
+
+      let currentQuestionUuid: string = 'first';
+
+      firebase.firestore().collection('Q').doc(quizUuid).collection('Q').get().then((questionsSnapshot) => {
+        questionsSnapshot.forEach((questionDoc) => {
+          let questionData = questionDoc.data();
+
+          let question: Question = {
+            uuid: questionDoc.id,
+            afterQuestionUuid: questionData.afterQuestionUuid,
+            question: questionData.question,
+            type: questionData.type,
+            rightAnswer: questionData.rightAnswer,
+            answers: questionData.answers,
+            extras: questionData.extras,
+            categoryUuid: questionData.categoryUuid,
+            authorId: questionData.authorId,
+            hide: questionData.hide,
+            draft: questionData.draft
+          };
+
+          questions.push(question);
+          questionsUuid.push(question.uuid);
+        });
+
+        resolve(this.orderQuestionsFromOnline(questions));
+      }).catch((error) => {
+        reject('loadQuestionsFromOnline failed');
+      });
+    });
+  }
+
+  loadCategorysFromOnline(quizUuid: string) {
+    return new Promise((resolve, reject) => {
+      let promises = [];
+
+      let categorys: Array<Category> = new Array<Category>();
+
+      firebase.firestore().collection('Q').doc(quizUuid).collection('C').get().then((categorysSnapshot) => {
+        categorysSnapshot.forEach((categoryDoc) => {
+          let categoryData = categoryDoc.data();
+
+          let category: Category = {
+            uuid: categoryDoc.id,
+            afterCategoryUuid: categoryData.afterCategoryUuid,
+            name: categoryData.name
+          };
+
+          categorys.push(category);
+        });
+
+        resolve(this.orderCategorysFromOnline(categorys));
+      }).catch((error) => {
+        reject('loadCategorysFromOnline failed');
+      });
+    });
+  }
+
+  orderQuestionsFromOnline(toBeSortedQuestions: Array<Question>) {
+    let searchedUuid: string = 'first';
+
+    let sortedQuestions: Array<Question> = new Array<Question>();
+
+    while (toBeSortedQuestions.length > 0) {
+      let currentIndex: number = toBeSortedQuestions.findIndex((q) => q.afterQuestionUuid === searchedUuid);
+      if (currentIndex === -1) currentIndex = 0; //Fail safe operation, if something is wrong with ids, just push the next
+
+      searchedUuid = toBeSortedQuestions[currentIndex].uuid;
+      sortedQuestions.push(toBeSortedQuestions[currentIndex]);
+
+      toBeSortedQuestions.splice(currentIndex, 1);
+    }
+
+    return sortedQuestions;
+  }
+
+  orderCategorysFromOnline(toBeSortedCategorys: Array<Category>) {
+    let searchedUuid: string = 'first';
+
+    let sortedCategorys: Array<Category> = new Array<Category>();
+
+    while (toBeSortedCategorys.length > 0) {
+      let currentIndex = toBeSortedCategorys.findIndex((q) => q.afterCategoryUuid === searchedUuid);
+      if (currentIndex === -1) currentIndex = 0; //Fail safe operation, if something is wrong with ids, just push the next
+
+      searchedUuid = toBeSortedCategorys[currentIndex].uuid;
+      sortedCategorys.push(toBeSortedCategorys[currentIndex]);
+
+      toBeSortedCategorys.splice(currentIndex, 1);
+    }
+
+    return sortedCategorys;
+  }
+
   loadFromStorage() {
     return new Promise((resolve, reject) => {
-      this.storage.keys().then(keys => {
+      resolve();
+      /*this.storage.keys().then(keys => {
         if (keys.indexOf('quizs') > -1) {
           this.storage.get('quizs').then(data => {
             if (data) {
@@ -440,7 +604,7 @@ export class QuizsProvider {
         }
       }).catch(() => {
         reject();
-      });
+      });*/
 
     });
   }
