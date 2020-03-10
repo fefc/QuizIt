@@ -1,10 +1,7 @@
 import * as firebase from "firebase/app";
 import 'firebase/firestore';
-import 'firebase/functions';
 
-import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
-import { reorderArray } from 'ionic-angular';
 import { File } from '@ionic-native/file';
 
 import { AuthenticationProvider } from '../authentication/authentication';
@@ -39,7 +36,7 @@ interface AttachementsResult {
 export class QuizsProvider {
   public quizs: Array<Quiz>;
 
-  constructor(private storage: Storage, private file: File, private authProv: AuthenticationProvider) {
+  constructor(private file: File, private authProv: AuthenticationProvider) {
     this.quizs = new Array<Quiz>();
   }
 
@@ -486,14 +483,7 @@ export class QuizsProvider {
 
   loadQuestionsFromOnline(quizUuid: string) {
     return new Promise((resolve, reject) => {
-      let promises = [];
-
       let questions: Array<Question> = new Array<Question>();
-
-      let questionsUuid: Array<string> = new Array<string>();
-
-
-      let currentQuestionUuid: string = 'first';
 
       firebase.firestore().collection('Q').doc(quizUuid).collection('Q').get().then((questionsSnapshot) => {
         questionsSnapshot.forEach((questionDoc) => {
@@ -514,7 +504,6 @@ export class QuizsProvider {
           };
 
           questions.push(question);
-          questionsUuid.push(question.uuid);
         });
 
         resolve(this.orderQuestionsFromOnline(questions));
@@ -526,8 +515,6 @@ export class QuizsProvider {
 
   loadCategorysFromOnline(quizUuid: string) {
     return new Promise((resolve, reject) => {
-      let promises = [];
-
       let categorys: Array<Category> = new Array<Category>();
 
       firebase.firestore().collection('Q').doc(quizUuid).collection('C').get().then((categorysSnapshot) => {
@@ -586,29 +573,6 @@ export class QuizsProvider {
     return sortedCategorys;
   }
 
-  loadFromStorage() {
-    return new Promise((resolve, reject) => {
-      resolve();
-      /*this.storage.keys().then(keys => {
-        if (keys.indexOf('quizs') > -1) {
-          this.storage.get('quizs').then(data => {
-            if (data) {
-              this.quizs = JSON.parse(data);
-              resolve();
-            }
-          }).catch(() => {
-            reject();
-          });
-        } else {
-          resolve();
-        }
-      }).catch(() => {
-        reject();
-      });*/
-
-    });
-  }
-
   saveToStorage(quiz: Quiz) {
     return new Promise(async (resolve, reject) => {
       let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
@@ -664,11 +628,12 @@ export class QuizsProvider {
           }
         }
 
-        this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+        /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
           resolve();
         }).catch(() => {
           reject('Could not save quizs to storage.');
-        });
+        });*/
+        resolve();
       } catch(error) {
         console.log(error);
         reject('Could not save attachements.');
@@ -697,11 +662,12 @@ export class QuizsProvider {
       }
 
       Promise.all(promises).then(() => {
-        this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+        /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
           resolve();
         }).catch(() => {
           reject();
-        });
+        });*/
+        resolve();
       }).catch(() => {
         reject();
       })
@@ -714,11 +680,12 @@ export class QuizsProvider {
       if (index !== -1) {
         this.deleteQuizDir(this.quizs[index].uuid).then(() => {
           this.quizs.splice(index, 1);
-          this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+          /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
             resolve();
           }).catch(() => {
             reject();
-          });
+          });*/
+          resolve();
         }).catch(() => {
           reject();
         });
@@ -991,7 +958,7 @@ export class QuizsProvider {
 
                         this.quizs.push(importQuiz);
 
-                        this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
+                        /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
                           //Before we are done, lets delete all the mess we have done
                           this.file.removeRecursively(this.file.cacheDirectory, 'import').then(() => {
                             this.file.removeFile(cordovaFilePath, filePath).then(() => {
@@ -1005,7 +972,8 @@ export class QuizsProvider {
                           resolve();
                         }).catch(() => {
                           reject('Could not save quizs to storage.');
-                        });
+                        });*/
+                        resolve();
                       } catch(error) {
                         reject('Could not save attachements. ' + error);
                       };

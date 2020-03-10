@@ -64,7 +64,7 @@ export class StartPage {
     this.slides.slideTo(1);
   }
 
-  gotToCreateProfile(profile?: UserProfile) {
+  gotToCreateProfile(profile: UserProfile) {
     if (profile) {
       this.profile = {
         uuid: profile.uuid,
@@ -119,7 +119,6 @@ export class StartPage {
   }
 
   startLogin() {
-    let profile: UserProfile;
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('LOGGING_IN')
     });
@@ -129,25 +128,14 @@ export class StartPage {
     this.authProv.login(this.email, this.password).then((user) => {
       loading.dismiss();
 
-      if (user.displayName) {
-        profile = {
-          uuid: '',
-          nickname: user.displayName,
-          avatar: user.photoURL,
-          email: user.email
-        }
-
-        this.createProfile(profile);
-      } else {
-        profile = {
-          uuid: '',
-          nickname: '',
-          avatar: '',
-          email: user.email
-        }
+      this.profilesProv.loadFromOnline().then(() => {
+        let profile: UserProfile = JSON.parse(JSON.stringify(this.profilesProv.profiles[0]));
 
         this.gotToCreateProfile(profile);
-      }
+      }).catch((error) => {
+        alert('Something went wrong');
+      });
+
     }).catch((error) => {
       loading.dismiss();
       this.showOnlineAlert('ERROR_LOGGING_IN', error.code);
@@ -183,7 +171,7 @@ export class StartPage {
         let profile: UserProfile;
 
         profile = {
-          uuid: '',
+          uuid: data.user.id,
           nickname: '',
           avatar: '',
           email: data.user.email
@@ -194,30 +182,17 @@ export class StartPage {
     });
   }
 
-  createProfile(profile?: UserProfile) {
+  createProfile(profile: UserProfile) {
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('CREATING')
     });
 
     loading.present();
 
-    this.profilesProv.saveToStorage((profile !== undefined ? profile : this.profile)).then((savedProfile) => {
-      if (savedProfile.email) {
-        this.authProv.updateUserProfile(savedProfile.nickname, savedProfile.avatar).then(() => {
-          loading.dismiss();
-          this.navCtrl.setRoot(HomePage);
-          this.menuCtrl.enable(true, 'menu-one');
-        }).catch((error) => {
-          loading.dismiss();
-          this.navCtrl.setRoot(HomePage);
-          this.menuCtrl.enable(true, 'menu-one');
-          alert('Unable to save User profile online. ' + error.code);
-        });
-      } else {
-        loading.dismiss();
-        this.navCtrl.setRoot(HomePage);
-        this.menuCtrl.enable(true, 'menu-one');
-      }
+    this.profilesProv.saveToOnline(this.profile).then(() => {
+      loading.dismiss();
+      this.navCtrl.setRoot(HomePage);
+      this.menuCtrl.enable(true, 'menu-one');
     }).catch(() => {
       loading.dismiss();
       alert('Unable to save User profile.');

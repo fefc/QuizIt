@@ -110,7 +110,7 @@ export class AppComponent {
       firebase.firestore().enablePersistence().then(() => {
         this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
           if (loggedIn) {
-            this.profilesProv.loadFromStorage().then(() => {
+            this.profilesProv.loadFromOnline().then(() => {
               if (this.profilesProv.profiles.length > 0) {
                 this.quizsProv.loadFromOnline().then(() => {
                   //statusBar.styleDefault();
@@ -156,9 +156,7 @@ export class AppComponent {
 
         loading.present();
 
-        this.profilesProv.profiles[0] = data;
-
-        this.profilesProv.saveToStorage(data).then(() => {
+        this.profilesProv.saveToOnline(data).then(() => {
           loading.dismiss();
         }).catch(() => {
           loading.dismiss();

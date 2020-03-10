@@ -8,6 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { UserProfile } from '../../models/user-profile';
 
 import { AuthenticationProvider } from '../../providers/authentication/authentication';
+import { UserProfilesProvider } from '../../providers/user-profiles/user-profiles';
 
 import { SignUpPage } from '../../pages/sign-up/sign-up';
 
@@ -31,6 +32,7 @@ export class UserProfilePage {
               private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
               private authProv: AuthenticationProvider,
+              private profilesProv: UserProfilesProvider,
               private translate: TranslateService,
               params: NavParams) {
     //lets make deep copies, so that we don't modfiy anything before user confirmation
@@ -203,8 +205,7 @@ export class UserProfilePage {
 
         loading.present();
 
-        this.authProv.updateUserProfile(this.profile.nickname, this.profile.avatar).then(() => {
-          this.profile.email = data.user.email;
+        this.profilesProv.saveToOnline(this.profile).then(() => {
           loading.dismiss();
           this.save();
         }).catch((error) => {

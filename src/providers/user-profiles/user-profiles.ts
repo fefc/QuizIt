@@ -1,5 +1,9 @@
-import { Storage } from '@ionic/storage';
+import * as firebase from "firebase/app";
+import 'firebase/firestore';
+
 import { Injectable } from '@angular/core';
+
+import { AuthenticationProvider } from '../authentication/authentication';
 
 import { UserProfile } from '../../models/user-profile';
 
@@ -7,84 +11,79 @@ import { UserProfile } from '../../models/user-profile';
 export class UserProfilesProvider {
   public profiles: Array<UserProfile>;
 
-  constructor(private storage: Storage) {
+  constructor(private authProv: AuthenticationProvider) {
     this.profiles = new Array<UserProfile>();
   }
 
-  loadFromStorage() {
-    return new Promise((resolve, reject) => {
-      this.storage.keys().then(keys => {
-        if (keys.indexOf('profiles') > -1) {
-          this.storage.get('profiles').then(data => {
-            if (data) {
-              this.profiles = JSON.parse(data);
-              resolve();
-            }
-          }).catch(() => {
-            reject();
-          });
-        } else {
-          resolve();
-        }
-      }).catch(() => {
-        reject();
-      });
+  getPropertiesChanges(profile: UserProfile) {
+    let savedUserProfile: UserProfile = this.profiles.find((p) => p.uuid === profile.uuid);
+    let changes: any = {};
 
-    });
+    if (savedUserProfile) {
+      //An update on a category
+      if (profile.nickname !== savedUserProfile.nickname) changes.nickname = profile.nickname;
+      if (profile.avatar !== savedUserProfile.avatar) changes.avatar = profile.avatar;
+      if (profile.email !== savedUserProfile.email) changes.email = profile.email;
+    } else {
+      //A creation of a category
+      changes.nickname = profile.nickname;
+      changes.avatar = profile.avatar;
+      changes.email = profile.email;
+    }
+
+    if (Object.keys(changes).length === 0) return undefined;
+    else return changes;
   }
 
-  saveToStorage(profile: UserProfile) {
-    return new Promise<any>((resolve, reject) => {
-      if (!profile.uuid) {
-        //We have a new profile, so first we need to get a new uuid
-        let uuid: string = this.uuidv4();
+  loadFromOnline() {
+    return new Promise((resolve, reject) => {
+      firebase.firestore().collection('U').doc(this.authProv.getUser().uid).get().then((profileDoc) => {
+        let profileData = profileDoc.data();
 
-        while (this.profiles.findIndex((p) => p.uuid === uuid) !== -1) {
-          uuid = this.uuidv4();
-        }
-
-        let newProfile: UserProfile = {
-          uuid: uuid,
-          nickname: profile.nickname,
-          avatar: profile.avatar,
-          email: profile.email
-        }
+        let profile: UserProfile = {
+          uuid: profileData.id,
+          nickname: profileData.nickname,
+          avatar: profileData.avatar,
+          email: profileData.email
+        };
 
         if(this.profiles.length > 0) {
-          this.profiles[0] = newProfile;
+          this.profiles[0] = profile;
         } else {
-          this.profiles.push(newProfile);
+          this.profiles.push(profile);
         }
 
-        this.storage.set('profiles', JSON.stringify(this.profiles)).then(() => {
-          profile = this.profiles[this.profiles.length - 1];
-          resolve(newProfile);
-        }).catch(() => {
-          reject('Could not save user profile to storage.');
-        });
-      }
-      else {
-        //Saving an exsisting profile, lets just make sure it's in the list
-        let profileIndex: number = this.profiles.findIndex((p) => p.uuid === profile.uuid);
-        if (profileIndex !== -1) {
-          this.storage.set('profiles', JSON.stringify(this.profiles)).then(() => {
-            resolve();
-          }).catch(() => {
-            reject('Could not save user profile to storage.');
-          });
-        }
-        else {
-          reject('Could not find user profile.');
-        }
-      }
+        resolve();
+      }).catch((error) => {
+        console.log(error);
+        reject('Could not get quizes');
+      });
     });
   }
 
-  //From https://stackoverflow.com/a/2117523
-  uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
+  saveToOnline(profile: UserProfile) {
+    return new Promise((resolve, reject) => {
+      let changes = this.getPropertiesChanges(profile);
+
+      console.log(changes);
+
+      if (changes) {
+        firebase.firestore().collection('U').doc(this.authProv.getUser().uid).update(changes).then(() => {
+
+          if(this.profiles.length > 0) {
+            this.profiles[0] = profile;
+          } else {
+            this.profiles.push(profile);
+          }
+
+          resolve();
+        }).catch((error) => {
+          console.log(error);
+          reject(error);
+        });
+      } else {
+        resolve();
+      }
     });
   }
 }

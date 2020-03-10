@@ -37,7 +37,7 @@ export class AuthenticationProvider {
     }
   }
 
-  updateUserProfile(nickname: string, avatar: string) {
+  /*updateUserProfile(nickname: string, avatar: string) {
     return new Promise((resolve, reject) => {
       if (firebase.auth().currentUser) {
         firebase.auth().currentUser.updateProfile({
@@ -52,7 +52,7 @@ export class AuthenticationProvider {
         reject({code: "Currently no user logged in."});
       }
     });
-  }
+  }*/
 
   updatePassword(email: string, password: string, newPassword: string) {
     return new Promise((resolve, reject) => {
