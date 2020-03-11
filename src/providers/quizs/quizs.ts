@@ -22,7 +22,6 @@ enum AttachementType {
 }
 
 interface AttachementsResult {
-  questionUuid: string,
   type: AttachementType,
   fileNames: Array<string>
 }
@@ -265,13 +264,10 @@ export class QuizsProvider {
   }
 
   saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category) {
-    console.log('saveQuestionOnline');
-
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
       if (newCategory) {
-        console.log(newCategory);
         let newCatRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc();
         batch.set(newCatRef, {afterCategoryUuid: newCategory.afterCategoryUuid, name: newCategory.name});
 
@@ -284,45 +280,43 @@ export class QuizsProvider {
         question.categoryUuid = newCategory.uuid;
       }
 
+      //Make sure to have a reference (id) before handling attachements
+      let questionRef;
 
-
+      if (question.uuid) {
+        questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
+      }
+      else {
+        questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
+      }
 
       //Check attachements
-      //var promises = [];  //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
       var promises = [];
 
       //First check question answers (pictures)
-      promises.push(this.saveAttachementsOnline(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
-      //promises.push(this.saveAttachementsOnline(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
+      promises.push(this.saveAttachementsOnline(quiz.uuid, questionRef.id, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
+      promises.push(this.saveAttachementsOnline(quiz.uuid, questionRef.id, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
 
       //Update answers so that they contain only fileName and not fullPath
       Promise.all(promises).then((attachementResults) => {
-        console.log('here');
-        console.log(attachementResults);
-
         for (let result of attachementResults) {
           let attachementIndex: number;
 
-          console.log('QuestionIndex ', result);
-          console.log(JSON.stringify(result.questionUuid));
-          console.log(JSON.stringify(result.fileNames));
+          if (result.type === AttachementType.answers) {
+            //set correct answers
+            for (let fileName of result.fileNames) {
+              attachementIndex = question.answers.findIndex((a) => a.endsWith(fileName));
 
-            if (result.type == AttachementType.answers) {
-              //set correct answers
-              for (let fileName of result.fileNames) {
-                console.log(fileName);
-                attachementIndex = question.answers.findIndex((a) => a.endsWith(fileName));
-
-                question.answers[attachementIndex] = fileName;
-              }
-            } else if (result.type == AttachementType.extras) {
-              //set correct extras
-              for (let fileName of result.fileNames) {
-                question.extras.findIndex((e) => e.endsWith(fileName));
-
-                question.extras[attachementIndex] = fileName;
-              }
+              question.answers[attachementIndex] = fileName;
             }
+          } else if (result.type === AttachementType.extras) {
+            //set correct extras
+            for (let fileName of result.fileNames) {
+              attachementIndex = question.extras.findIndex((e) => e.endsWith(fileName));
+
+              question.extras[attachementIndex] = fileName;
+            }
+          }
         }
 
         //Do the normal stuff
@@ -330,19 +324,13 @@ export class QuizsProvider {
 
         console.log(changes);
 
-        resolve();
-
-        /*if (changes) {
-          let questionRef;
-
-          if (question.uuid) {
-            questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
-            batch.update(questionRef, changes);
-          }
-          else {
-            questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
-            batch.set(questionRef, changes);
-          }
+        if (changes) {
+        if (question.uuid) {
+          batch.update(questionRef, changes);
+        }
+        else {
+          batch.set(questionRef, changes);
+        }
 
           // Commit the batch
           batch.commit().then(() => {
@@ -380,7 +368,7 @@ export class QuizsProvider {
           });
         } else {
           resolve();
-        }*/
+        }
 
       }).catch((error) => {
         reject("Could not update players online");
@@ -696,29 +684,28 @@ export class QuizsProvider {
       var promises = [];
 
       var result: AttachementsResult = {
-        questionUuid: questionUuid,
         type: type,
         fileNames: []
       };
 
       for (let attachement of attachements) {
-        promises.push(this.uploadFileOnline(attachement, quizUuid, questionUuid));
+        promises.push(this.uploadFileOnline(quizUuid, questionUuid, attachement));
       }
 
       Promise.all(promises).then((fileNames) => {
         result.fileNames = fileNames;
+        resolve(result);
+      }).catch((error) => {
+        reject(error);
       });
-
-      resolve(result);
     });
   }
 
-  uploadFileOnline(fullLocalPath: string, quizUuid: string, questionUuid: string) {
+  uploadFileOnline(quizUuid: string, questionUuid: string, fullLocalPath: string) {
     return new Promise((resolve, reject) => {
       var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
       var sourceDir = fullLocalPath.substring(0, indexOfSlash);
       var fileName = fullLocalPath.substring(indexOfSlash);
-
 
       this.file.readAsArrayBuffer(sourceDir, fileName).then((arrayBuffer) => {
         var fileRef = firebase.storage().ref().child(quizUuid + '/' + questionUuid + '/' + fileName);
