@@ -1,5 +1,6 @@
 import * as firebase from "firebase/app";
 import 'firebase/firestore';
+import 'firebase/storage';
 
 import { Injectable } from '@angular/core';
 import { File } from '@ionic-native/file';
@@ -155,7 +156,7 @@ export class QuizsProvider {
         }
 
         // Commit the batch
-        return batch.commit().then(() => {
+        batch.commit().then(() => {
 
           let newQuiz: Quiz = {
             uuid: newQuizRef.id,
@@ -166,14 +167,7 @@ export class QuizsProvider {
             settings: quiz.settings
           }
 
-          console.log(newQuiz);
-
-          this.saveToStorage(newQuiz).then(() => {
-            resolve();
-          }).catch((error) => {
-            console.log(error);
-            reject(error);
-          });
+          resolve();
         }).catch((error) => {
           console.log(error);
           reject("Could not update players online");
@@ -195,21 +189,13 @@ export class QuizsProvider {
     return new Promise((resolve, reject) => {
       let changes = this.getSettingsPropertiesChanges(quiz, title, settings);
 
-      console.log('changing data', changes);
-
       if (changes) {
         firebase.firestore().collection('Q').doc(quiz.uuid).update(changes).then(() => {
-
-          console.log('updated data on firestore');
 
           quiz.title = title;
           quiz.settings = settings;
 
-          this.saveToStorage(quiz).then(() => {
-            resolve();
-          }).catch((error) => {
-            reject(error);
-          });
+          resolve();
         }).catch((error) => {
           reject(error);
         });
@@ -233,7 +219,7 @@ export class QuizsProvider {
       }
 
       // Commit the batch
-      return batch.commit().then(() => {
+      batch.commit().then(() => {
         for (let category of categorys) {
           let oldCategory: number = quiz.categorys.findIndex((c) => c.uuid === category.uuid);
 
@@ -244,11 +230,9 @@ export class QuizsProvider {
             reject('cant batch update new categorys');
           }
         }
-        this.saveToStorage(quiz).then(() => {
-          resolve();
-        }).catch((error) => {
-          reject(error);
-        });
+
+        resolve();
+
       }).catch((error) => {
         console.log(error);
         reject("Could not update players online");
@@ -269,14 +253,11 @@ export class QuizsProvider {
       batch.delete(categoryRef);
 
       // Commit the batch
-      return batch.commit().then(() => {
+      batch.commit().then(() => {
         quiz.questions = quiz.questions.filter((q) => q.categoryUuid !== category.uuid);
         quiz.categorys = quiz.categorys.filter((c) => c.uuid !== category.uuid);
-        this.saveToStorage(quiz).then(() => {
-          resolve();
-        }).catch((error) => {
-          reject(error);
-        });
+
+        resolve();
       }).catch(() => {
         reject('Could not delete category and associated questions online.');
       });
@@ -284,6 +265,8 @@ export class QuizsProvider {
   }
 
   saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category) {
+    console.log('saveQuestionOnline');
+
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
@@ -301,60 +284,107 @@ export class QuizsProvider {
         question.categoryUuid = newCategory.uuid;
       }
 
-      let changes = this.getQuestionPropertiesChanges(quiz, question);
 
-      if (changes) {
-        let questionRef;
 
-        if (question.uuid) {
-          questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
-          batch.update(questionRef, changes);
+
+      //Check attachements
+      //var promises = [];  //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
+      var promises = [];
+
+      //First check question answers (pictures)
+      promises.push(this.saveAttachementsOnline(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
+      //promises.push(this.saveAttachementsOnline(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
+
+      //Update answers so that they contain only fileName and not fullPath
+      Promise.all(promises).then((attachementResults) => {
+        console.log('here');
+        console.log(attachementResults);
+
+        for (let result of attachementResults) {
+          let attachementIndex: number;
+
+          console.log('QuestionIndex ', result);
+          console.log(JSON.stringify(result.questionUuid));
+          console.log(JSON.stringify(result.fileNames));
+
+            if (result.type == AttachementType.answers) {
+              //set correct answers
+              for (let fileName of result.fileNames) {
+                console.log(fileName);
+                attachementIndex = question.answers.findIndex((a) => a.endsWith(fileName));
+
+                question.answers[attachementIndex] = fileName;
+              }
+            } else if (result.type == AttachementType.extras) {
+              //set correct extras
+              for (let fileName of result.fileNames) {
+                question.extras.findIndex((e) => e.endsWith(fileName));
+
+                question.extras[attachementIndex] = fileName;
+              }
+            }
         }
-        else {
-          questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
-          batch.set(questionRef, changes);
-        }
 
-        // Commit the batch
-        return batch.commit().then(() => {
+        //Do the normal stuff
+        let changes = this.getQuestionPropertiesChanges(quiz, question);
 
-          let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
+        console.log(changes);
 
-          if (newCategory) quiz.categorys.push(newCategory);
+        resolve();
 
-          if (oldQuestion !== -1) {
-            quiz.questions[oldQuestion] = question;
+        /*if (changes) {
+          let questionRef;
+
+          if (question.uuid) {
+            questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
+            batch.update(questionRef, changes);
           }
           else {
-            let questionUUID: Question = {
-              uuid: questionRef.id,
-              afterQuestionUuid: question.afterQuestionUuid,
-              question: question.question,
-              type: question.type,
-              categoryUuid: question.categoryUuid,
-              rightAnswer: question.rightAnswer,
-              draft: question.draft,
-              hide: question.hide,
-              answers: question.answers,
-              extras: question.extras,
-              authorId: question.authorId
-            }
-
-            quiz.questions.push(questionUUID);
+            questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
+            batch.set(questionRef, changes);
           }
 
-          this.saveToStorage(quiz).then(() => {
+          // Commit the batch
+          batch.commit().then(() => {
+
+            let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
+
+            if (newCategory) quiz.categorys.push(newCategory);
+
+            if (oldQuestion !== -1) {
+              quiz.questions[oldQuestion] = question;
+            }
+            else {
+              let questionUUID: Question = {
+                uuid: questionRef.id,
+                afterQuestionUuid: question.afterQuestionUuid,
+                question: question.question,
+                type: question.type,
+                categoryUuid: question.categoryUuid,
+                rightAnswer: question.rightAnswer,
+                draft: question.draft,
+                hide: question.hide,
+                answers: question.answers,
+                extras: question.extras,
+                authorId: question.authorId
+              }
+
+              quiz.questions.push(questionUUID);
+            }
+
             resolve();
+
           }).catch((error) => {
-            reject(error);
+            console.log(error);
+            reject("Could not update players online");
           });
-        }).catch((error) => {
-          console.log(error);
-          reject("Could not update players online");
-        });
-      } else {
-        resolve();
-      }
+        } else {
+          resolve();
+        }*/
+
+      }).catch((error) => {
+        reject("Could not update players online");
+      });
     });
   }
 
@@ -368,13 +398,10 @@ export class QuizsProvider {
       }
 
       // Commit the batch
-      return batch.commit().then(() => {
+      batch.commit().then(() => {
         quiz.questions = quiz.questions.filter((q) => q.selected !== true);
-        this.saveToStorage(quiz).then(() => {
-          resolve();
-        }).catch((error) => {
-          reject(error);
-        });
+
+        resolve();
       }).catch(() => {
         reject("Could not update players online");
       });
@@ -402,7 +429,7 @@ export class QuizsProvider {
       }
 
       // Commit the batch
-      return batch.commit().then(() => {
+      batch.commit().then(() => {
         for (let question of questions) {
           let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
 
@@ -413,11 +440,8 @@ export class QuizsProvider {
             reject('cant batch update new questions');
           }
         }
-        this.saveToStorage(quiz).then(() => {
-          resolve();
-        }).catch((error) => {
-          reject(error);
-        });
+
+        resolve();
       }).catch((error) => {
         console.log(error);
         reject("Could not update players online");
@@ -577,7 +601,7 @@ export class QuizsProvider {
     return sortedCategorys;
   }
 
-  saveToStorage(quiz: Quiz) {
+  /*saveToStorage(quiz: Quiz) {
     return new Promise(async (resolve, reject) => {
       let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
 
@@ -631,23 +655,18 @@ export class QuizsProvider {
             }
           }
         }
-
-        /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-          resolve();
-        }).catch(() => {
-          reject('Could not save quizs to storage.');
-        });*/
         resolve();
       } catch(error) {
         console.log(error);
         reject('Could not save attachements.');
       };
     });
-  }
+  }*/
 
   deleteSelectedFromStorage() {
     return new Promise((resolve, reject) => {
-      let indexes: Array<number> = Array<number>();
+      reject('Not implemented yet');
+      /*let indexes: Array<number> = Array<number>();
 
       for (let selectedQuiz of this.quizs.filter((quiz) => quiz.selected === true)) {
         let index = this.quizs.findIndex(quiz => quiz.uuid === selectedQuiz.uuid);
@@ -665,102 +684,17 @@ export class QuizsProvider {
         this.quizs.splice(index, 1);
       }
 
-      Promise.all(promises).then(() => {
-        /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-          resolve();
-        }).catch(() => {
-          reject();
-        });*/
         resolve();
       }).catch(() => {
         reject();
-      })
+      })*/
     });
   }
 
-  deleteFromStorage(quiz: Quiz) {
-    return new Promise((resolve, reject) => {
-      let index: number = this.quizs.findIndex(q => q.uuid === quiz.uuid);
-      if (index !== -1) {
-        this.deleteQuizDir(this.quizs[index].uuid).then(() => {
-          this.quizs.splice(index, 1);
-          /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-            resolve();
-          }).catch(() => {
-            reject();
-          });*/
-          resolve();
-        }).catch(() => {
-          reject();
-        });
-      }
-      else {
-        reject();
-      }
-    });
-  }
+  saveAttachementsOnline(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
+    return new Promise<AttachementsResult>((resolve, reject) => {
+      var promises = [];
 
-  //From https://stackoverflow.com/a/2117523
-  uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-
-  copyAttachementsToDataDirectory(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
-    return new Promise((resolve, reject) => {
-      this.checkAndCreateDirectories(quizUuid, questionUuid).then(() => {
-        this.moveAttachementsFromCacheToDataDir(quizUuid, questionUuid, type, attachements).then((result: AttachementsResult) => {
-          resolve(result);
-        }).catch((err) => {
-          reject(err);
-        });
-      }).catch((err) => {
-        alert(err);
-        reject(err);
-      });
-    });
-  }
-
-  checkAndCreateDirectories(quizUuid: string, questionUuid: string) {
-    return new Promise((resolve, reject) => {
-      //check Quiz Dir
-      this.file.checkDir(this.file.dataDirectory, quizUuid).then(() => {
-        //check question Dir
-        this.file.checkDir(this.file.dataDirectory, quizUuid + '/' + questionUuid).then(() => {
-          resolve();
-        }).catch(() => {
-          this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, false).then(() => {
-            resolve();
-          }).catch((error) => {
-            console.log(error);
-            reject('Could not create question directory.');
-          });
-        });
-      }).catch(() => {
-        //If non existent, create question dir
-        this.file.createDir(this.file.dataDirectory, quizUuid, true).then(() => {
-          this.file.createDir(this.file.dataDirectory, quizUuid + '/' + questionUuid, true).then(() => {
-            resolve();
-          }).catch((error) => {
-            console.log(error);
-            reject('Could not create question directory.');
-          });
-        }).catch((error) => {
-          console.log(error)
-          reject('Could not create quiz directory.');
-        });
-      });
-    });
-  }
-
-  moveAttachementsFromCacheToDataDir(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
-    return new Promise<AttachementsResult>(async (resolve, reject) => {
-      //var promises = []; //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
-      var destinationDir: string = this.file.dataDirectory + quizUuid + '/' + questionUuid;
-      var sourceDir: string;
-      var fileName: string;
       var result: AttachementsResult = {
         questionUuid: questionUuid,
         type: type,
@@ -768,60 +702,42 @@ export class QuizsProvider {
       };
 
       for (let attachement of attachements) {
-        var indexOfSlash: number = attachement.lastIndexOf('/') + 1;
-        sourceDir = attachement.substring(0, indexOfSlash);
-        fileName = attachement.substring(indexOfSlash);
-        if (indexOfSlash > 0) {
-          try {
-            await this.file.moveFile(sourceDir, fileName, destinationDir, fileName);
-          } catch (error) {
-            console.log(error);
-           reject('Moving file from temporary to persistant failed');
-          }
-
-          result.fileNames.push(fileName);
-        }
-        else {
-          reject('Invalid sourceDir of fileName.');
-        }
+        promises.push(this.uploadFileOnline(attachement, quizUuid, questionUuid));
       }
+
+      Promise.all(promises).then((fileNames) => {
+        result.fileNames = fileNames;
+      });
+
       resolve(result);
     });
   }
 
-  deleteQuizDir(quizUuid: string) {
+  uploadFileOnline(fullLocalPath: string, quizUuid: string, questionUuid: string) {
     return new Promise((resolve, reject) => {
-      this.file.checkDir(this.file.dataDirectory, quizUuid).then(() => {
-        this.file.removeRecursively(this.file.dataDirectory, quizUuid).then(() => {
-          resolve();
-        }).catch(() => {
-          reject();
-        });
-      }).catch(() => {
-        resolve();
-      });
-    });
-  }
+      var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
+      var sourceDir = fullLocalPath.substring(0, indexOfSlash);
+      var fileName = fullLocalPath.substring(indexOfSlash);
 
-  createQuizDir(quizUuid: string) {
-    return new Promise((resolve, reject) => {
-      //check Quiz Dir
-      this.file.checkDir(this.file.dataDirectory, quizUuid).then(() => {
-        resolve();
-      }).catch(() => {
-        //If non existent, create question dir
-        this.file.createDir(this.file.dataDirectory, quizUuid, false).then(() => {
-          resolve();
-        }).catch(() => {
-          reject('Could not create quiz directory.');
+
+      this.file.readAsArrayBuffer(sourceDir, fileName).then((arrayBuffer) => {
+        var fileRef = firebase.storage().ref().child(quizUuid + '/' + questionUuid + '/' + fileName);
+
+        fileRef.put(arrayBuffer).then(() => {
+          resolve(fileName);
+        }).catch((error) => {
+          reject(error);
         });
+      }).catch((error) => {
+        reject(error);
       });
     });
   }
 
   zip(quiz: Quiz) {
     return new Promise((resolve, reject) => {
-      this.createQuizDir(quiz.uuid).then(() => {
+      reject('Not implemented yet');
+      /*this.createQuizDir(quiz.uuid).then(() => {
         this.file.writeFile(this.file.dataDirectory, quiz.uuid + '/database.json', JSON.stringify(quiz), { replace: true }).then(() => {
           let zipName: string;
           let d: Date = new Date();
@@ -852,13 +768,14 @@ export class QuizsProvider {
         });
       }).catch((e) => {
         reject(e);
-      });
+      });*/
     });
   }
 
   unzip(cordovaFilePath: string, filePath: string) {
     return new Promise((resolve, reject) => {
-      this.file.checkDir(this.file.cacheDirectory, 'import').then(() => {
+      reject('Not implemented yet');
+      /*this.file.checkDir(this.file.cacheDirectory, 'import').then(() => {
         this.file.removeRecursively(this.file.cacheDirectory, 'import').then(() => {
           this.unzipImportedQuizAndImport(cordovaFilePath, filePath).then((data) => {
             resolve(data);
@@ -874,12 +791,12 @@ export class QuizsProvider {
         }).catch((error) => {
           reject(error);
         });
-      });
+      });*/
     });
   }
 
   // TODO: This function needs to be updated to export extras!!
-  unzipImportedQuizAndImport(cordovaFilePath: string, filePath: string) {
+  /*unzipImportedQuizAndImport(cordovaFilePath: string, filePath: string) {
     return new Promise((resolve, reject) => {
       JJzip.unzip(cordovaFilePath + filePath, {target: this.file.cacheDirectory + 'import'}, (data) => {
         if (data.success) {
@@ -962,21 +879,17 @@ export class QuizsProvider {
 
                         this.quizs.push(importQuiz);
 
-                        /*this.storage.set('quizs', JSON.stringify(this.quizs)).then(() => {
-                          //Before we are done, lets delete all the mess we have done
-                          this.file.removeRecursively(this.file.cacheDirectory, 'import').then(() => {
-                            this.file.removeFile(cordovaFilePath, filePath).then(() => {
-                              resolve();
-                            }).catch(() => {
-                              reject('Failed to remove zip file from cache.');
-                            });
+                        //Before we are done, lets delete all the mess we have done
+                        this.file.removeRecursively(this.file.cacheDirectory, 'import').then(() => {
+                          this.file.removeFile(cordovaFilePath, filePath).then(() => {
+                            resolve();
                           }).catch(() => {
-                            reject('Failed to remove import dir.');
-                          })
-                          resolve();
+                            reject('Failed to remove zip file from cache.');
+                          });
                         }).catch(() => {
-                          reject('Could not save quizs to storage.');
-                        });*/
+                          reject('Failed to remove import dir.');
+                        });
+
                         resolve();
                       } catch(error) {
                         reject('Could not save attachements. ' + error);
@@ -1006,6 +919,6 @@ export class QuizsProvider {
         reject('Something went wrong unzipping 2');
       });
     });
-  }
+  }*/
 
 }
