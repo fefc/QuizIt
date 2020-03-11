@@ -56,6 +56,7 @@ export class AppComponent {
   @ViewChild('content') nav;
 
   private authStateChangesSubscription: Subscription;
+  private profileChangesSubscription: Subscription;
 
   constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
     public menuCtrl: MenuController,
@@ -113,6 +114,9 @@ export class AppComponent {
             this.profilesProv.loadFromOnline().then(() => {
               if (this.profilesProv.profiles.length > 0) {
                 if (this.profilesProv.profiles[0].nickname.length > 2) {
+
+                  this.profileChangesSubscription = this.profilesProv.profileChanges().subscribe();
+
                   this.quizsProv.loadFromOnline().then(() => {
                     splashScreen.hide();
                   });
@@ -129,6 +133,11 @@ export class AppComponent {
               splashScreen.hide();
             });
           } else {
+            if (this.profileChangesSubscription) {
+              this.profileChangesSubscription.unsubscribe();
+            }
+
+
             this.openStartPage();
             splashScreen.hide();
           }

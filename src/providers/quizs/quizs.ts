@@ -195,8 +195,12 @@ export class QuizsProvider {
     return new Promise((resolve, reject) => {
       let changes = this.getSettingsPropertiesChanges(quiz, title, settings);
 
+      console.log('changing data', changes);
+
       if (changes) {
         firebase.firestore().collection('Q').doc(quiz.uuid).update(changes).then(() => {
+
+          console.log('updated data on firestore');
 
           quiz.title = title;
           quiz.settings = settings;

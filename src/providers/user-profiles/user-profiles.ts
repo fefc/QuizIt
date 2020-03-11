@@ -2,6 +2,7 @@ import * as firebase from "firebase/app";
 import 'firebase/firestore';
 
 import { Injectable } from '@angular/core';
+import { Observable } from "rxjs/Observable"
 
 import { AuthenticationProvider } from '../authentication/authentication';
 
@@ -114,6 +115,36 @@ export class UserProfilesProvider {
       } else {
         resolve();
       }
+    });
+  }
+
+  profileChanges() {
+    return new Observable<boolean>(observer => {
+      const unsubscribe = firebase.firestore().collection('U').doc(this.authProv.getUser().uid).onSnapshot((profileDoc) => {
+        //console.log(profileDoc.data());
+
+        let profileData = profileDoc.data();
+
+        var source = profileDoc.metadata.hasPendingWrites ? "Local" : "Server";
+        console.log(source, " data: ", profileData);
+
+        if (source === "Server") {
+          this.profiles[0].avatar = profileData.avatar;
+          this.profiles[0].nickname = profileData.nickname;
+        }
+
+        /*if (user) {
+          // User is signed in.
+          observer.next(true);
+        } else {
+          // No user is signed in.
+          observer.next(false);
+        }*/
+      });
+
+      return () => {
+        unsubscribe();
+      };
     });
   }
 }
