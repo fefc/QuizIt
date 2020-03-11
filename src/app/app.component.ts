@@ -112,14 +112,16 @@ export class AppComponent {
           if (loggedIn) {
             this.profilesProv.loadFromOnline().then(() => {
               if (this.profilesProv.profiles.length > 0) {
-                this.quizsProv.loadFromOnline().then(() => {
-                  //statusBar.styleDefault();
-                  this.openHomePage();
+                if (this.profilesProv.profiles[0].nickname.length > 2) {
+                  this.quizsProv.loadFromOnline().then(() => {
+                    splashScreen.hide();
+                  });
+                } else {
+                  this.openStartPage();
                   splashScreen.hide();
-                });
+                }
               } else {
                 this.openStartPage();
-                this.menuCtrl.enable(false, 'menu-one');
                 splashScreen.hide();
               }
             }).catch((error) => {
@@ -127,10 +129,12 @@ export class AppComponent {
               splashScreen.hide();
             });
           } else {
-            alert('You are not logged in');
+            this.openStartPage();
+            splashScreen.hide();
           }
         }, (error) => {
-          console.log(error);
+          this.openGeneralErrorPage(error);
+          splashScreen.hide();
         });
       }).catch((error) => {
         this.openGeneralErrorPage(error);
@@ -176,6 +180,7 @@ export class AppComponent {
 
   openStartPage() {
     this.menuCtrl.close('menu-one');
+    this.menuCtrl.enable(false, 'menu-one');
 
     if (this.nav.getActive().component !== StartPage) {
       this.nav.setRoot(StartPage);

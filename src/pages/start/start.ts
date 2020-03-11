@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { Platform, NavController, MenuController, ModalController, ViewController, LoadingController, AlertController, Slides } from 'ionic-angular';
+import { Platform, NavController, MenuController, ModalController, ViewController, LoadingController, AlertController, NavParams, Slides } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { TranslateService } from '@ngx-translate/core';
@@ -40,7 +40,8 @@ export class StartPage {
     private sanitizer:DomSanitizer,
     private profilesProv: UserProfilesProvider,
     private authProv: AuthenticationProvider,
-    private translate: TranslateService) {
+    private translate: TranslateService,
+    params: NavParams) {
     this.profile = {
       uuid: '',
       nickname: '',
@@ -49,6 +50,12 @@ export class StartPage {
 
     this.email = '';
     this.password = '';
+
+    if (params.data) {
+      if (params.data.slide === 2) {
+        this.gotToCreateProfile();
+      }
+    }
   }
 
   ngAfterViewInit() {
@@ -64,16 +71,7 @@ export class StartPage {
     this.slides.slideTo(1);
   }
 
-  gotToCreateProfile(profile: UserProfile) {
-    if (profile) {
-      this.profile = {
-        uuid: profile.uuid,
-        nickname: profile.nickname,
-        avatar: profile.avatar,
-        email: profile.email
-      }
-    }
-
+  gotToCreateProfile() {
     this.slides.slideTo(2);
   }
 
@@ -129,9 +127,15 @@ export class StartPage {
       loading.dismiss();
 
       this.profilesProv.loadFromOnline().then(() => {
-        let profile: UserProfile = JSON.parse(JSON.stringify(this.profilesProv.profiles[0]));
+        if (this.profilesProv.profiles[0]) {
+          this.profile = JSON.parse(JSON.stringify(this.profilesProv.profiles[0]));
 
-        this.gotToCreateProfile(profile);
+          if (this.profile.nickname.length > 2) {
+            this.openHomePage();
+          } else {
+            this.gotToCreateProfile();
+          }
+        }
       }).catch((error) => {
         alert('Something went wrong');
       });
@@ -162,37 +166,39 @@ export class StartPage {
     return this.email.length > 3 && this.password.length > 3;
   }
 
+  openHomePage() {
+    this.navCtrl.setRoot(HomePage);
+    this.menuCtrl.enable(true, 'menu-one');
+  }
+
   openSignUpPage() {
     let modal = this.modalCtrl.create(SignUpPage);
     modal.present();
 
     modal.onDidDismiss(data => {
       if (data) {
-        let profile: UserProfile;
 
-        profile = {
+        this.profile = {
           uuid: data.user.id,
           nickname: '',
-          avatar: '',
-          email: data.user.email
+          avatar: ''
         }
 
-        this.gotToCreateProfile(profile);
+        this.gotToCreateProfile();
       }
     });
   }
 
-  createProfile(profile: UserProfile) {
+  createProfile() {
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('CREATING')
     });
 
     loading.present();
 
-    this.profilesProv.saveToOnline(this.profile).then(() => {
+    this.profilesProv.createOnline(this.profile).then(() => {
       loading.dismiss();
-      this.navCtrl.setRoot(HomePage);
-      this.menuCtrl.enable(true, 'menu-one');
+      this.openHomePage();
     }).catch(() => {
       loading.dismiss();
       alert('Unable to save User profile.');

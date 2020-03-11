@@ -40,8 +40,7 @@ export class UserProfilePage {
       this.profile = {
         uuid: '',
         nickname: '',
-        avatar : '',
-        email: ''
+        avatar : ''
       }
     } else {
       this.profile = JSON.parse(JSON.stringify(params.data.profile));
@@ -79,7 +78,7 @@ export class UserProfilePage {
 
             loading.present();
 
-            this.authProv.updatePassword(this.profile.email, data.password, data.newPassword).then(() => {
+            this.authProv.updatePassword(data.password, data.newPassword).then(() => {
               loading.dismiss();
               this.showOnlineAlert('UPDATE_PASSWORD', 'UPDATE_PASSWORD_CONFIRMATION');
             }).catch((error) => {
@@ -135,49 +134,6 @@ export class UserProfilePage {
     alert.present();
   }
 
-  firstTimeLogin() {
-
-  }
-
-  login() {
-    let alert = this.alertCtrl.create({
-      title: this.translate.instant('LOG_IN'),
-      enableBackdropDismiss: false,
-      inputs: [
-        {
-          name: 'password',
-          placeholder: this.translate.instant('PASSWORD'),
-          type: 'password'
-        }
-      ],
-      buttons: [
-        {
-          text: this.translate.instant('CANCEL'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('OK'),
-          handler: data => {
-            let loading = this.loadingCtrl.create({
-              content: this.translate.instant('LOGGING_IN')
-            });
-
-            loading.present();
-
-            this.authProv.login(this.profile.email, data.password).then(() => {
-              loading.dismiss();
-            }).catch((error) => {
-              loading.dismiss();
-              this.showOnlineAlert('ERROR_LOGGING_IN', error.code);
-            });
-          }
-        }
-      ]
-    });
-
-    alert.present();
-  }
-
   logout() {
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('LOGGING_OUT')
@@ -187,6 +143,7 @@ export class UserProfilePage {
 
     this.authProv.logout().then(() => {
       loading.dismiss();
+      this.dismiss();
     }).catch((error) => {
       loading.dismiss();
       this.showOnlineAlert('ERROR_SIGNING_UP', error.code);
@@ -207,7 +164,7 @@ export class UserProfilePage {
 
         this.profilesProv.saveToOnline(this.profile).then(() => {
           loading.dismiss();
-          this.save();
+          this.dismiss();
         }).catch((error) => {
           loading.dismiss();
           alert('Unable to save User profile online. ' + error.code);
@@ -248,9 +205,8 @@ export class UserProfilePage {
 
             loading.present();
 
-            this.authProv.deleteAccount(this.profile.email, data.password).then(() => {
+            this.authProv.deleteAccount(data.email, data.password).then(() => {
               //Has been deleted online, need to update local data, so save()
-              this.profile.email = undefined;
               this.save();
               loading.dismiss();
               this.showOnlineAlert('DELETE_ACCOUNT', 'DELETE_ACCOUNT_CONFIRMATION');
