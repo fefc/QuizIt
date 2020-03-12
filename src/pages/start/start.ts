@@ -127,6 +127,7 @@ export class StartPage {
       loading.dismiss();
 
       this.profilesProv.loadFromOnline().then(() => {
+
         if (this.profilesProv.profile.uuid) {
           this.profile = JSON.parse(JSON.stringify(this.profilesProv.profile));
 

@@ -112,6 +112,7 @@ export class AppComponent {
         this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
           if (loggedIn) {
             this.profilesProv.loadFromOnline().then(() => {
+
               if (this.profilesProv.profile.uuid) {
                 if (this.profilesProv.profile.nickname.length > 2) {
 
