@@ -1,8 +1,10 @@
 import * as firebase from "firebase/app";
 import 'firebase/firestore';
+import 'firebase/storage';
 
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable"
+import { File } from '@ionic-native/file';
 
 import { AuthenticationProvider } from '../authentication/authentication';
 
@@ -10,20 +12,23 @@ import { UserProfile } from '../../models/user-profile';
 
 @Injectable()
 export class UserProfilesProvider {
-  public profiles: Array<UserProfile>;
+  public profile: UserProfile;
 
-  constructor(private authProv: AuthenticationProvider) {
-    this.profiles = new Array<UserProfile>();
+  constructor(private file: File, private authProv: AuthenticationProvider) {
+    this.profile = {
+      uuid: '',
+      nickname: '',
+      avatar: ''
+    };
   }
 
   getPropertiesChanges(profile: UserProfile) {
-    let savedUserProfile: UserProfile = this.profiles.find((p) => p.uuid === profile.uuid);
     let changes: any = {};
 
-    if (savedUserProfile) {
+    if (this.profile.uuid === profile.uuid) {
       //An update on a category
-      if (profile.nickname !== savedUserProfile.nickname) changes.nickname = profile.nickname;
-      if (profile.avatar !== savedUserProfile.avatar) changes.avatar = profile.avatar;
+      if (profile.nickname !== this.profile.nickname) changes.nickname = profile.nickname;
+      if (profile.avatar !== this.profile.avatar) changes.avatar = profile.avatar;
     } else {
       //A creation of a category
       changes.nickname = profile.nickname;
@@ -40,13 +45,7 @@ export class UserProfilesProvider {
 
       if (changes) {
         firebase.firestore().collection('U').doc(profile.uuid).set(changes).then(() => {
-
-          if(this.profiles.length > 0) {
-            this.profiles[0] = profile;
-          } else {
-            this.profiles.push(profile);
-          }
-
+          this.profile = profile;
           resolve();
         }).catch((error) => {
           console.log(error);
@@ -78,16 +77,11 @@ export class UserProfilesProvider {
          };
         }
 
-        if(this.profiles.length > 0) {
-          this.profiles[0] = profile;
-        } else {
-          this.profiles.push(profile);
-        }
-
+        this.profile = profile;
         resolve();
       }).catch((error) => {
         console.log(error);
-        reject('Could not get quizes');
+        reject('Could not get profile');
       });
     });
   }
@@ -96,17 +90,9 @@ export class UserProfilesProvider {
     return new Promise((resolve, reject) => {
       let changes = this.getPropertiesChanges(profile);
 
-      console.log(changes);
-
       if (changes) {
         firebase.firestore().collection('U').doc(this.authProv.getUser().uid).update(changes).then(() => {
-
-          if(this.profiles.length > 0) {
-            this.profiles[0] = profile;
-          } else {
-            this.profiles.push(profile);
-          }
-
+          this.profile = profile;
           resolve();
         }).catch((error) => {
           console.log(error);
@@ -121,16 +107,14 @@ export class UserProfilesProvider {
   profileChanges() {
     return new Observable<boolean>(observer => {
       const unsubscribe = firebase.firestore().collection('U').doc(this.authProv.getUser().uid).onSnapshot((profileDoc) => {
-        //console.log(profileDoc.data());
-
         let profileData = profileDoc.data();
 
         var source = profileDoc.metadata.hasPendingWrites ? "Local" : "Server";
         console.log(source, " data: ", profileData);
 
         if (source === "Server") {
-          this.profiles[0].avatar = profileData.avatar;
-          this.profiles[0].nickname = profileData.nickname;
+          this.profile.avatar = profileData.avatar;
+          this.profile.nickname = profileData.nickname;
         }
 
         /*if (user) {
