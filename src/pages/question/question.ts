@@ -1,3 +1,6 @@
+import * as firebase from "firebase/app";
+import 'firebase/storage';
+
 import { Component, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, ModalController, AlertController, ToastController, NavParams, Slides, FabContainer, reorderArray } from 'ionic-angular';
@@ -83,7 +86,7 @@ export class QuestionPage {
 
       if (this.question.type == QuestionType.rightPicture) {
         for (let i: number = 0; i < this.question.answers.length; i++) {
-          this.renderPicture(this.file.dataDirectory, this.attachementDir + this.question.answers[i], i);
+          this.renderPicture(false, this.attachementDir + this.question.answers[i], i);
         }
       }
 
@@ -280,7 +283,7 @@ export class QuestionPage {
 
         this.question.answers.push(decodedURI);
         this.pictures.push(undefined);
-        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), this.pictures.length - 1);
+        this.renderPicture(true, decodedURI.replace(decodedCacheDirectoryURI, ''), this.pictures.length - 1);
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -294,7 +297,7 @@ export class QuestionPage {
         let decodedURI: string = decodeURIComponent(results[0]);
 
         this.question.answers[val] = decodedURI;
-        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), val);
+        this.renderPicture(true, decodedURI.replace(decodedCacheDirectoryURI, ''), val);
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -387,12 +390,20 @@ export class QuestionPage {
     this.viewCtrl.dismiss();
   }
 
-  renderPicture(directory: string, fileName: string, position: number) {
-    this.file.readAsDataURL(directory, fileName).then((picture) => {
-      this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
-      this.slides.update();
-    }).catch((error) => {
-      console.log("Something went wrong when reading pictures.", error);
-    });
+  renderPicture(local: boolean, fileName: string, position: number) {
+    if (local) {
+      this.file.readAsDataURL(this.file.cacheDirectory, fileName).then((picture) => {
+        this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
+        this.slides.update();
+      }).catch((error) => {
+        console.log("Something went wrong when reading pictures.", error);
+      });
+    } else {
+      firebase.storage().ref().child(fileName).getDownloadURL().then((url) => {
+        this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
+      }).catch((error) => {
+        console.log("Something went wrong when reading pictures from firebase.", error);
+      });
+    }
   }
 }

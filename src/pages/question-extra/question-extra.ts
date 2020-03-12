@@ -1,3 +1,6 @@
+import * as firebase from "firebase/app";
+import 'firebase/storage';
+
 import { Component } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, NavParams } from 'ionic-angular';
@@ -46,10 +49,10 @@ export class QuestionExtraPage {
       if (this.extras.length > 0) {
         if (this.extras[0].startsWith(this.file.cacheDirectory)) {
           //It might be an extra that has not already been saved to dataDirectory
-          this.renderExtra(this.file.cacheDirectory, this.extras[0].replace(this.file.cacheDirectory, ''));
+          this.renderExtra(true, this.extras[0].replace(this.file.cacheDirectory, ''));
         } else {
           //Or it might be an extra that has already been saved to dataDirectory
-          this.renderExtra(this.file.dataDirectory, this.attachementDir + this.extras[0]);
+          this.renderExtra(false, this.attachementDir + this.extras[0]);
         }
       } else {
         this.currentExtraType = ExtraType.none;
@@ -91,7 +94,7 @@ export class QuestionExtraPage {
         this.extras = [];
         this.extras.push(decodedURI);
 
-        this.renderExtra(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''));
+        this.renderExtra(true, decodedURI.replace(decodedCacheDirectoryURI, ''));
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -113,17 +116,31 @@ export class QuestionExtraPage {
     this.viewCtrl.dismiss();
   }
 
-  renderExtra(directory: string, fileName: string) {
-    this.file.readAsDataURL(directory, fileName).then((picture) => {
-      if (['.mp4', '.webm', '.ogg'].some(extension => fileName.endsWith(extension))) {
-        this.currentExtraType = ExtraType.video;
-        this.renderedExtra = this.sanitizer.bypassSecurityTrustUrl(picture);
-      } else {
-        this.currentExtraType = ExtraType.picture;
-        this.renderedExtra = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
-      }
-    }).catch((error) => {
-      console.log("Something went wrong when reading pictures.", error);
-    });
+  renderExtra(local: boolean, fileName: string) {
+    if (local) {
+      this.file.readAsDataURL(this.file.cacheDirectory, fileName).then((picture) => {
+        if (['.mp4', '.webm', '.ogg'].some(extension => fileName.endsWith(extension))) {
+          this.currentExtraType = ExtraType.video;
+          this.renderedExtra = this.sanitizer.bypassSecurityTrustUrl(picture);
+        } else {
+          this.currentExtraType = ExtraType.picture;
+          this.renderedExtra = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
+        }
+      }).catch((error) => {
+        console.log("Something went wrong when reading pictures.", error);
+      });
+    } else {
+      firebase.storage().ref().child(fileName).getDownloadURL().then((url) => {
+        if (['.mp4', '.webm', '.ogg'].some(extension => fileName.endsWith(extension))) {
+          this.currentExtraType = ExtraType.video;
+          this.renderedExtra = this.sanitizer.bypassSecurityTrustUrl(url);
+        } else {
+          this.currentExtraType = ExtraType.picture;
+          this.renderedExtra = this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
+        }
+      }).catch((error) => {
+        console.log("Something went wrong when reading pictures from firebase.", error);
+      });
+    }
   }
 }

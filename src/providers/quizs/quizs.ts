@@ -589,68 +589,6 @@ export class QuizsProvider {
     return sortedCategorys;
   }
 
-  /*saveToStorage(quiz: Quiz) {
-    return new Promise(async (resolve, reject) => {
-      let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
-
-      if (quizIndex === -1) {
-        this.quizs.push(quiz);
-      }
-
-      quizIndex = this.quizs.findIndex((q) => q.uuid === quiz.uuid);
-
-      //Check attachements
-      //var promises = [];  //DO NOT TRY to use Promise.all to resolve multiples promises, file.moveFile does not supports // executions
-      try {
-        var attachementResults = [];
-
-        //First check question answers (pictures)
-        for (let question of quiz.questions.filter((q) => (q.type === QuestionType.rightPicture && q.answers.findIndex((a) => a.startsWith("file:///") || a.startsWith("filesystem:")) !== -1))) {
-          attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
-        }
-
-        //// TODO: Maybe do a cleaner code for that?
-
-        //Second check question extras
-        for (let question of quiz.questions.filter((q) => (q.extras.findIndex((e) => e.startsWith("file:///") || e.startsWith("filesystem:")) !== -1))) {
-          attachementResults.push(await this.copyAttachementsToDataDirectory(quiz.uuid, question.uuid, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
-        }
-
-        //Update answers so that they contain only fileName and not fullPath
-        let attachementIndex: number;
-
-        if (attachementResults) {
-          for (let result of attachementResults) {
-            let questionIndex = quiz.questions.findIndex((q) => q.uuid === result.questionUuid);
-
-            if (questionIndex !== -1) {
-              if (result.type === AttachementType.answers) {
-                //set correct answers
-                for (let fileName of result.fileNames) {
-                  attachementIndex = quiz.questions[questionIndex].answers.findIndex((a) => a.endsWith(fileName));
-
-                  quiz.questions[questionIndex].answers[attachementIndex] = fileName;
-                }
-              } else if (result.type === AttachementType.extras) {
-                //set correct extras
-                for (let fileName of result.fileNames) {
-                  attachementIndex = quiz.questions[questionIndex].extras.findIndex((e) => e.endsWith(fileName));
-
-                  quiz.questions[questionIndex].extras[attachementIndex] = fileName;
-                }
-              }
-
-            }
-          }
-        }
-        resolve();
-      } catch(error) {
-        console.log(error);
-        reject('Could not save attachements.');
-      };
-    });
-  }*/
-
   deleteSelectedFromStorage() {
     return new Promise((resolve, reject) => {
       reject('Not implemented yet');
