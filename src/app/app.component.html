@@ -1,12 +1,12 @@
 <ion-menu [content]="content" id="menu-one">
-  <ion-header *ngIf="profilesProv.profiles.length > 0">
+  <ion-header>
     <ion-item no-lines class="user-info" tappable (tap)="openUserProfilePage()">
       <ion-icon name="create"></ion-icon>
       <ion-avatar>
-        <img class="no-img" *ngIf="!profilesProv.profiles[0].avatar" src="assets/svgs/icon.svg">
-        <img *ngIf="profilesProv.profiles[0].avatar" [src]="renderPicture(profilesProv.profiles[0].avatar)">
+        <img class="no-img" *ngIf="!profilesProv.profile.avatar" src="assets/svgs/icon.svg">
+        <img *ngIf="profilesProv.profile.avatar" [src]="renderPicture(profilesProv.profile.avatar)">
       </ion-avatar>
-        <div class="card-title">{{profilesProv.profiles[0].nickname}}</div>
+        <div class="card-title">{{profilesProv.profile.nickname}}</div>
     </ion-item>
   </ion-header>
   <ion-content>

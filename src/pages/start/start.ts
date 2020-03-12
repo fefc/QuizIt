@@ -127,8 +127,8 @@ export class StartPage {
       loading.dismiss();
 
       this.profilesProv.loadFromOnline().then(() => {
-        if (this.profilesProv.profiles[0]) {
-          this.profile = JSON.parse(JSON.stringify(this.profilesProv.profiles[0]));
+        if (this.profilesProv.profile.uuid) {
+          this.profile = JSON.parse(JSON.stringify(this.profilesProv.profile));
 
           if (this.profile.nickname.length > 2) {
             this.openHomePage();

@@ -112,8 +112,8 @@ export class AppComponent {
         this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
           if (loggedIn) {
             this.profilesProv.loadFromOnline().then(() => {
-              if (this.profilesProv.profiles.length > 0) {
-                if (this.profilesProv.profiles[0].nickname.length > 2) {
+              if (this.profilesProv.profile.uuid) {
+                if (this.profilesProv.profile.nickname.length > 2) {
 
                   this.profileChangesSubscription = this.profilesProv.profileChanges().subscribe();
 
@@ -159,7 +159,7 @@ export class AppComponent {
   openUserProfilePage() {
     this.menuCtrl.close('menu-one');
 
-    let modal = this.modalCtrl.create(UserProfilePage, {profile: this.profilesProv.profiles[0]});
+    let modal = this.modalCtrl.create(UserProfilePage, {profile: this.profilesProv.profile});
     modal.present();
     modal.onDidDismiss((data) => {
       if (data) {
@@ -240,9 +240,9 @@ export class AppComponent {
 
     loading.present();
 
-    this.resizeAvatar(this.profilesProv.profiles[0].avatar).then((resizedAvatar) => {
+    this.resizeAvatar(this.profilesProv.profile.avatar).then((resizedAvatar) => {
 
-      this.gameControllerProv.joinGame(gameID, alternativeNickname ? alternativeNickname : this.profilesProv.profiles[0].nickname, resizedAvatar).then(() => {
+      this.gameControllerProv.joinGame(gameID, alternativeNickname ? alternativeNickname : this.profilesProv.profile.nickname, resizedAvatar).then(() => {
         loading.dismiss();
         this.nav.push(GameControllerPage);
       }).catch((error) => {
