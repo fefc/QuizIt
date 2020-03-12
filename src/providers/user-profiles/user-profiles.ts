@@ -131,4 +131,24 @@ export class UserProfilesProvider {
       };
     });
   }
+
+  uploadFileOnline(profileUuid: string, fullLocalPath: string) {
+    return new Promise((resolve, reject) => {
+      var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
+      var sourceDir = fullLocalPath.substring(0, indexOfSlash);
+      var fileName = fullLocalPath.substring(indexOfSlash);
+
+      this.file.readAsArrayBuffer(sourceDir, fileName).then((arrayBuffer) => {
+        var fileRef = firebase.storage().ref().child(profileUuid + '/' + fileName);
+
+        fileRef.put(arrayBuffer).then(() => {
+          resolve(fileName);
+        }).catch((error) => {
+          reject(error);
+        });
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  }
 }
