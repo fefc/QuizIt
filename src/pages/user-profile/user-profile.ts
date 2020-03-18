@@ -44,7 +44,7 @@ export class UserProfilePage {
       this.profile = JSON.parse(JSON.stringify(params.data.profile));
 
       if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
-        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl(this.profile.avatar);
+        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl((<any> window).Ionic.WebView.convertFileSrc(this.profile.avatar));
       }
     }
   }
@@ -260,7 +260,7 @@ export class UserProfilePage {
     this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
       if (results.length === 1) {
         this.profile.avatar = decodeURIComponent(results[0]);
-        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl(this.profile.avatar);
+        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl((<any> window).Ionic.WebView.convertFileSrc(this.profile.avatar));
       }
     }).catch(() => {
       alert('Could not get images.');

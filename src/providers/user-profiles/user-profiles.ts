@@ -104,7 +104,8 @@ export class UserProfilesProvider {
 
           if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
             if (pendingUpload) {
-              this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl(this.profile.avatar);
+              this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl((<any> window).Ionic.WebView.convertFileSrc(this.profile.avatar));
+              console.log('normalized ' ,this.profile.avatarUrl);
             } else {
               this.profile.avatarUrl = undefined;
             }
