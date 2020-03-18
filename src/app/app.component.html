@@ -3,8 +3,7 @@
     <ion-item no-lines class="user-info" tappable (tap)="openUserProfilePage()">
       <ion-icon name="create"></ion-icon>
       <ion-avatar>
-        <img class="no-img" *ngIf="!profilesProv.profile.avatar" src="assets/svgs/icon.svg">
-        <img *ngIf="profilesProv.profile.avatar" [src]="renderPicture(profilesProv.profile.avatar)">
+        <img [class.no-img]="!profilesProv.profile.avatarUrl" [src]="profilesProv.profile.avatarUrl || 'assets/svgs/icon.svg'">
       </ion-avatar>
         <div class="card-title">{{profilesProv.profile.nickname}}</div>
     </ion-item>
@@ -28,6 +27,10 @@
           <ion-icon name="settings" item-start></ion-icon>
           Settings
         </ion-item>-->
+        <ion-item>
+          <ion-icon name="{{connProv.connected === true ? 'planet' : 'plane' }}" item-start></ion-icon>
+          {{ connProv.connected === true ? ('ONLINE' | translate) : ('OFFLINE' | translate) }}
+        </ion-item>
         <ion-item tappable (tap)="openAboutPage()">
           <ion-icon name="information-circle" item-start></ion-icon>
           {{ 'ABOUT' | translate }}

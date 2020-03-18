@@ -9,12 +9,14 @@ import { TranslateService } from '@ngx-translate/core';
 import { Globalization } from '@ionic-native/globalization';
 import { Subscription } from "rxjs/Subscription";
 import * as firebase from "firebase/app";
+import 'firebase/storage';
 
 import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
 import { GameProvider } from '../providers/game/game';
 import { GameControllerProvider } from '../providers/game-controller/game-controller';
 import { AuthenticationProvider } from '../providers/authentication/authentication';
+import { ConnectionProvider } from '../providers/connection/connection';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
@@ -50,13 +52,13 @@ const FIREBASE_CONFIG = {
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  providers: [UserProfilesProvider, QuizsProvider, GameProvider, GameControllerProvider, AuthenticationProvider]
+  providers: [UserProfilesProvider, QuizsProvider, GameProvider, GameControllerProvider, AuthenticationProvider, ConnectionProvider]
 })
 export class AppComponent {
   @ViewChild('content') nav;
 
   private authStateChangesSubscription: Subscription;
-  private profileChangesSubscription: Subscription;
+  private connectionStateChangesSubscription: Subscription;
 
   constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
     public menuCtrl: MenuController,
@@ -70,6 +72,7 @@ export class AppComponent {
     private quizsProv: QuizsProvider,
     private gameControllerProv: GameControllerProvider,
     private authProv: AuthenticationProvider,
+    private connProv: ConnectionProvider,
     private translate: TranslateService,
     private globalization: Globalization) {
 
@@ -107,37 +110,79 @@ export class AppComponent {
 
       //Initialize Firebase
       firebase.initializeApp(FIREBASE_CONFIG);
+      firebase.storage().setMaxOperationRetryTime(1);
+      firebase.storage().setMaxUploadRetryTime(1);
 
       firebase.firestore().enablePersistence().then(() => {
+        firebase.firestore().disableNetwork();
+
+        let firstTime: boolean = true;
+
         this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
           if (loggedIn) {
+            this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
+              console.log('Connection state changed', connected);
+                this.profilesProv.disconnectOnline();
+                this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
+                  splashScreen.hide();
+                }).catch((error) => {
+                  //This should go to the create profile page
+                  this.openStartPage();
+                  splashScreen.hide();
+                });
+            }, (error) => {
+              console.log(error);
+            });
+
+
+            /*this.connProv.connectOnline().then(() => {
+              console.log('connected online')
+              this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
+                console.log('user p');
+                splashScreen.hide();
+              }).catch((error) => {
+                //This should go to the create profile page
+                this.openStartPage();
+                splashScreen.hide();
+              });
+            }).catch((error) => {
+              this.openGeneralErrorPage(error);
+              splashScreen.hide();
+            });*/
+
+
+            /*this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
+              if (connected) {
+                this.profileChangesSubscription = this.profilesProv.profileChanges().subscribe();
+              } else {
+                if (this.profileChangesSubscription) {
+                  this.profileChangesSubscription.unsubscribe();
+                }
+              }
+            })
+
             this.profilesProv.loadFromOnline().then(() => {
+              if (this.profilesProv.profile.uuid && this.profilesProv.profile.nickname.length > 2) {
+                this.profilesProv.subscribeForConnectionStateChanges();
 
-              if (this.profilesProv.profile.uuid) {
-                if (this.profilesProv.profile.nickname.length > 2) {
+                this.connProv.connectionStateChangesSubscription.unsubscribe();
 
-                  this.profileChangesSubscription = this.profilesProv.profileChanges().subscribe();
 
                   this.quizsProv.loadFromOnline().then(() => {
                     splashScreen.hide();
                   });
-                } else {
-                  this.openStartPage();
-                  splashScreen.hide();
-                }
               } else {
+                //This should go to the create profile page
                 this.openStartPage();
                 splashScreen.hide();
               }
             }).catch((error) => {
               this.openGeneralErrorPage(error);
               splashScreen.hide();
-            });
+            });*/
           } else {
-            if (this.profileChangesSubscription) {
-              this.profileChangesSubscription.unsubscribe();
-            }
-
+            if (this.connectionStateChangesSubscription) this.connectionStateChangesSubscription.unsubscribe();
+            this.profilesProv.disconnectOnline();
 
             this.openStartPage();
             splashScreen.hide();
@@ -151,10 +196,6 @@ export class AppComponent {
         splashScreen.hide();
       });
     });
-  }
-
-  renderPicture(base64: string) {
-    return this.sanitizer.bypassSecurityTrustUrl(base64);
   }
 
   openUserProfilePage() {
@@ -235,6 +276,7 @@ export class AppComponent {
   }
 
   joinGame(gameID: string, alternativeNickname?: string) {
+    //// TODO: Not going to work with new avatar
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('JOINING')
     });

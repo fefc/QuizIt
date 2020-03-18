@@ -8,12 +8,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { UserProfile } from '../../models/user-profile';
 
 import { AuthenticationProvider } from '../../providers/authentication/authentication';
-import { UserProfilesProvider } from '../../providers/user-profiles/user-profiles';
 
 import { SignUpPage } from '../../pages/sign-up/sign-up';
 
-const MAX_PICTURE_WIDTH: number = 64;
-const MAX_PICTURE_HEIGHT: number = 64;
+const MAX_PICTURE_WIDTH: number = 512;
+const MAX_PICTURE_HEIGHT: number = 512;
 
 @Component({
   selector: 'page-user-profile',
@@ -32,7 +31,6 @@ export class UserProfilePage {
               private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
               private authProv: AuthenticationProvider,
-              private profilesProv: UserProfilesProvider,
               private translate: TranslateService,
               params: NavParams) {
     //lets make deep copies, so that we don't modfiy anything before user confirmation
@@ -44,6 +42,10 @@ export class UserProfilePage {
       }
     } else {
       this.profile = JSON.parse(JSON.stringify(params.data.profile));
+
+      if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
+        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl(this.profile.avatar);
+      }
     }
   }
 
@@ -147,30 +149,6 @@ export class UserProfilePage {
     }).catch((error) => {
       loading.dismiss();
       this.showOnlineAlert('ERROR_SIGNING_UP', error.code);
-    });
-  }
-
-  openSignUpPage() {
-    let modal = this.modalCtrl.create(SignUpPage);
-    modal.present();
-
-    modal.onDidDismiss(data => {
-      if (data) {
-        let loading = this.loadingCtrl.create({
-          content: this.translate.instant('CREATING')
-        });
-
-        loading.present();
-
-        this.profilesProv.saveToOnline(this.profile).then(() => {
-          loading.dismiss();
-          this.dismiss();
-        }).catch((error) => {
-          loading.dismiss();
-          alert('Unable to save User profile online. ' + error.code);
-          this.dismiss();
-        });
-      }
     });
   }
 
@@ -279,16 +257,13 @@ export class UserProfilePage {
   }
 
   openMobileImagePicker() {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 80, outputType: 1}).then((results) => {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
       if (results.length === 1) {
-        this.profile.avatar = 'data:image/jpeg;base64,' + results[0];
+        this.profile.avatar = decodeURIComponent(results[0]);
+        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl(this.profile.avatar);
       }
     }).catch(() => {
       alert('Could not get images.');
     });
-  }
-
-  renderPicture(base64: string) {
-    return this.sanitizer.bypassSecurityTrustUrl(base64);
   }
 }

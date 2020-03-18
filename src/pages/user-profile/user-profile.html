@@ -16,8 +16,7 @@
     <ion-item-group>
       <ion-item no-lines>
         <ion-avatar>
-          <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
-          <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
+          <img [class.no-img]="!profile.avatarUrl" [src]="profile.avatarUrl || 'assets/svgs/icon.svg'">
         </ion-avatar>
         <ion-fab class="avatar-fab" (click)="openImagePicker()">
         <button ion-fab>

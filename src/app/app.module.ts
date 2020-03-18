@@ -19,6 +19,7 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { Globalization } from '@ionic-native/globalization';
+import { NativeStorage } from '@ionic-native/native-storage';
 
 import { AppComponent } from './app.component';
 
@@ -27,6 +28,8 @@ import { QuizsProvider } from '../providers/quizs/quizs';
 import { GameProvider } from '../providers/game/game';
 import { GameControllerProvider } from '../providers/game-controller/game-controller';
 import { AuthenticationProvider } from '../providers/authentication/authentication';
+import { ConnectionProvider } from '../providers/connection/connection';
+
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 import { SignUpPage } from '../pages/sign-up/sign-up';
@@ -130,7 +133,9 @@ export function createTranslateLoader(http: HttpClient) {
     GameProvider,
     GameControllerProvider,
     AuthenticationProvider,
-    Globalization
+    ConnectionProvider,
+    Globalization,
+    NativeStorage
   ]
 })
 export class AppModule {}

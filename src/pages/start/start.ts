@@ -126,7 +126,8 @@ export class StartPage {
     this.authProv.login(this.email, this.password).then((user) => {
       loading.dismiss();
 
-      this.profilesProv.loadFromOnline().then(() => {
+      this.gotToCreateProfile();
+      /*this.profilesProv.loadFromOnline().then(() => {
 
         if (this.profilesProv.profile.uuid) {
           this.profile = JSON.parse(JSON.stringify(this.profilesProv.profile));
@@ -139,7 +140,7 @@ export class StartPage {
         }
       }).catch((error) => {
         alert('Something went wrong');
-      });
+      });*/
 
     }).catch((error) => {
       loading.dismiss();
