@@ -118,6 +118,7 @@
     <plugin name="cordova-plugin-telerik-imagepicker" spec="../cordova-plugins/ImagePicker" />
     <plugin name="com.jjdltc.cordova.plugin.zip" spec="../cordova-plugins/jjdltc-cordova-plugin-zip" />
     <plugin name="cordova-plugin-globalization" spec="1.11.0" />
+    <plugin name="cordova-plugin-network-information" spec="2.0.2" />
     <engine name="browser" spec="5.0.4" />
     <engine name="android" spec="8.0.0" />
 </widget>

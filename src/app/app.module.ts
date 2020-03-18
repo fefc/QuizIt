@@ -19,7 +19,7 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { Globalization } from '@ionic-native/globalization';
-import { NativeStorage } from '@ionic-native/native-storage';
+import { Network } from '@ionic-native/network';
 
 import { AppComponent } from './app.component';
 
@@ -135,7 +135,7 @@ export function createTranslateLoader(http: HttpClient) {
     AuthenticationProvider,
     ConnectionProvider,
     Globalization,
-    NativeStorage
+    Network
   ]
 })
 export class AppModule {}
