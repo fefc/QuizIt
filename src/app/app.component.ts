@@ -114,82 +114,82 @@ export class AppComponent {
       firebase.storage().setMaxUploadRetryTime(1);
 
       firebase.firestore().enablePersistence().then(() => {
-        firebase.firestore().disableNetwork();
-
         let firstTime: boolean = true;
 
-        this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
-          if (loggedIn) {
-            this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
-              console.log('Connection state changed', connected);
-                this.profilesProv.disconnectOnline();
+        this.connProv.init().then(() => {
+          this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
+            if (loggedIn) {
+              this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
+                console.log('Connection state changed', connected);
+                  this.profilesProv.disconnectOnline();
+                  this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
+                    splashScreen.hide();  //This should only happen once please!
+                  }).catch((error) => {
+                    //This should go to the create profile page
+                    this.openStartPage();
+                    splashScreen.hide();
+                  });
+              }, (error) => {
+                console.log(error);
+              });
+
+
+              /*this.connProv.connectOnline().then(() => {
+                console.log('connected online')
                 this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
+                  console.log('user p');
                   splashScreen.hide();
                 }).catch((error) => {
                   //This should go to the create profile page
                   this.openStartPage();
                   splashScreen.hide();
                 });
-            }, (error) => {
-              console.log(error);
-            });
-
-
-            /*this.connProv.connectOnline().then(() => {
-              console.log('connected online')
-              this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
-                console.log('user p');
-                splashScreen.hide();
               }).catch((error) => {
-                //This should go to the create profile page
-                this.openStartPage();
+                this.openGeneralErrorPage(error);
                 splashScreen.hide();
-              });
-            }).catch((error) => {
-              this.openGeneralErrorPage(error);
-              splashScreen.hide();
-            });*/
+              });*/
 
 
-            /*this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
-              if (connected) {
-                this.profileChangesSubscription = this.profilesProv.profileChanges().subscribe();
-              } else {
-                if (this.profileChangesSubscription) {
-                  this.profileChangesSubscription.unsubscribe();
+              /*this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
+                if (connected) {
+                  this.profileChangesSubscription = this.profilesProv.profileChanges().subscribe();
+                } else {
+                  if (this.profileChangesSubscription) {
+                    this.profileChangesSubscription.unsubscribe();
+                  }
                 }
-              }
-            })
+              })
 
-            this.profilesProv.loadFromOnline().then(() => {
-              if (this.profilesProv.profile.uuid && this.profilesProv.profile.nickname.length > 2) {
-                this.profilesProv.subscribeForConnectionStateChanges();
+              this.profilesProv.loadFromOnline().then(() => {
+                if (this.profilesProv.profile.uuid && this.profilesProv.profile.nickname.length > 2) {
+                  this.profilesProv.subscribeForConnectionStateChanges();
 
-                this.connProv.connectionStateChangesSubscription.unsubscribe();
+                  this.connProv.connectionStateChangesSubscription.unsubscribe();
 
 
-                  this.quizsProv.loadFromOnline().then(() => {
-                    splashScreen.hide();
-                  });
-              } else {
-                //This should go to the create profile page
-                this.openStartPage();
+                    this.quizsProv.loadFromOnline().then(() => {
+                      splashScreen.hide();
+                    });
+                } else {
+                  //This should go to the create profile page
+                  this.openStartPage();
+                  splashScreen.hide();
+                }
+              }).catch((error) => {
+                this.openGeneralErrorPage(error);
                 splashScreen.hide();
-              }
-            }).catch((error) => {
-              this.openGeneralErrorPage(error);
-              splashScreen.hide();
-            });*/
-          } else {
-            if (this.connectionStateChangesSubscription) this.connectionStateChangesSubscription.unsubscribe();
-            this.profilesProv.disconnectOnline();
+              });*/
+            } else {
+              if (this.connectionStateChangesSubscription) this.connectionStateChangesSubscription.unsubscribe();
+              this.profilesProv.disconnectOnline();
 
-            this.openStartPage();
+              this.openStartPage();
+              splashScreen.hide();
+            }
+          }, (error) => {
+            this.openGeneralErrorPage(error);
             splashScreen.hide();
-          }
-        }, (error) => {
-          this.openGeneralErrorPage(error);
-          splashScreen.hide();
+          });
         });
       }).catch((error) => {
         this.openGeneralErrorPage(error);

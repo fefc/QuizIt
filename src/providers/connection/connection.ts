@@ -8,49 +8,48 @@ import { Observable } from "rxjs/Observable"
 import { Subscription } from "rxjs/Subscription";
 
 import { File } from '@ionic-native/file';
+import { Network } from '@ionic-native/network';
 
 @Injectable()
 export class ConnectionProvider {
   public connected: boolean;
 
-  public connectionStateChangesSubscription: Subscription;
-
   constructor(
-    private file: File) {
+    private file: File,
+    private network: Network) {
     this.connected = false;
   }
 
-  /*connectOnline() {
+  init() {
     return new Promise((resolve, reject) => {
-      this.connectionStateChangesSubscription = this.connectionStateChanges().subscribe();
-      resolve();
+      if (this.network.type !== this.network.Connection.NONE) {
+        this.connected = true;
+        firebase.firestore().enableNetwork().then(() => resolve());
+      } else {
+        this.connected = false;
+        firebase.firestore().disableNetwork().then(() => resolve());
+      }
     });
-  }*/
-
-  /*disconnectOnline() {
-    if (this.connectionStateChangesSubscription) {
-      this.connectionStateChangesSubscription.unsubscribe();
-    }
-  }*/
+  }
 
   connectionStateChanges() {
     return new Observable<boolean>((observer) => {
-      firebase.database().ref('.info/connected').on('value', (state) => {
-        this.connected = state.val();
 
-        console.log('connectionStateChanges');
-
-        //observer.next(this.connected);
-
-        if (this.connected) {
+      let connectSubscription = this.network.onchange().subscribe((state) => {
+        if (state.type != 'offline') {
+          this.connected = true;
           firebase.firestore().enableNetwork().then(() => {observer.next(this.connected);});
         } else {
+          this.connected = false;
           firebase.firestore().disableNetwork().then(() => {observer.next(this.connected);});
         }
       });
 
+      //Execute once at subscribtion.
+      observer.next(this.connected);
+
       return () => {
-        firebase.database().ref('.info/connected').off();
+        connectSubscription.unsubscribe();
         this.connected = false;
       };
     });
