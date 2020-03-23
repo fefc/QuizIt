@@ -7,6 +7,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable"
 import { Subscription } from "rxjs/Subscription";
 
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { File } from '@ionic-native/file';
 import { Network } from '@ionic-native/network';
 
@@ -16,7 +17,8 @@ export class ConnectionProvider {
 
   constructor(
     private file: File,
-    private network: Network) {
+    private network: Network,
+    private sanitizer: DomSanitizer) {
     this.connected = false;
   }
 
@@ -119,5 +121,29 @@ export class ConnectionProvider {
         reject("No reference, can't getStorageUrl.");
       }
     });
+  }
+
+  getLocalFileUrl(fullLocalPath: string): Promise<SafeUrl> {
+    let convertedUrl: string = (<any> window).Ionic.WebView.convertFileSrc(fullLocalPath);
+
+    if (convertedUrl.includes('http://')) {
+      return new Promise<SafeUrl>((resolve, reject) => {
+        resolve(this.sanitizer.bypassSecurityTrustUrl(convertedUrl));
+      });
+    } else  {
+      //On some browser convertFileSrc does not work properly (firefox at the moment)
+      //In this case we are going to read the file and give the DataUrl back
+      var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
+      var sourceDir = fullLocalPath.substring(0, indexOfSlash);
+      var fileName = fullLocalPath.substring(indexOfSlash);
+
+      return new Promise<SafeUrl>((resolve, reject) => {
+        this.file.readAsDataURL(sourceDir, fileName).then((dataUrl) => {
+          resolve(this.sanitizer.bypassSecurityTrustUrl(dataUrl));
+        }).catch((error) => {
+          resolve(undefined);
+        })
+      });
+    }
   }
 }

@@ -6,9 +6,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable"
 import { Subscription } from "rxjs/Subscription";
 
-import { File } from '@ionic-native/file';
-import { DomSanitizer } from '@angular/platform-browser';
-
 import { UserProfile } from '../../models/user-profile';
 
 import { ConnectionProvider } from '../connection/connection';
@@ -20,8 +17,6 @@ export class UserProfilesProvider {
   private profileChangesSubscription: Subscription;
 
   constructor(
-    private file: File,
-    private sanitizer:DomSanitizer,
     private connProv: ConnectionProvider) {
     this.profile = {
       uuid: '',
@@ -104,8 +99,7 @@ export class UserProfilesProvider {
 
           if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
             if (pendingUpload) {
-              this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl((<any> window).Ionic.WebView.convertFileSrc(this.profile.avatar));
-              console.log('normalized ' ,this.profile.avatarUrl);
+              this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
             } else {
               this.profile.avatarUrl = undefined;
             }

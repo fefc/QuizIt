@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { Platform, ModalController, ViewController, LoadingController, AlertController, NavParams } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
@@ -8,6 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { UserProfile } from '../../models/user-profile';
 
 import { AuthenticationProvider } from '../../providers/authentication/authentication';
+import { ConnectionProvider } from '../../providers/connection/connection';
 
 import { SignUpPage } from '../../pages/sign-up/sign-up';
 
@@ -28,9 +28,9 @@ export class UserProfilePage {
               private loadingCtrl: LoadingController,
               private alertCtrl: AlertController,
               private imagePicker: ImagePicker,
-              private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
               private authProv: AuthenticationProvider,
+              private connProv: ConnectionProvider,
               private translate: TranslateService,
               params: NavParams) {
     //lets make deep copies, so that we don't modfiy anything before user confirmation
@@ -44,7 +44,9 @@ export class UserProfilePage {
       this.profile = JSON.parse(JSON.stringify(params.data.profile));
 
       if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
-        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl((<any> window).Ionic.WebView.convertFileSrc(this.profile.avatar));
+        setTimeout(async () =>  {
+          this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
+        }, 0); //Constructor can't get aysnc so let's do it my way.
       }
     }
   }
@@ -257,10 +259,10 @@ export class UserProfilePage {
   }
 
   openMobileImagePicker() {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then(async (results) => {
       if (results.length === 1) {
         this.profile.avatar = decodeURIComponent(results[0]);
-        this.profile.avatarUrl = this.sanitizer.bypassSecurityTrustUrl((<any> window).Ionic.WebView.convertFileSrc(this.profile.avatar));
+        this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
       }
     }).catch(() => {
       alert('Could not get images.');
