@@ -110,6 +110,8 @@ export class UserProfilesProvider {
               this.profile.avatarUrl = undefined;
            });
           }
+        } else {
+          this.profile.avatarUrl = undefined;
         }
       });
       return () => {
