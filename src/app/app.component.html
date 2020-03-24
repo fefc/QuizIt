@@ -3,7 +3,7 @@
     <ion-item no-lines class="user-info" tappable (tap)="openUserProfilePage()">
       <ion-icon name="create"></ion-icon>
       <ion-avatar>
-        <img [class.no-img]="!profilesProv.profile.avatarUrl" [src]="profilesProv.profile.avatarUrl || 'assets/svgs/icon.svg'">
+        <img id="avatar" crossorigin="anonymous" [class.no-img]="!profilesProv.profile.avatarUrl" [src]="profilesProv.profile.avatarUrl || 'assets/svgs/icon.svg'">
       </ion-avatar>
         <div class="card-title">{{profilesProv.profile.nickname}}</div>
     </ion-item>

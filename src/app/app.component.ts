@@ -123,7 +123,9 @@ export class AppComponent {
                 console.log('Connection state changed', connected);
                   this.profilesProv.disconnectOnline();
                   this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
-                    splashScreen.hide();  //This should only happen once please!
+                    this.quizsProv.loadFromOnline().then(() => {
+                      splashScreen.hide(); //This should only happen once please!
+                    });
                   }).catch((error) => {
                     //This should go to the create profile page
                     this.openStartPage();
@@ -132,53 +134,6 @@ export class AppComponent {
               }, (error) => {
                 console.log(error);
               });
-
-
-              /*this.connProv.connectOnline().then(() => {
-                console.log('connected online')
-                this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
-                  console.log('user p');
-                  splashScreen.hide();
-                }).catch((error) => {
-                  //This should go to the create profile page
-                  this.openStartPage();
-                  splashScreen.hide();
-                });
-              }).catch((error) => {
-                this.openGeneralErrorPage(error);
-                splashScreen.hide();
-              });*/
-
-
-              /*this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
-                if (connected) {
-                  this.profileChangesSubscription = this.profilesProv.profileChanges().subscribe();
-                } else {
-                  if (this.profileChangesSubscription) {
-                    this.profileChangesSubscription.unsubscribe();
-                  }
-                }
-              })
-
-              this.profilesProv.loadFromOnline().then(() => {
-                if (this.profilesProv.profile.uuid && this.profilesProv.profile.nickname.length > 2) {
-                  this.profilesProv.subscribeForConnectionStateChanges();
-
-                  this.connProv.connectionStateChangesSubscription.unsubscribe();
-
-
-                    this.quizsProv.loadFromOnline().then(() => {
-                      splashScreen.hide();
-                    });
-                } else {
-                  //This should go to the create profile page
-                  this.openStartPage();
-                  splashScreen.hide();
-                }
-              }).catch((error) => {
-                this.openGeneralErrorPage(error);
-                splashScreen.hide();
-              });*/
             } else {
               if (this.connectionStateChangesSubscription) this.connectionStateChangesSubscription.unsubscribe();
               this.profilesProv.disconnectOnline();
@@ -283,8 +238,7 @@ export class AppComponent {
 
     loading.present();
 
-    this.resizeAvatar(this.profilesProv.profile.avatar).then((resizedAvatar) => {
-
+    this.resizeAvatar().then((resizedAvatar) => {
       this.gameControllerProv.joinGame(gameID, alternativeNickname ? alternativeNickname : this.profilesProv.profile.nickname, resizedAvatar).then(() => {
         loading.dismiss();
         this.nav.push(GameControllerPage);
@@ -344,15 +298,16 @@ export class AppComponent {
     message.present();
   }
 
-  resizeAvatar(base64Avatar: string) {
+  resizeAvatar() {
     return new Promise<string>((resolve, reject) => {
       //First resize the image
       //The zoom it like avatar displayed
       //https://zocada.com/compress-resize-images-javascript-browser/
       //https://stackoverflow.com/a/28048865/7890583
-      let img = new Image();
-      img.src = base64Avatar;
-      img.onload = (pic: any) => {
+
+      if (this.profilesProv.profile.avatarUrl) {
+        let img = <HTMLImageElement> document.getElementById('avatar');
+
         let canvas = document.createElement('canvas');
         let imgRatio: number = img.width / img.height;
         let zoom: number;
@@ -379,9 +334,7 @@ export class AppComponent {
         let ctx = canvas.getContext('2d');
         ctx.drawImage(img, widthMargin, heightMargin, newImgWidth, newImgHeight);
         resolve(ctx.canvas.toDataURL('image/jpeg', 0.8));
-      };
-
-      img.onerror = (error : any) => {
+      } else {
         resolve('');
       }
     });
