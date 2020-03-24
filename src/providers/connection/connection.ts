@@ -10,16 +10,25 @@ import { Subscription } from "rxjs/Subscription";
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { File } from '@ionic-native/file';
 import { Network } from '@ionic-native/network';
+import { NativeStorage } from '@ionic-native/native-storage';
 
 @Injectable()
 export class ConnectionProvider {
   public connected: boolean;
+  private serviceWorkerAvailable: boolean;
 
   constructor(
     private file: File,
     private network: Network,
+    private nativeStorage: NativeStorage,
     private sanitizer: DomSanitizer) {
     this.connected = false;
+
+    if ((<any> window).serviceWorkerAvailable == true) {
+      this.serviceWorkerAvailable = true;
+    } else {
+      this.serviceWorkerAvailable = false;
+    }
   }
 
   init() {
@@ -111,13 +120,35 @@ export class ConnectionProvider {
   getStorageUrl(reference: string) {
     return new Promise<string>((resolve, reject) => {
       if (reference) {
+        if (this.connected) {
           firebase.storage().ref().child(reference).getDownloadURL().then((url) => {
+            if (!this.serviceWorkerAvailable) {
+              this.nativeStorage.setItem(reference, url); //No need to wait for it beeing done
+            }
             resolve(url);
           }).catch((error) => {
-            reject('Could not getStorageUrl from firebase.');
+            if (!this.serviceWorkerAvailable) {
+              this.nativeStorage.getItem(reference).then((cachedUrl) => {
+                resolve(cachedUrl);
+              }).catch((error) => {
+                reject('Could not getCachedUrl from getStorageUrl.')
+              });
+            } else {
+              reject('Could not getStorageUrl from firebase.');
+            }
           });
+        } else {
+          if (!this.serviceWorkerAvailable) {
+            this.nativeStorage.getItem(reference).then((cachedUrl) => {
+              resolve(cachedUrl);
+            }).catch((error) => {
+              reject('Could not getCachedUrl from getStorageUrl.')
+            });
+          } else {
+            reject('Could not getStorageUrl from firebase.');
+          }
         }
-       else {
+      } else {
         reject("No reference, can't getStorageUrl.");
       }
     });
