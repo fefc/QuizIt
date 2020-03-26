@@ -3,6 +3,8 @@ import 'firebase/firestore';
 import 'firebase/storage';
 
 import { Injectable } from '@angular/core';
+import { Observable } from "rxjs/Observable"
+import { Subscription } from "rxjs/Subscription";
 import { File } from '@ionic-native/file';
 
 import { AuthenticationProvider } from '../authentication/authentication';
@@ -26,6 +28,11 @@ interface AttachementsResult {
   fileNames: Array<string>
 }
 
+interface QuizSnapshot {
+  readonly quizUuid: string,
+  readonly unsubscribe: () => void
+}
+
 /*
   Generated class for the QuizsProvider provider.
 
@@ -36,151 +43,202 @@ interface AttachementsResult {
 export class QuizsProvider {
   public quizs: Array<Quiz>;
 
+  private profileUuid: string;
+  private quizsChangesSubscription: Subscription;
+
   constructor(private file: File, private authProv: AuthenticationProvider) {
     this.quizs = new Array<Quiz>();
   }
 
-  getSettingsPropertiesChanges(quiz: Quiz, title: string, settings: QuizSettings) {
-    let savedSettings: QuizSettings = quiz.settings;
-    let changes: any = {};
+  sync(profileUuid: string) {
+    return new Promise(async (resolve, reject) => {
+      this.profileUuid = profileUuid;
+      this.stopSync();
 
-    if (savedSettings && quiz.uuid) {
-      //title is considered as part of settings, simplifies firebase updates
-      if (title !== quiz.title) changes['title'] = title;
+      try {
+        //await this.loadFromOnline();
+      } catch (error) {
+        reject(error);
+      }
 
-      //An update on settings
-      if (settings.commonAnimationDuration !== undefined && settings.commonAnimationDuration !== savedSettings.commonAnimationDuration) changes['settings.commonAnimationDuration'] = settings.commonAnimationDuration;
-      if (settings.timeBarAnimationDuration !== undefined && settings.timeBarAnimationDuration !== savedSettings.timeBarAnimationDuration) changes['settings.timeBarAnimationDuration'] = settings.timeBarAnimationDuration;
-      if (settings.playerAnswerAnimationDuration !== undefined && settings.playerAnswerAnimationDuration !== savedSettings.playerAnswerAnimationDuration) changes['settings.playerAnswerAnimationDuration'] = settings.playerAnswerAnimationDuration;
-      if (settings.showNextDelay !== undefined && settings.showNextDelay !== savedSettings.showNextDelay) changes['settings.showNextDelay'] = settings.showNextDelay;
-      if (settings.amountOfPicturesToShow !== undefined && settings.amountOfPicturesToShow !== savedSettings.amountOfPicturesToShow) changes['settings.amountOfPicturesToShow'] = settings.amountOfPicturesToShow;
-      if (settings.autoPlay !== undefined && settings.autoPlay !== savedSettings.autoPlay) changes['settings.autoPlay'] = settings.autoPlay;
-      if (settings.startMessage !== undefined && settings.startMessage !== savedSettings.startMessage) changes['settings.startMessage'] = settings.startMessage;
-      if (settings.endMessage !== undefined && settings.endMessage !== savedSettings.endMessage) changes['settings.endMessage'] = settings.endMessage;
-      if (settings.backgroundImage !== undefined && settings.backgroundImage !== savedSettings.backgroundImage) changes['settings.backgroundImage'] = settings.backgroundImage;
-      if (settings.extraDisplayDuration !== undefined && settings.extraDisplayDuration !== savedSettings.extraDisplayDuration) changes['settings.extraDisplayDuration'] = settings.extraDisplayDuration;
-
-    } else {
-      //title is considered as part of settings, simplifies firebase updates
-      changes['title'] = title;
-
-      //A creation of a quiz and so settings as well
-      if (settings.commonAnimationDuration !== undefined) changes['settings.commonAnimationDuration'] = settings.commonAnimationDuration;
-      if (settings.timeBarAnimationDuration !== undefined) changes['settings.timeBarAnimationDuration'] = settings.timeBarAnimationDuration;
-      if (settings.playerAnswerAnimationDuration !== undefined) changes['settings.playerAnswerAnimationDuration'] = settings.playerAnswerAnimationDuration;
-      if (settings.showNextDelay !== undefined) changes['settings.showNextDelay'] = settings.showNextDelay;
-      if (settings.amountOfPicturesToShow !== undefined) changes['settings.amountOfPicturesToShow'] = settings.amountOfPicturesToShow;
-      if (settings.autoPlay !== undefined) changes['settings.autoPlay'] = settings.autoPlay;
-      if (settings.startMessage !== undefined) changes['settings.startMessage'] = settings.startMessage;
-      if (settings.endMessage !== undefined) changes['settings.endMessage'] = settings.endMessage;
-      if (settings.backgroundImage !== undefined) changes['settings.backgroundImage'] = settings.backgroundImage;
-      if (settings.extraDisplayDuration !== undefined) changes['settings.extraDisplayDuration'] = settings.extraDisplayDuration;
-    }
-
-    if (Object.keys(changes).length === 0) return undefined;
-    else return changes;
+      this.quizsChangesSubscription = this.quizsChanges().subscribe();
+      resolve();
+    });
   }
 
-  getCategoryPropertiesChanges(quiz: Quiz, category: Category) {
-    let savedCategory: Category = quiz.categorys.find((c) => c.uuid === category.uuid);
-    let changes: any = {};
-
-    if (savedCategory) {
-      //An update on a category
-      if (category.afterCategoryUuid !== savedCategory.afterCategoryUuid) changes.afterCategoryUuid = category.afterCategoryUuid;
-      if (category.name !== savedCategory.name) changes.name = category.name;
-    } else {
-      //A creation of a category
-      changes.afterCategoryUuid = category.afterCategoryUuid;
-      changes.name = category.name;
-    }
-
-    if (Object.keys(changes).length === 0) return undefined;
-    else return changes;
+  stopSync() {
+    if (this.quizsChangesSubscription) this.quizsChangesSubscription.unsubscribe();
   }
 
-  getQuestionPropertiesChanges(quiz: Quiz, question: Question) {
-    let savedQuestion: Question = quiz.questions.find((q) => q.uuid === question.uuid);
-    let changes: any = {};
+  quizsChanges() {
+    return new Observable<boolean>(observer => {
+      let quizsSnapshots: Array<QuizSnapshot> = new Array<QuizSnapshot>();
 
-    if (savedQuestion) {
-      //An update on a question
-      if (question.afterQuestionUuid !== savedQuestion.afterQuestionUuid) changes.afterQuestionUuid = question.afterQuestionUuid;
-      if (question.question !== savedQuestion.question) changes.question = question.question;
-      if (question.type !== savedQuestion.type) changes.type = question.type;
-      if (question.categoryUuid !== savedQuestion.categoryUuid) changes.categoryUuid = question.categoryUuid;
-      if (question.rightAnswer !== savedQuestion.rightAnswer) changes.rightAnswer = question.rightAnswer;
-      if (question.draft !== savedQuestion.draft) changes.draft = question.draft;
-      if (question.hide !== savedQuestion.hide) changes.hide = question.hide;
-      if (JSON.stringify(question.answers) !== JSON.stringify(savedQuestion.answers)) changes.answers = question.answers;
-      if (JSON.stringify(question.extras) !== JSON.stringify(savedQuestion.extras)) changes.extras = question.extras;
-    } else {
-      //A creation of a question
-      changes.afterQuestionUuid = question.afterQuestionUuid;
-      changes.question = question.question;
-      changes.type = question.type;
-      changes.categoryUuid = question.categoryUuid;
-      changes.rightAnswer = question.rightAnswer;
-      changes.draft = question.draft;
-      changes.hide = question.hide;
-      changes.answers = question.answers;
-      changes.extras = question.extras;
-    }
+      const unsubscribe = firebase.firestore().collection('U').doc(this.profileUuid).collection('Q').onSnapshot(async (querySnapshot) => {
+        let currentQuizUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
+        let addedQuizIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
 
-    if (Object.keys(changes).length === 0) return undefined;
-    else return changes;
+        //First delete quizs if user has been removed of it and stop listen to changes
+        //console.log(this.quizs.filter((q) => currentQuizs.some((currentQ) => currentQ === q.uuid))) //Donne les lignes supprimes
+        for (let quiz of this.quizs) {
+          if (!currentQuizUuids.some(uuid => uuid === quiz.uuid)) {
+            let snapshot: QuizSnapshot = quizsSnapshots.find((q) => q.quizUuid === quiz.uuid);
+            if (snapshot) snapshot.unsubscribe();
+
+            this.quizs.splice(this.quizs.indexOf(quiz), 1);
+          }
+        }
+
+        //Handle added quizs
+        setTimeout(() => {
+          for (let index of addedQuizIndexes) {
+            let doc = querySnapshot.docs[index];
+
+              console.log(doc.id, ' => ', doc.data());
+
+              const unsubscribe = firebase.firestore().collection('Q').doc(doc.id).onSnapshot((quizDoc) => {
+                console.log('something is happening here, has it been deleted?');
+                console.log(quizDoc.id, ' => ', quizDoc.data(), ' status ', quizDoc);
+
+                let quizData = quizDoc.data();
+
+                let quiz: Quiz = {
+                  uuid: quizDoc.id,
+                  title: quizData.title,
+                  creationDate: 0,
+                  settings: quizData.settings,
+                  categorys: [],
+                  questions: [],
+                };
+
+                let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quizDoc.id);
+
+                if (quizIndex !== -1) {
+                  this.quizs[quizIndex] = quiz;
+                  console.log('changed quiz v2');
+                } else {
+                  this.quizs.push(quiz);
+                  console.log('pushed quiz');
+                }
+              }, (error) => {
+                console.log('something bad happend 2', error);
+              });
+
+              quizsSnapshots.push({quizUuid: doc.id, unsubscribe: unsubscribe});
+          }
+        }, 500);
+
+      }, (error) => {
+        console.log('shit happed on that level ', error);
+      });
+
+
+
+      return () => {
+        for (let snapshot of quizsSnapshots) {
+          snapshot.unsubscribe();
+        }
+
+        unsubscribe();
+      };
+    });
+  }
+
+  quizChanges() {
+
+  }
+
+  questionsChanges() {
+
+  }
+
+  questionChanges() {
+
+  }
+
+  categorysChanges() {
+
+  }
+
+  categoryChanges() {
+
   }
 
   createQuizOnline(quiz: Quiz) {
     return new Promise((resolve, reject) => {
-      firebase.firestore().collection('Q').add({title: quiz.title, settings: quiz.settings}).then((newQuizRef) => {
-        let batch = firebase.firestore().batch();
+      console.log('createQuizOnline');
+      let batch = firebase.firestore().batch();
 
-        let userQuizRef = firebase.firestore().collection('U').doc(this.authProv.getUser().uid).collection('Q').doc(newQuizRef.id);
-        batch.set(userQuizRef, {});
+      let newQuizRef = firebase.firestore().collection('Q').doc();
 
-        let quizUserRef = newQuizRef.collection('U').doc(this.authProv.getUser().uid);
-        batch.set(quizUserRef, {});
+      batch.set(newQuizRef, {title: quiz.title, settings: quiz.settings});
 
-        for (let i = 0; i < quiz.categorys.length ; i++) {
-          let quizCategoryRef = newQuizRef.collection('C').doc();
+      let quizUserRef = newQuizRef.collection('U').doc(this.authProv.getUser().uid);
+      batch.set(quizUserRef, {});
 
-          quiz.categorys[i] = {
-            uuid: quizCategoryRef.id,
-            afterCategoryUuid: i > 0 ? quiz.categorys[i - 1].afterCategoryUuid : 'first',
-            name: quiz.categorys[i].name
-          };
+      let userQuizRef = firebase.firestore().collection('U').doc(this.authProv.getUser().uid).collection('Q').doc(newQuizRef.id);
+      batch.set(userQuizRef, {});
 
-          batch.set(quizCategoryRef, {name: quiz.categorys[i].name});
-        }
+      for (let i = 0; i < quiz.categorys.length ; i++) {
+        let quizCategoryRef = newQuizRef.collection('C').doc();
 
-        // Commit the batch
-        batch.commit().then(() => {
+        quiz.categorys[i] = {
+          uuid: quizCategoryRef.id,
+          afterCategoryUuid: i > 0 ? quiz.categorys[i - 1].afterCategoryUuid : 'first',
+          name: quiz.categorys[i].name
+        };
 
-          let newQuiz: Quiz = {
-            uuid: newQuizRef.id,
-            title: quiz.title,
-            creationDate: quiz.creationDate,
-            categorys: quiz.categorys,
-            questions: quiz.questions,
-            settings: quiz.settings
-          }
+        batch.set(quizCategoryRef, {name: quiz.categorys[i].name});
+      }
 
-          resolve();
-        }).catch((error) => {
-          console.log(error);
-          reject("Could not update players online");
-        });
+      batch.commit();
+      resolve();
+
+      // Commit the batch
+      /*batch.commit().then(() => {
+
+        //let newQuiz: Quiz = {
+        //  uuid: newQuizRef.id,
+        //  title: quiz.title,
+        //  creationDate: quiz.creationDate,
+        //  categorys: quiz.categorys,
+        //  questions: quiz.questions,
+        //  settings: quiz.settings
+        //}
+
+        resolve();
       }).catch((error) => {
         console.log(error);
-        reject(error);
-      });
+        reject("Could not update players online");
+      });*/
     });
   }
 
   deleteQuizOnline(quiz: Quiz) {
     return new Promise((resolve, reject) => {
-      reject('not implemented');
+      let batch = firebase.firestore().batch();
+
+    });
+  }
+
+  deleteQuizsOnline() {
+    return new Promise((resolve, reject) => {
+      let batch = firebase.firestore().batch();
+
+      for (let selectedQuiz of this.quizs.filter((quiz) => quiz.selected === true)) {
+        let quizUserRef = firebase.firestore().collection('Q').doc(selectedQuiz.uuid).collection('U').doc(this.profileUuid);
+        batch.delete(quizUserRef);
+
+        let userQuizRef = firebase.firestore().collection('U').doc(this.profileUuid).collection('Q').doc(selectedQuiz.uuid);
+        batch.delete(userQuizRef);
+      }
+
+      batch.commit().then(() => {
+        resolve();
+      }).catch((error) => {
+        console.log(error);
+        reject('Could not delete category and associated questions online.');
+      });
     });
   }
 
@@ -589,34 +647,6 @@ export class QuizsProvider {
     return sortedCategorys;
   }
 
-  deleteSelectedFromStorage() {
-    return new Promise((resolve, reject) => {
-      reject('Not implemented yet');
-      /*let indexes: Array<number> = Array<number>();
-
-      for (let selectedQuiz of this.quizs.filter((quiz) => quiz.selected === true)) {
-        let index = this.quizs.findIndex(quiz => quiz.uuid === selectedQuiz.uuid);
-        if (index !== -1) {
-          indexes.push(index);
-        }
-      }
-
-      indexes.sort(function(a,b){ return b - a; });
-
-      var promises = [];
-
-      for (let index of indexes) {
-        promises.push(this.deleteQuizDir(this.quizs[index].uuid));
-        this.quizs.splice(index, 1);
-      }
-
-        resolve();
-      }).catch(() => {
-        reject();
-      })*/
-    });
-  }
-
   saveAttachementsOnline(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
     return new Promise<AttachementsResult>((resolve, reject) => {
       var promises = [];
@@ -657,6 +687,97 @@ export class QuizsProvider {
         reject(error);
       });
     });
+  }
+
+  getSettingsPropertiesChanges(quiz: Quiz, title: string, settings: QuizSettings) {
+    let savedSettings: QuizSettings = quiz.settings;
+    let changes: any = {};
+
+    if (savedSettings && quiz.uuid) {
+      //title is considered as part of settings, simplifies firebase updates
+      if (title !== quiz.title) changes['title'] = title;
+
+      //An update on settings
+      if (settings.commonAnimationDuration !== undefined && settings.commonAnimationDuration !== savedSettings.commonAnimationDuration) changes['settings.commonAnimationDuration'] = settings.commonAnimationDuration;
+      if (settings.timeBarAnimationDuration !== undefined && settings.timeBarAnimationDuration !== savedSettings.timeBarAnimationDuration) changes['settings.timeBarAnimationDuration'] = settings.timeBarAnimationDuration;
+      if (settings.playerAnswerAnimationDuration !== undefined && settings.playerAnswerAnimationDuration !== savedSettings.playerAnswerAnimationDuration) changes['settings.playerAnswerAnimationDuration'] = settings.playerAnswerAnimationDuration;
+      if (settings.showNextDelay !== undefined && settings.showNextDelay !== savedSettings.showNextDelay) changes['settings.showNextDelay'] = settings.showNextDelay;
+      if (settings.amountOfPicturesToShow !== undefined && settings.amountOfPicturesToShow !== savedSettings.amountOfPicturesToShow) changes['settings.amountOfPicturesToShow'] = settings.amountOfPicturesToShow;
+      if (settings.autoPlay !== undefined && settings.autoPlay !== savedSettings.autoPlay) changes['settings.autoPlay'] = settings.autoPlay;
+      if (settings.startMessage !== undefined && settings.startMessage !== savedSettings.startMessage) changes['settings.startMessage'] = settings.startMessage;
+      if (settings.endMessage !== undefined && settings.endMessage !== savedSettings.endMessage) changes['settings.endMessage'] = settings.endMessage;
+      if (settings.backgroundImage !== undefined && settings.backgroundImage !== savedSettings.backgroundImage) changes['settings.backgroundImage'] = settings.backgroundImage;
+      if (settings.extraDisplayDuration !== undefined && settings.extraDisplayDuration !== savedSettings.extraDisplayDuration) changes['settings.extraDisplayDuration'] = settings.extraDisplayDuration;
+
+    } else {
+      //title is considered as part of settings, simplifies firebase updates
+      changes['title'] = title;
+
+      //A creation of a quiz and so settings as well
+      if (settings.commonAnimationDuration !== undefined) changes['settings.commonAnimationDuration'] = settings.commonAnimationDuration;
+      if (settings.timeBarAnimationDuration !== undefined) changes['settings.timeBarAnimationDuration'] = settings.timeBarAnimationDuration;
+      if (settings.playerAnswerAnimationDuration !== undefined) changes['settings.playerAnswerAnimationDuration'] = settings.playerAnswerAnimationDuration;
+      if (settings.showNextDelay !== undefined) changes['settings.showNextDelay'] = settings.showNextDelay;
+      if (settings.amountOfPicturesToShow !== undefined) changes['settings.amountOfPicturesToShow'] = settings.amountOfPicturesToShow;
+      if (settings.autoPlay !== undefined) changes['settings.autoPlay'] = settings.autoPlay;
+      if (settings.startMessage !== undefined) changes['settings.startMessage'] = settings.startMessage;
+      if (settings.endMessage !== undefined) changes['settings.endMessage'] = settings.endMessage;
+      if (settings.backgroundImage !== undefined) changes['settings.backgroundImage'] = settings.backgroundImage;
+      if (settings.extraDisplayDuration !== undefined) changes['settings.extraDisplayDuration'] = settings.extraDisplayDuration;
+    }
+
+    if (Object.keys(changes).length === 0) return undefined;
+    else return changes;
+  }
+
+  getCategoryPropertiesChanges(quiz: Quiz, category: Category) {
+    let savedCategory: Category = quiz.categorys.find((c) => c.uuid === category.uuid);
+    let changes: any = {};
+
+    if (savedCategory) {
+      //An update on a category
+      if (category.afterCategoryUuid !== savedCategory.afterCategoryUuid) changes.afterCategoryUuid = category.afterCategoryUuid;
+      if (category.name !== savedCategory.name) changes.name = category.name;
+    } else {
+      //A creation of a category
+      changes.afterCategoryUuid = category.afterCategoryUuid;
+      changes.name = category.name;
+    }
+
+    if (Object.keys(changes).length === 0) return undefined;
+    else return changes;
+  }
+
+  getQuestionPropertiesChanges(quiz: Quiz, question: Question) {
+    let savedQuestion: Question = quiz.questions.find((q) => q.uuid === question.uuid);
+    let changes: any = {};
+
+    if (savedQuestion) {
+      //An update on a question
+      if (question.afterQuestionUuid !== savedQuestion.afterQuestionUuid) changes.afterQuestionUuid = question.afterQuestionUuid;
+      if (question.question !== savedQuestion.question) changes.question = question.question;
+      if (question.type !== savedQuestion.type) changes.type = question.type;
+      if (question.categoryUuid !== savedQuestion.categoryUuid) changes.categoryUuid = question.categoryUuid;
+      if (question.rightAnswer !== savedQuestion.rightAnswer) changes.rightAnswer = question.rightAnswer;
+      if (question.draft !== savedQuestion.draft) changes.draft = question.draft;
+      if (question.hide !== savedQuestion.hide) changes.hide = question.hide;
+      if (JSON.stringify(question.answers) !== JSON.stringify(savedQuestion.answers)) changes.answers = question.answers;
+      if (JSON.stringify(question.extras) !== JSON.stringify(savedQuestion.extras)) changes.extras = question.extras;
+    } else {
+      //A creation of a question
+      changes.afterQuestionUuid = question.afterQuestionUuid;
+      changes.question = question.question;
+      changes.type = question.type;
+      changes.categoryUuid = question.categoryUuid;
+      changes.rightAnswer = question.rightAnswer;
+      changes.draft = question.draft;
+      changes.hide = question.hide;
+      changes.answers = question.answers;
+      changes.extras = question.extras;
+    }
+
+    if (Object.keys(changes).length === 0) return undefined;
+    else return changes;
   }
 
   zip(quiz: Quiz) {

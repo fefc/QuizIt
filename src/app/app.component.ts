@@ -114,29 +114,31 @@ export class AppComponent {
       firebase.storage().setMaxUploadRetryTime(1);
 
       firebase.firestore().enablePersistence().then(() => {
-        let firstTime: boolean = true;
 
         this.connProv.init().then(() => {
           this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
             if (loggedIn) {
               this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
-                console.log('Connection state changed', connected);
-                  this.profilesProv.disconnectOnline();
-                  this.profilesProv.connectOnline(this.authProv.getUser().uid).then(() => {
-                    this.quizsProv.loadFromOnline().then(() => {
-                      splashScreen.hide(); //This should only happen once please!
-                    });
-                  }).catch((error) => {
-                    //This should go to the create profile page
-                    this.openStartPage();
-                    splashScreen.hide();
-                  });
+                let promises = [];
+
+                promises.push(this.profilesProv.sync(this.authProv.getUser().uid));
+                promises.push(this.quizsProv.sync(this.authProv.getUser().uid));
+
+                Promise.all(promises).then((results) => {
+                  splashScreen.hide(); //This should only happen once please!
+
+                  //setTimeout(() => this.quizsProv.stopSync(), 5000);
+                }).catch((errors) => {
+                  this.openGeneralErrorPage(errors);
+                  splashScreen.hide();
+                });
               }, (error) => {
                 console.log(error);
               });
             } else {
               if (this.connectionStateChangesSubscription) this.connectionStateChangesSubscription.unsubscribe();
-              this.profilesProv.disconnectOnline();
+              this.profilesProv.stopSync();
+              this.quizsProv.stopSync();
 
               this.openStartPage();
               splashScreen.hide();

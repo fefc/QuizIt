@@ -132,7 +132,7 @@ export class HomePage {
 
     deleting.present();
 
-    this.quizsProv.deleteSelectedFromStorage().then(() => {
+    this.quizsProv.deleteQuizsOnline().then(() => {
       this.selectedQuizs = 0;
       deleting.dismiss();
 

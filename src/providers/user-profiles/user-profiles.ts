@@ -25,8 +25,10 @@ export class UserProfilesProvider {
     };
   }
 
-  connectOnline(profileUuid: string) {
+  sync(profileUuid: string) {
     return new Promise(async (resolve, reject) => {
+      this.stopSync();
+
       if (this.profile.uuid !== profileUuid) {
         try {
           let profileDoc = await firebase.firestore().collection('U').doc(profileUuid).get();
@@ -47,7 +49,7 @@ export class UserProfilesProvider {
     });
   }
 
-  disconnectOnline() {
+  stopSync() {
     if (this.profileChangesSubscription) this.profileChangesSubscription.unsubscribe();
   }
 
