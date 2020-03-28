@@ -92,10 +92,13 @@ export class QuizsProvider {
 
         this.quizs = this.quizs.filter((q) => currentUuids.some((uuid) => uuid === q.uuid));
 
-        for (let index of addedIndexes) {
-          let doc = querySnapshot.docs[index];
+        setTimeout(() => {
+          for (let index of addedIndexes) {
+            let doc = querySnapshot.docs[index];
             snapshots.push({uuid: doc.id, subscription: this.quizChanges(doc.id).subscribe()});
-        }
+          }
+        }, 1000);
+
       }, (error) => {
         console.log('quizsChanges onSnapshot error: ', error);
       });
@@ -115,13 +118,17 @@ export class QuizsProvider {
       //First register for quiz data changes
       const unsubscribeQuizSnapshot = this.quizChangesOnSnapshot(quizUuid);
 
+      //Then register for categorys changes
+      const unsubscribeQuizcategorys = this.categorysChanges(quizUuid).subscribe();
+
       //Then register for questions changes
       const unsubscribeQuizQuestions = this.questionsChanges(quizUuid).subscribe();
 
-
       return () => {
-        unsubscribeQuizSnapshot();
         unsubscribeQuizQuestions.unsubscribe();
+        unsubscribeQuizcategorys.unsubscribe();
+        unsubscribeQuizSnapshot();
+
       };
     });
   }
@@ -129,27 +136,30 @@ export class QuizsProvider {
   private quizChangesOnSnapshot(quizUuid: string): () => void {
     return firebase.firestore().collection('Q').doc(quizUuid).onSnapshot((quizDoc) => {
       console.log('quizChangesOnSnapshot', quizDoc.id, ' => ', quizDoc.data(), ' status ', quizDoc);
+      console.log('meta ', quizDoc.metadata);
 
       let quizData = quizDoc.data();
-
-      let quiz: Quiz = {
-        uuid: quizDoc.id,
-        title: quizData.title,
-        creationDate: 0,
-        settings: quizData.settings,
-        categorys: [{uuid: 'YfG5l18oxHk1IQZ2xgx4', afterCategoryUuid: 'first', name: 'uncategorized'}],
-        questions: [],
-      };
-
       let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quizDoc.id);
 
       if (quizIndex !== -1) {
-        this.quizs[quizIndex] = quiz;
+        this.quizs[quizIndex].title = quizData.title;
+        this.quizs[quizIndex].creationDate = 0;
+        this.quizs[quizIndex].settings = quizData.settings;
       } else {
+        let quiz: Quiz = {
+          uuid: quizDoc.id,
+          title: quizData.title,
+          creationDate: 0,
+          settings: quizData.settings,
+          categorys: [],
+          questions: [],
+        };
+
         this.quizs.push(quiz);
       }
     }, (error) => {
       console.log('quizChangesOnSnapshot error: ', error);
+      console.log('this is failing');
     });
   }
 
@@ -158,9 +168,13 @@ export class QuizsProvider {
       let snapshots: Array<FirebaseSnapshot> = new Array<FirebaseSnapshot>();
 
       const unsubscribe = firebase.firestore().collection('Q').doc(quizUuid).collection('Q').onSnapshot((querySnapshot) => {
+        console.log('meta ', querySnapshot.metadata);
+
+
         let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
         let currentUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
         let addedIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
+
 
         for (let snapshot of snapshots) {
           if (!currentUuids.some(uuid => uuid === snapshot.uuid)) {
@@ -227,6 +241,8 @@ export class QuizsProvider {
 
           quiz.questions.push(formatedData);
         }
+
+        quiz.questions = this.orderQuestionsFromOnline(quiz.questions);
       } else {
         console.log('questionChangesOnSnapshot, quiz does not exists anymore');
       }
@@ -236,12 +252,73 @@ export class QuizsProvider {
   }
 
 
-  categorysChanges() {
+  categorysChanges(quizUuid: string):  Observable<void> {
+    return new Observable<void>(observer => {
+      let snapshots: Array<FirebaseSnapshot> = new Array<FirebaseSnapshot>();
 
+      const unsubscribe = firebase.firestore().collection('Q').doc(quizUuid).collection('C').onSnapshot((querySnapshot) => {
+        let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
+        let currentUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
+        let addedIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
+
+
+        for (let snapshot of snapshots) {
+          if (!currentUuids.some(uuid => uuid === snapshot.uuid)) {
+            snapshot.unsubscribe();
+            snapshots.splice(snapshots.indexOf(snapshot), 1);
+          }
+        }
+
+        quiz.categorys = quiz.categorys.filter((c) => currentUuids.some((uuid) => uuid === c.uuid));
+
+        for (let index of addedIndexes) {
+          let doc = querySnapshot.docs[index];
+            snapshots.push({uuid: doc.id, unsubscribe: this.categoryChangesOnSnapshot(quiz.uuid, doc.id)});
+        }
+      }, (error) => {
+        console.log('categorysChanges onSnapshot error: ', error);
+      });
+
+      return () => {
+        for (let snapshot of snapshots) {
+          snapshot.unsubscribe();
+        }
+
+        unsubscribe();
+      };
+    });
   }
 
-  categoryChanges() {
+  categoryChangesOnSnapshot(quizUuid: string, categoryUuid: string): () => void {
+    return firebase.firestore().collection('Q').doc(quizUuid).collection('C').doc(categoryUuid).onSnapshot((doc) => {
+      let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
+      let data = doc.data();
 
+      console.log('questionChangesOnSnapshot', doc.id, ' => ', data, ' status ', doc);
+
+      if (quiz) {
+        let category: Category = quiz.categorys.find((c) => c.uuid === doc.id);
+
+        if (category) {
+          category.afterCategoryUuid = data.afterCategoryUuid,
+          category.name = data.name
+        } else {
+          let formatedData: Category = {
+            uuid: doc.id,
+            afterCategoryUuid: data.afterCategoryUuid,
+            name: data.name
+          }
+
+          quiz.categorys.push(formatedData);
+        }
+
+        quiz.categorys = this.orderCategorysFromOnline(quiz.categorys);
+      } else {
+        console.log('categoryChangesOnSnapshot, quiz does not exists anymore');
+      }
+    }, (error) => {
+      console.log('categoryChangesOnSnapshot error: ', error);
+    });
   }
 
   public createQuizOnline(quiz: Quiz) {
@@ -273,33 +350,15 @@ export class QuizsProvider {
 
       batch.commit();
       resolve();
-
-      // Commit the batch
-      /*batch.commit().then(() => {
-
-        //let newQuiz: Quiz = {
-        //  uuid: newQuizRef.id,
-        //  title: quiz.title,
-        //  creationDate: quiz.creationDate,
-        //  categorys: quiz.categorys,
-        //  questions: quiz.questions,
-        //  settings: quiz.settings
-        //}
-
-        resolve();
-      }).catch((error) => {
-        console.log(error);
-        reject("Could not update players online");
-      });*/
     });
   }
 
-  public deleteQuizOnline(quiz: Quiz) {
+  /*public deleteQuizOnline(quiz: Quiz) {
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
     });
-  }
+  }*/
 
   public deleteQuizsOnline() {
     return new Promise((resolve, reject) => {
@@ -313,12 +372,8 @@ export class QuizsProvider {
         batch.delete(userQuizRef);
       }
 
-      batch.commit().then(() => {
-        resolve();
-      }).catch((error) => {
-        console.log(error);
-        reject('Could not delete category and associated questions online.');
-      });
+      batch.commit();
+      resolve();
     });
   }
 
@@ -327,15 +382,8 @@ export class QuizsProvider {
       let changes = this.getSettingsPropertiesChanges(quiz, title, settings);
 
       if (changes) {
-        firebase.firestore().collection('Q').doc(quiz.uuid).update(changes).then(() => {
-
-          quiz.title = title;
-          quiz.settings = settings;
-
-          resolve();
-        }).catch((error) => {
-          reject(error);
-        });
+        firebase.firestore().collection('Q').doc(quiz.uuid).update(changes);
+        resolve();
       } else {
         resolve();
       }
@@ -356,24 +404,8 @@ export class QuizsProvider {
       }
 
       // Commit the batch
-      batch.commit().then(() => {
-        for (let category of categorys) {
-          let oldCategory: number = quiz.categorys.findIndex((c) => c.uuid === category.uuid);
-
-          if (oldCategory !== -1) {
-            quiz.categorys[oldCategory] = category;
-          }
-          else {
-            reject('cant batch update new categorys');
-          }
-        }
-
-        resolve();
-
-      }).catch((error) => {
-        console.log(error);
-        reject("Could not update players online");
-      });
+      batch.commit();
+      resolve();
     });
   }
 
@@ -390,14 +422,8 @@ export class QuizsProvider {
       batch.delete(categoryRef);
 
       // Commit the batch
-      batch.commit().then(() => {
-        quiz.questions = quiz.questions.filter((q) => q.categoryUuid !== category.uuid);
-        quiz.categorys = quiz.categorys.filter((c) => c.uuid !== category.uuid);
-
-        resolve();
-      }).catch(() => {
-        reject('Could not delete category and associated questions online.');
-      });
+      batch.commit();
+      resolve();
     });
   }
 
@@ -460,54 +486,20 @@ export class QuizsProvider {
         //Do the normal stuff
         let changes = this.getQuestionPropertiesChanges(quiz, question);
 
-        console.log(changes);
-
         if (changes) {
-        if (question.uuid) {
-          batch.update(questionRef, changes);
-        }
-        else {
-          batch.set(questionRef, changes);
-        }
+          if (question.uuid) {
+            batch.update(questionRef, changes);
+          }
+          else {
+            batch.set(questionRef, changes);
+          }
 
           // Commit the batch
-          batch.commit().then(() => {
-
-            //let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
-
-            if (newCategory) quiz.categorys.push(newCategory);
-
-            /*if (oldQuestion !== -1) {
-              quiz.questions[oldQuestion] = question;
-            }
-            else {
-              let questionUUID: Question = {
-                uuid: questionRef.id,
-                afterQuestionUuid: question.afterQuestionUuid,
-                question: question.question,
-                type: question.type,
-                categoryUuid: question.categoryUuid,
-                rightAnswer: question.rightAnswer,
-                draft: question.draft,
-                hide: question.hide,
-                answers: question.answers,
-                extras: question.extras,
-                authorId: question.authorId
-              }
-
-              quiz.questions.push(questionUUID);
-            }*/
-
-            resolve();
-
-          }).catch((error) => {
-            console.log(error);
-            reject("Could not update players online");
-          });
+          batch.commit();
+          resolve();
         } else {
           resolve();
         }
-
       }).catch((error) => {
         reject("Could not update players online");
       });
@@ -524,13 +516,8 @@ export class QuizsProvider {
       }
 
       // Commit the batch
-      batch.commit().then(() => {
-        quiz.questions = quiz.questions.filter((q) => q.selected !== true);
-
-        resolve();
-      }).catch(() => {
-        reject("Could not update players online");
-      });
+      batch.commit();
+      resolve();
     });
   }
 
@@ -555,23 +542,8 @@ export class QuizsProvider {
       }
 
       // Commit the batch
-      batch.commit().then(() => {
-        for (let question of questions) {
-          let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
-
-          if (oldQuestion !== -1) {
-            quiz.questions[oldQuestion] = question;
-          }
-          else {
-            reject('cant batch update new questions');
-          }
-        }
-
-        resolve();
-      }).catch((error) => {
-        console.log(error);
-        reject("Could not update players online");
-      });
+      batch.commit();
+      resolve();
     });
   }
 
