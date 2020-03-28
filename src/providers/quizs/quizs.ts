@@ -28,9 +28,14 @@ interface AttachementsResult {
   fileNames: Array<string>
 }
 
-interface QuizSnapshot {
-  readonly quizUuid: string,
+interface FirebaseSnapshot {
+  readonly uuid: string,
   readonly unsubscribe: () => void
+}
+
+interface FirebaseObservable {
+  readonly uuid: string,
+  readonly subscription: Subscription
 }
 
 /*
@@ -50,7 +55,7 @@ export class QuizsProvider {
     this.quizs = new Array<Quiz>();
   }
 
-  sync(profileUuid: string) {
+  public sync(profileUuid: string) {
     return new Promise(async (resolve, reject) => {
       this.profileUuid = profileUuid;
       this.stopSync();
@@ -66,76 +71,116 @@ export class QuizsProvider {
     });
   }
 
-  stopSync() {
+  public stopSync() {
     if (this.quizsChangesSubscription) this.quizsChangesSubscription.unsubscribe();
   }
 
-  quizsChanges() {
+  private quizsChanges() {
     return new Observable<boolean>(observer => {
-      let quizsSnapshots: Array<QuizSnapshot> = new Array<QuizSnapshot>();
+      let snapshots: Array<FirebaseObservable> = new Array<FirebaseObservable>();
 
-      const unsubscribe = firebase.firestore().collection('U').doc(this.profileUuid).collection('Q').onSnapshot(async (querySnapshot) => {
-        let currentQuizUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
-        let addedQuizIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
+      const unsubscribe = firebase.firestore().collection('U').doc(this.profileUuid).collection('Q').onSnapshot((querySnapshot) => {
+        let currentUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
+        let addedIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
 
-        //First delete quizs if user has been removed of it and stop listen to changes
-        //console.log(this.quizs.filter((q) => currentQuizs.some((currentQ) => currentQ === q.uuid))) //Donne les lignes supprimes
-        for (let quiz of this.quizs) {
-          if (!currentQuizUuids.some(uuid => uuid === quiz.uuid)) {
-            let snapshot: QuizSnapshot = quizsSnapshots.find((q) => q.quizUuid === quiz.uuid);
-            if (snapshot) snapshot.unsubscribe();
-
-            this.quizs.splice(this.quizs.indexOf(quiz), 1);
+        for (let snapshot of snapshots) {
+          if (!currentUuids.some(uuid => uuid === snapshot.uuid)) {
+            snapshot.subscription.unsubscribe();
+            snapshots.splice(snapshots.indexOf(snapshot), 1);
           }
         }
 
-        //Handle added quizs
-        setTimeout(() => {
-          for (let index of addedQuizIndexes) {
-            let doc = querySnapshot.docs[index];
+        this.quizs = this.quizs.filter((q) => currentUuids.some((uuid) => uuid === q.uuid));
 
-              console.log(doc.id, ' => ', doc.data());
-
-              const unsubscribe = firebase.firestore().collection('Q').doc(doc.id).onSnapshot((quizDoc) => {
-                console.log('something is happening here, has it been deleted?');
-                console.log(quizDoc.id, ' => ', quizDoc.data(), ' status ', quizDoc);
-
-                let quizData = quizDoc.data();
-
-                let quiz: Quiz = {
-                  uuid: quizDoc.id,
-                  title: quizData.title,
-                  creationDate: 0,
-                  settings: quizData.settings,
-                  categorys: [],
-                  questions: [],
-                };
-
-                let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quizDoc.id);
-
-                if (quizIndex !== -1) {
-                  this.quizs[quizIndex] = quiz;
-                  console.log('changed quiz v2');
-                } else {
-                  this.quizs.push(quiz);
-                  console.log('pushed quiz');
-                }
-              }, (error) => {
-                console.log('something bad happend 2', error);
-              });
-
-              quizsSnapshots.push({quizUuid: doc.id, unsubscribe: unsubscribe});
-          }
-        }, 500);
-
+        for (let index of addedIndexes) {
+          let doc = querySnapshot.docs[index];
+            snapshots.push({uuid: doc.id, subscription: this.quizChanges(doc.id).subscribe()});
+        }
       }, (error) => {
-        console.log('shit happed on that level ', error);
+        console.log('quizsChanges onSnapshot error: ', error);
       });
 
+      return () => {
+        for (let snapshot of snapshots) {
+          snapshot.subscription.unsubscribe();
+        }
+
+        unsubscribe();
+      };
+    });
+  }
+
+  private quizChanges(quizUuid: string) {
+    return new Observable<boolean>(observer => {
+      //First register for quiz data changes
+      const unsubscribeQuizSnapshot = this.quizChangesOnSnapshot(quizUuid);
+
+      //Then register for questions changes
+      const unsubscribeQuizQuestions = this.questionsChanges(quizUuid).subscribe();
 
 
       return () => {
-        for (let snapshot of quizsSnapshots) {
+        unsubscribeQuizSnapshot();
+        unsubscribeQuizQuestions.unsubscribe();
+      };
+    });
+  }
+
+  private quizChangesOnSnapshot(quizUuid: string): () => void {
+    return firebase.firestore().collection('Q').doc(quizUuid).onSnapshot((quizDoc) => {
+      console.log('quizChangesOnSnapshot', quizDoc.id, ' => ', quizDoc.data(), ' status ', quizDoc);
+
+      let quizData = quizDoc.data();
+
+      let quiz: Quiz = {
+        uuid: quizDoc.id,
+        title: quizData.title,
+        creationDate: 0,
+        settings: quizData.settings,
+        categorys: [{uuid: 'YfG5l18oxHk1IQZ2xgx4', afterCategoryUuid: 'first', name: 'uncategorized'}],
+        questions: [],
+      };
+
+      let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quizDoc.id);
+
+      if (quizIndex !== -1) {
+        this.quizs[quizIndex] = quiz;
+      } else {
+        this.quizs.push(quiz);
+      }
+    }, (error) => {
+      console.log('quizChangesOnSnapshot error: ', error);
+    });
+  }
+
+  private questionsChanges(quizUuid: string):  Observable<void> {
+    return new Observable<void>(observer => {
+      let snapshots: Array<FirebaseSnapshot> = new Array<FirebaseSnapshot>();
+
+      const unsubscribe = firebase.firestore().collection('Q').doc(quizUuid).collection('Q').onSnapshot((querySnapshot) => {
+        let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
+        let currentUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
+        let addedIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
+
+        for (let snapshot of snapshots) {
+          if (!currentUuids.some(uuid => uuid === snapshot.uuid)) {
+            snapshot.unsubscribe();
+            snapshots.splice(snapshots.indexOf(snapshot), 1);
+          }
+        }
+
+        quiz.questions = quiz.questions.filter((q) => currentUuids.some((uuid) => uuid === q.uuid));
+
+        for (let index of addedIndexes) {
+          let doc = querySnapshot.docs[index];
+            snapshots.push({uuid: doc.id, unsubscribe: this.questionChangesOnSnapshot(quiz.uuid, doc.id)});
+        }
+      }, (error) => {
+        console.log('questionsChanges onSnapshot error: ', error);
+      });
+
+      return () => {
+        for (let snapshot of snapshots) {
           snapshot.unsubscribe();
         }
 
@@ -144,17 +189,52 @@ export class QuizsProvider {
     });
   }
 
-  quizChanges() {
+  private questionChangesOnSnapshot(quizUuid: string, questionUuid: string): () => void {
+    return firebase.firestore().collection('Q').doc(quizUuid).collection('Q').doc(questionUuid).onSnapshot((doc) => {
+      let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
+      let data = doc.data();
 
+      console.log('questionChangesOnSnapshot', doc.id, ' => ', data, ' status ', doc);
+
+      if (quiz) {
+        let question: Question = quiz.questions.find((q) => q.uuid === doc.id);
+
+        if (question) {
+          question.afterQuestionUuid = data.afterQuestionUuid,
+          question.question = data.question,
+          question.type = data.type,
+          question.rightAnswer = data.rightAnswer,
+          question.answers = data.answers,
+          question.extras = data.extras,
+          question.categoryUuid = data.categoryUuid,
+          question.authorId = data.authorId,
+          question.hide = data.hide,
+          question.draft = data.draft
+        } else {
+          let formatedData: Question = {
+            uuid: doc.id,
+            afterQuestionUuid: data.afterQuestionUuid,
+            question: data.question,
+            type: data.type,
+            rightAnswer: data.rightAnswer,
+            answers: data.answers,
+            extras: data.extras,
+            categoryUuid: data.categoryUuid,
+            authorId: data.authorId,
+            hide: data.hide,
+            draft: data.draft
+          }
+
+          quiz.questions.push(formatedData);
+        }
+      } else {
+        console.log('questionChangesOnSnapshot, quiz does not exists anymore');
+      }
+    }, (error) => {
+      console.log('questionChangesOnSnapshot error: ', error);
+    });
   }
 
-  questionsChanges() {
-
-  }
-
-  questionChanges() {
-
-  }
 
   categorysChanges() {
 
@@ -164,7 +244,7 @@ export class QuizsProvider {
 
   }
 
-  createQuizOnline(quiz: Quiz) {
+  public createQuizOnline(quiz: Quiz) {
     return new Promise((resolve, reject) => {
       console.log('createQuizOnline');
       let batch = firebase.firestore().batch();
@@ -214,14 +294,14 @@ export class QuizsProvider {
     });
   }
 
-  deleteQuizOnline(quiz: Quiz) {
+  public deleteQuizOnline(quiz: Quiz) {
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
     });
   }
 
-  deleteQuizsOnline() {
+  public deleteQuizsOnline() {
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
@@ -242,7 +322,7 @@ export class QuizsProvider {
     });
   }
 
-  saveSettingsOnline(quiz: Quiz, title: string, settings: QuizSettings) {
+  public saveSettingsOnline(quiz: Quiz, title: string, settings: QuizSettings) {
     return new Promise((resolve, reject) => {
       let changes = this.getSettingsPropertiesChanges(quiz, title, settings);
 
@@ -262,7 +342,7 @@ export class QuizsProvider {
     });
   }
 
-  saveCategorysOnline(quiz: Quiz, categorys: Array<Category>) {
+  public saveCategorysOnline(quiz: Quiz, categorys: Array<Category>) {
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
@@ -297,7 +377,7 @@ export class QuizsProvider {
     });
   }
 
-  deleteCategoryOnline(quiz: Quiz, category: Category) {
+  public deleteCategoryOnline(quiz: Quiz, category: Category) {
     return new Promise<string>((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
@@ -321,7 +401,7 @@ export class QuizsProvider {
     });
   }
 
-  saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category) {
+  public saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category) {
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
@@ -393,11 +473,11 @@ export class QuizsProvider {
           // Commit the batch
           batch.commit().then(() => {
 
-            let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
+            //let oldQuestion: number = quiz.questions.findIndex((q) => q.uuid === question.uuid);
 
             if (newCategory) quiz.categorys.push(newCategory);
 
-            if (oldQuestion !== -1) {
+            /*if (oldQuestion !== -1) {
               quiz.questions[oldQuestion] = question;
             }
             else {
@@ -416,7 +496,7 @@ export class QuizsProvider {
               }
 
               quiz.questions.push(questionUUID);
-            }
+            }*/
 
             resolve();
 
@@ -434,7 +514,7 @@ export class QuizsProvider {
     });
   }
 
-  deleteQuestionsOnline(quiz: Quiz) {
+  public deleteQuestionsOnline(quiz: Quiz) {
     return new Promise<string>((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
@@ -454,7 +534,7 @@ export class QuizsProvider {
     });
   }
 
-  saveQuestionsOnline(quiz: Quiz, questions: Array<Question>) {
+  public saveQuestionsOnline(quiz: Quiz, questions: Array<Question>) {
     return new Promise((resolve, reject) => {
       let batch = firebase.firestore().batch();
 
@@ -495,7 +575,7 @@ export class QuizsProvider {
     });
   }
 
-  loadFromOnline() {
+  /*loadFromOnline() {
     return new Promise((resolve, reject) => {
       firebase.firestore().collection('U').doc(this.authProv.getUser().uid).collection('Q').get().then((userQuizsSnapshot) => {
 
@@ -553,9 +633,9 @@ export class QuizsProvider {
         reject('Could not get quizes');
       });
     });
-  }
+  }*/
 
-  loadQuestionsFromOnline(quizUuid: string) {
+  /*loadQuestionsFromOnline(quizUuid: string) {
     return new Promise((resolve, reject) => {
       let questions: Array<Question> = new Array<Question>();
 
@@ -585,9 +665,9 @@ export class QuizsProvider {
         reject('loadQuestionsFromOnline failed');
       });
     });
-  }
+  }*/
 
-  loadCategorysFromOnline(quizUuid: string) {
+  /*loadCategorysFromOnline(quizUuid: string) {
     return new Promise((resolve, reject) => {
       let categorys: Array<Category> = new Array<Category>();
 
@@ -609,7 +689,7 @@ export class QuizsProvider {
         reject('loadCategorysFromOnline failed');
       });
     });
-  }
+  }*/
 
   orderQuestionsFromOnline(toBeSortedQuestions: Array<Question>) {
     let searchedUuid: string = 'first';
@@ -689,7 +769,7 @@ export class QuizsProvider {
     });
   }
 
-  getSettingsPropertiesChanges(quiz: Quiz, title: string, settings: QuizSettings) {
+  private getSettingsPropertiesChanges(quiz: Quiz, title: string, settings: QuizSettings) {
     let savedSettings: QuizSettings = quiz.settings;
     let changes: any = {};
 
@@ -730,7 +810,7 @@ export class QuizsProvider {
     else return changes;
   }
 
-  getCategoryPropertiesChanges(quiz: Quiz, category: Category) {
+  private getCategoryPropertiesChanges(quiz: Quiz, category: Category) {
     let savedCategory: Category = quiz.categorys.find((c) => c.uuid === category.uuid);
     let changes: any = {};
 
@@ -748,7 +828,7 @@ export class QuizsProvider {
     else return changes;
   }
 
-  getQuestionPropertiesChanges(quiz: Quiz, question: Question) {
+  private getQuestionPropertiesChanges(quiz: Quiz, question: Question) {
     let savedQuestion: Question = quiz.questions.find((q) => q.uuid === question.uuid);
     let changes: any = {};
 
