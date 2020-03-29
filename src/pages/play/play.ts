@@ -448,6 +448,7 @@ export class PlayPage {
         this.screenState = ScreenStateType.end;
 
         await this.gameProv.updateState(GameState.ended);
+        this.gameProv.deleteGame();
 
         setTimeout(() => this.showExit = true, this.showNextDelay);
       }
