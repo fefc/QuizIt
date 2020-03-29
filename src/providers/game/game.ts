@@ -148,7 +148,7 @@ export class GameProvider {
 
   playerAddedChanges() {
     return new Observable<Player>(observer => {
-      firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(querySnapshot => {
+      const unsubscribe = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(querySnapshot => {
         querySnapshot.docChanges().forEach(change => {
           if (change.type === 'added') {
             let player: Player = {
@@ -167,15 +167,14 @@ export class GameProvider {
       });
 
       return () => {
-        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(() => {});
-        unsub();
+        unsubscribe();
       };
     });
   }
 
   playerAnswerChanges() {
     return new Observable<any>(observer => {
-      firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(querySnapshot => {
+      const unsubscribe = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(querySnapshot => {
         querySnapshot.docChanges().forEach(change => {
           if (change.type === 'modified') {
             observer.next({uuid: change.doc.id, answer: change.doc.data().I});
@@ -184,8 +183,7 @@ export class GameProvider {
       });
 
       return () => {
-        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').onSnapshot(() => {});
-        unsub();
+        unsubscribe();
       };
     });
   }
