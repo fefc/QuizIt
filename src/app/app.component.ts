@@ -311,7 +311,7 @@ export class AppComponent {
         let img = <HTMLImageElement> document.getElementById('avatar');
 
         let canvas = document.createElement('canvas');
-        let imgRatio: number = img.width / img.height;
+        let imgRatio: number = img.naturalWidth / img.naturalHeight;
         let zoom: number;
         let newImgHeight: number;
         let newImgWidth: number;
@@ -322,13 +322,13 @@ export class AppComponent {
         canvas.height = 200;
 
         if (imgRatio > 1) {
-          zoom = img.height / canvas.height;
+          zoom = img.naturalHeight / canvas.height;
           newImgHeight = canvas.height;
-          newImgWidth = img.width / zoom;
+          newImgWidth = img.naturalWidth / zoom;
           widthMargin = -(newImgWidth / 2) + (canvas.width / 2);
         } else {
-          zoom = img.width / canvas.width;
-          newImgHeight = img.height / zoom;
+          zoom = img.naturalWidth / canvas.width;
+          newImgHeight = img.naturalHeight / zoom;
           newImgWidth = canvas.width;
           heightMargin = -(newImgHeight / 2) + (canvas.height / 2);
         }
