@@ -635,7 +635,7 @@ export class PlayPage {
   }
 
   getQuestionsFromCategory(category: Category) {
-    return this.quiz.questions.filter((question) => question.categoryUuid === category.uuid);
+    return this.quiz.questions.filter((question) => question.categoryUuid === category.uuid && !question.draft && !question.hide);
   }
 
   getPicturePath(question: Question, answerIndex: number) {
