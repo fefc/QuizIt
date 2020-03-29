@@ -138,10 +138,10 @@ export class GameProvider {
         if (result.data.deleted) {
           resolve();
         } else {
-          reject();
+          resolve();
         }
       }).catch(error => {
-        reject("Unable to delete game online.");
+        resolve("Unable to delete game online.");
       });
     });
   }
