@@ -161,6 +161,8 @@ $fullDark: rgba(0, 0, 0, 0.9);
       border-radius: 2vh;
 
       transform-origin: -15vw top;
+
+      transition: background-color 0.8s ease;
     }
 
     .zero {
@@ -181,6 +183,11 @@ $fullDark: rgba(0, 0, 0, 0.9);
     .three {
       background-color: rgba(146,148,1, 0.7);
       border: 0.2vh solid #929401;
+    }
+
+    .disabled {
+      background-color: #444 !important;
+      border: 0.4vh solid #444 !important;
     }
   }
 
