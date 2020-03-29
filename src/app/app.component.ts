@@ -265,7 +265,7 @@ export class AppComponent {
       enableBackdropDismiss: false,
       inputs: [
         {
-          name: this.translate.instant('NICKNAME'),
+          name: 'nickname',
           placeholder: this.translate.instant('NICKNAME_NEW')
         }
       ],
