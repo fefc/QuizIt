@@ -37,10 +37,7 @@
       <br>
       <p>{{ 'LOG_IN_INFO' | translate }}</p>
       <br>
-      <button ion-button outline color="fulllight" (click)="resetPassword()">
-        {{ 'LOST_PASSWORD' | translate }}
-      </button>
-      <button ion-button color="primary" (click)="startLogin()" [disabled]="!enableLoginButton()">
+      <button ion-button color="primary" (click)="startLogin()">
         {{ 'LOG_IN' | translate }}
       </button>
       <p class="sign-in">{{ 'DONT_HAVE_ACCOUNT' | translate }}</p>

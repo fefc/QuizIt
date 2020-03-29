@@ -11,7 +11,7 @@ import { UserProfilesProvider } from '../../providers/user-profiles/user-profile
 import { AuthenticationProvider } from '../../providers/authentication/authentication';
 
 import { HomePage } from '../../pages/home/home';
-import { SignUpPage } from '../../pages/sign-up/sign-up';
+import { LoginPage } from '../../pages/login/login';
 
 const MAX_PICTURE_WIDTH: number = 64;
 const MAX_PICTURE_HEIGHT: number = 64;
@@ -75,77 +75,9 @@ export class StartPage {
     this.slides.slideTo(2);
   }
 
-  resetPassword() {
-    let alert = this.alertCtrl.create({
-      title: this.translate.instant('RESET_PASSWORD'),
-      message: this.translate.instant('RESET_PASSWORD_INFO'),
-      enableBackdropDismiss: false,
-      inputs: [
-        {
-          name: 'email',
-          placeholder: this.translate.instant('EMAIL'),
-          type: 'email'
-        }
-      ],
-      buttons: [
-        {
-          text: this.translate.instant('CANCEL'),
-          role: 'cancel'
-        },
-        {
-          text: this.translate.instant('OK'),
-          handler: data => {
-            let loading = this.loadingCtrl.create({
-              content: this.translate.instant('RESETTING')
-            });
-
-            loading.present();
-
-            this.authProv.resetPassword(data.email).then(() => {
-              loading.dismiss();
-              this.showOnlineAlert('RESET_PASSWORD', 'RESET_PASSWORD_CONFIRMATION');
-            }).catch((error) => {
-              loading.dismiss();
-              this.showOnlineAlert('RESET_PASSWORD', error.code);
-            });
-          }
-        }
-      ]
-    });
-
-    alert.present();
-  }
-
   startLogin() {
-    let loading = this.loadingCtrl.create({
-      content: this.translate.instant('LOGGING_IN')
-    });
-
-    loading.present();
-
-    this.authProv.login(this.email, this.password).then((user) => {
-      loading.dismiss();
-
-      this.gotToCreateProfile();
-      /*this.profilesProv.loadFromOnline().then(() => {
-
-        if (this.profilesProv.profile.uuid) {
-          this.profile = JSON.parse(JSON.stringify(this.profilesProv.profile));
-
-          if (this.profile.nickname.length > 2) {
-            this.openHomePage();
-          } else {
-            this.gotToCreateProfile();
-          }
-        }
-      }).catch((error) => {
-        alert('Something went wrong');
-      });*/
-
-    }).catch((error) => {
-      loading.dismiss();
-      this.showOnlineAlert('ERROR_LOGGING_IN', error.code);
-    });
+    let modal = this.modalCtrl.create(LoginPage);
+    modal.present();
   }
 
   showOnlineAlert(title: string, message: string) {
@@ -174,21 +106,8 @@ export class StartPage {
   }
 
   openSignUpPage() {
-    let modal = this.modalCtrl.create(SignUpPage);
+    let modal = this.modalCtrl.create(LoginPage, {signUpScreen: true});
     modal.present();
-
-    modal.onDidDismiss(data => {
-      if (data) {
-
-        this.profile = {
-          uuid: data.user.id,
-          nickname: '',
-          avatar: ''
-        }
-
-        this.gotToCreateProfile();
-      }
-    });
   }
 
   createProfile() {

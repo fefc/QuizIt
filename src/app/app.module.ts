@@ -33,7 +33,7 @@ import { ConnectionProvider } from '../providers/connection/connection';
 
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
-import { SignUpPage } from '../pages/sign-up/sign-up';
+import { LoginPage } from '../pages/login/login';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
@@ -67,7 +67,7 @@ export function createTranslateLoader(http: HttpClient) {
     AboutPage,
     GeneralErrorPage,
     UserProfilePage,
-    SignUpPage,
+    LoginPage,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -100,7 +100,7 @@ export function createTranslateLoader(http: HttpClient) {
     AboutPage,
     GeneralErrorPage,
     UserProfilePage,
-    SignUpPage,
+    LoginPage,
     HomePage,
     HomeMenu,
     QuizNewPage,

@@ -9,8 +9,6 @@ import { UserProfile } from '../../models/user-profile';
 import { AuthenticationProvider } from '../../providers/authentication/authentication';
 import { ConnectionProvider } from '../../providers/connection/connection';
 
-import { SignUpPage } from '../../pages/sign-up/sign-up';
-
 const MAX_PICTURE_WIDTH: number = 512;
 const MAX_PICTURE_HEIGHT: number = 512;
 
