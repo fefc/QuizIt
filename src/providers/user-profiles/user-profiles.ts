@@ -32,13 +32,15 @@ export class UserProfilesProvider {
       if (this.profile.uuid !== profileUuid) {
         try {
           let profileDoc = await firebase.firestore().collection('U').doc(profileUuid).get();
-          let profileData = profileDoc.data();
+          let profileData = profileDoc.exists ? profileDoc.data() : undefined;
 
           this.profile = {
             uuid: profileUuid,
-            nickname: profileData ? profileData.nickname: '',
+            nickname: profileData ? profileData.nickname : '',
             avatar: profileData ? profileData.avatar : '',
+            avatarUrl: undefined //intentional, if nickname = '' this will shot the create profile without avatar
           };
+
         } catch (error) {
           reject(error);
         }
@@ -53,11 +55,7 @@ export class UserProfilesProvider {
     if (this.profileChangesSubscription) this.profileChangesSubscription.unsubscribe();
   }
 
-  createOnline(profile: UserProfile) {
-    return this.saveToOnline(profile, true);
-  }
-
-  saveToOnline(profile: UserProfile, newProfile?: boolean) {
+  saveToOnline(profile: UserProfile) {
     return new Promise(async (resolve, reject) => {
       try {
         profile.avatar = await this.uploadAvatar(profile);
@@ -68,51 +66,62 @@ export class UserProfilesProvider {
       let changes = this.getPropertiesChanges(profile);
 
       if (changes) {
-        if (newProfile) {
-          firebase.firestore().collection('U').doc(profile.uuid).set(changes);
-        } else {
-          firebase.firestore().collection('U').doc(profile.uuid).update(changes);
-        }
+        firebase.firestore().collection('U').doc(profile.uuid).get().then((doc) => {
+          if (doc.exists) {
+            firebase.firestore().collection('U').doc(profile.uuid).update(changes);
+          } else {
+            firebase.firestore().collection('U').doc(profile.uuid).set(changes);
+          }
+          resolve();
+        }).catch((error) => {
+          reject();
+        });
+      } else {
+        resolve();
       }
-
-      resolve();
     });
   }
 
   profileChanges() {
     return new Observable<boolean>(observer => {
       const unsubscribe = firebase.firestore().collection('U').doc(this.profile.uuid).onSnapshot(async (profileDoc) => {
-        let profileData = profileDoc.data();
-        let pendingUpload:boolean = false;
+        if (profileDoc.exists) {
+          let profileData = profileDoc.data();
+          let pendingUpload:boolean = false;
 
-        this.profile.avatar = profileData.avatar;
-        this.profile.nickname = profileData.nickname;
+          this.profile.avatar = profileData.avatar;
+          this.profile.nickname = profileData.nickname;
 
-        if (this.profile.avatar) {
-          try {
-             pendingUpload = await this.connProv.checkPendingUpload(this.profile.avatar);
+          if (this.profile.avatar) {
+            try {
+               pendingUpload = await this.connProv.checkPendingUpload(this.profile.avatar);
 
-            if (pendingUpload) {
-              await this.saveToOnline(JSON.parse(JSON.stringify(this.profile)));
+              if (pendingUpload) {
+                await this.saveToOnline(JSON.parse(JSON.stringify(this.profile)));
+              }
+            } catch (error) {
+              console.log(error);
             }
-          } catch (error) {
-            console.log(error);
-          }
 
-          if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
-            if (pendingUpload) {
-              this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
+            if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
+              if (pendingUpload) {
+                this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
+              } else {
+                this.profile.avatarUrl = undefined;
+              }
             } else {
-              this.profile.avatarUrl = undefined;
+              this.getAvatar(this.profile).then((url) => {
+                this.profile.avatarUrl = url;
+              }).catch((error) => {
+                this.profile.avatarUrl = undefined;
+             });
             }
           } else {
-            this.getAvatar(this.profile).then((url) => {
-              this.profile.avatarUrl = url;
-            }).catch((error) => {
-              this.profile.avatarUrl = undefined;
-           });
+            this.profile.avatarUrl = undefined;
           }
         } else {
+          this.profile.avatar = '';
+          this.profile.nickname = '';
           this.profile.avatarUrl = undefined;
         }
       });
@@ -125,7 +134,7 @@ export class UserProfilesProvider {
   getPropertiesChanges(profile: UserProfile) {
     let changes: any = {};
 
-    if (this.profile.uuid === profile.uuid) {
+    if (this.profile.nickname !== '') {
       //An update on a category
       if (profile.nickname !== this.profile.nickname) changes.nickname = profile.nickname;
       if (profile.avatar !== this.profile.avatar) changes.avatar = profile.avatar;

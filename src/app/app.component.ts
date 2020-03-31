@@ -106,7 +106,8 @@ export class AppComponent {
       }
 
       //Initialize root element
-      this.nav.setRoot(HomePage);
+      this.nav.setRoot(StartPage);
+      this.menuCtrl.enable(false, 'menu-one');
 
       //Initialize Firebase
       firebase.initializeApp(FIREBASE_CONFIG);
@@ -124,10 +125,13 @@ export class AppComponent {
                 promises.push(this.profilesProv.sync(this.authProv.getUser().uid));
                 promises.push(this.quizsProv.sync(this.authProv.getUser().uid));
 
-                Promise.all(promises).then((results) => {
+                Promise.all(promises).then(() => {
+                  this.openHomePage();
                   splashScreen.hide(); //This should only happen once please!
 
-                  //setTimeout(() => this.quizsProv.stopSync(), 5000);
+                  if (this.profilesProv.profile.nickname.length < 3) {
+                    this.openUserProfilePage(true);
+                  }
                 }).catch((errors) => {
                   this.openGeneralErrorPage(errors);
                   splashScreen.hide();
@@ -141,7 +145,7 @@ export class AppComponent {
               this.quizsProv.stopSync();
 
               this.openStartPage();
-              splashScreen.hide();
+              splashScreen.hide(); //This should only happen once please!
             }
           }, (error) => {
             this.openGeneralErrorPage(error);
@@ -155,10 +159,12 @@ export class AppComponent {
     });
   }
 
-  openUserProfilePage() {
+  openUserProfilePage(profileMustBeUpdated?: boolean) {
     this.menuCtrl.close('menu-one');
 
-    let modal = this.modalCtrl.create(UserProfilePage, {profile: this.profilesProv.profile});
+    let modal = this.modalCtrl.create(UserProfilePage,
+      {profile: this.profilesProv.profile, profileMustBeUpdated: profileMustBeUpdated},
+      {enableBackdropDismiss: profileMustBeUpdated ? false : true});
     modal.present();
     modal.onDidDismiss((data) => {
       if (data) {
@@ -180,6 +186,7 @@ export class AppComponent {
 
   openHomePage() {
     this.menuCtrl.close('menu-one');
+    this.menuCtrl.enable(true, 'menu-one');
 
     if (this.nav.getActive().component !== HomePage) {
       this.nav.setRoot(HomePage);
@@ -233,7 +240,6 @@ export class AppComponent {
   }
 
   joinGame(gameID: string, alternativeNickname?: string) {
-    //// TODO: Not going to work with new avatar
     let loading = this.loadingCtrl.create({
       content: this.translate.instant('JOINING')
     });

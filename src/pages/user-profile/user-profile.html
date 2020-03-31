@@ -1,9 +1,9 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      {{ 'EDIT_PROFILE' | translate }}
+      {{ !profileMustBeUpdated ? ('EDIT_PROFILE' | translate) : ('CREATE_PROFILE' | translate) }}
     </ion-title>
-    <ion-buttons end>
+    <ion-buttons end *ngIf="!profileMustBeUpdated">
       <button ion-button icon-only (click)="dismiss()">
         <ion-icon name="close"></ion-icon>
       </button>
@@ -32,12 +32,12 @@
         {{ 'NICKNAME_INFO' | translate }}
       </p>
     </ion-item-group>
-    <ion-item-group *ngIf="authProv.getUser()">
+    <ion-item-group *ngIf="authProv.getUser() && !profileMustBeUpdated">
       <ion-item-divider>
         <ion-label>{{ 'ONLINE_ACCOUNT' | translate }}</ion-label>
       </ion-item-divider>
       <ion-item>
-        <ion-icon name="cloud" item-start></ion-icon>
+        <ion-icon name="person" item-start></ion-icon>
         <h2>{{ 'CONNECTED_WITH' | translate }}</h2>
         <h3>{{ authProv.getUser().email }}</h3>
       </ion-item>
@@ -68,7 +68,9 @@
 <ion-footer>
   <ion-toolbar color="fulldark">
     <ion-buttons end>
-      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">{{ 'SAVE' | translate }}</button>
+      <button ion-button (click)="save()" [disabled]="!enableSaveButton()">
+        {{ !profileMustBeUpdated ? ('SAVE' | translate) : ('CREATE' | translate) }}
+      </button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

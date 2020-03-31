@@ -20,6 +20,8 @@ const MAX_PICTURE_HEIGHT: number = 512;
 export class UserProfilePage {
   private profile: UserProfile;
 
+  private profileMustBeUpdated: boolean;
+
   constructor(private platform: Platform,
               public modalCtrl: ModalController,
               public viewCtrl: ViewController,
@@ -31,6 +33,9 @@ export class UserProfilePage {
               private connProv: ConnectionProvider,
               private translate: TranslateService,
               params: NavParams) {
+
+    this.profileMustBeUpdated = params.data.profileMustBeUpdated;
+
     //lets make deep copies, so that we don't modfiy anything before user confirmation
     if (!params.data.profile) {
       this.profile = {

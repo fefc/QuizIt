@@ -6,67 +6,33 @@ page-start {
     flex-flow: column;
   }
 
-  .slide-zoom {
+  ion-grid {
     height: 100%;
-    overflow-y: scroll;
-  }
+    width: 100%;
 
-  .h2 {
-    margin-top: 2.8rem;
-  }
+    ion-row {
+      height: 100%;
+      width: 100%;
 
-  b {
-    color: color($colors, primary);
-  }
+      ion-col {
+        height: 100%;
+        width: 100%;
 
-  p {
-      padding: 0 40px;
-      font-size: 14px;
-      line-height: 1.5;
-  }
+        display: flex;
+        flex-flow: column;
+        text-align: center;
 
-  .forgot-password {
-    color: color($colors, primary);
-  }
+        .slide-image {
+          max-height: 50%;
+          max-width: 60%;
+          margin: 18px 0;
+        }
 
-  .sign-in {
-    border-top: solid color($colors, fulllight) 1px;
-    padding-top: 40px;
-    margin-top: 20px;
-    margin-left: 40px;
-    margin-right: 40px;
-  }
-
-  .slide-image {
-    max-height: 50%;
-    max-width: 60%;
-    margin: 18px 0;
-  }
-
-  ion-avatar {
-    margin: 10px 0 20px 0;
-
-    img {
-      height: 128px !important;
-      width: 128px !important;
-      margin: auto;
-      border: 0.2em solid white;
-      object-fit: cover;
+        .empty-space {
+          height: auto;
+          flex-grow: 1;
+        }
+      }
     }
-
-    .no-img {
-      padding: 10px;
-    }
-  }
-
-  .avatar-fab {
-    left: 50%;
-    margin-left: 14px;
-    bottom: 14px;
-  }
-
-  .slide-input {
-    max-width: 600px;
-    margin: auto;
   }
 }
