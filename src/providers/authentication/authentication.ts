@@ -122,7 +122,6 @@ export class AuthenticationProvider {
   signInAnonymously() {
     return new Promise<any>((resolve, reject) => {
       firebase.auth().signInAnonymously().then((additionalUserInfo) => {
-        console.log(this.getUser());
         resolve(additionalUserInfo.user);
       }).catch((error) => {
         reject(error);
