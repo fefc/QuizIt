@@ -62,9 +62,9 @@
         <h3>{{ 'LINK_ACCOUNT_INFO' | translate }}</h3>
       </ion-item>
       <ion-item tappable (tap)="!authProv.getUser().isAnonymous ? deleteAccount() : deleteAnonymousAccount()">
-        <ion-icon name="trash" item-start></ion-icon>
-        <h2>{{ 'DELETE_ACCOUNT' | translate }}</h2>
-        <h3>{{ 'DELETE_ACCOUNT_INFO' | translate }}</h3>
+        <ion-icon [name]="!authProv.getUser().isAnonymous ? 'trash' : 'log-out'" item-start></ion-icon>
+        <h2>{{ !authProv.getUser().isAnonymous ? ('DELETE_ACCOUNT' | translate) : ('LOG_OUT' | translate) }}</h2>
+        <h3>{{ !authProv.getUser().isAnonymous ? ('DELETE_ACCOUNT_INFO' | translate) : ('LOG_OUT_INFO' | translate) }}</h3>
       </ion-item>
     </ion-item-group>
   </ion-list>
