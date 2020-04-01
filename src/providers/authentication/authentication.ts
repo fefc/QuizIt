@@ -79,7 +79,9 @@ export class AuthenticationProvider {
 
   createAccount(email: string, password: string) {
     return new Promise<any>((resolve, reject) => {
-      firebase.auth().createUserWithEmailAndPassword(email, password).then((additionalUserInfo) => {
+      let promise = !this.getUser() ? firebase.auth().createUserWithEmailAndPassword(email, password) : this.linkWithEmail(email, password);
+
+      promise.then((additionalUserInfo) => {
         resolve(additionalUserInfo.user);
       }).catch((error) => {
         reject(error);
@@ -113,6 +115,57 @@ export class AuthenticationProvider {
         });
       } else {
         reject({code: "Currently no user logged in."});
+      }
+    });
+  }
+
+  signInAnonymously() {
+    return new Promise<any>((resolve, reject) => {
+      firebase.auth().signInAnonymously().then((additionalUserInfo) => {
+        console.log(this.getUser());
+        resolve(additionalUserInfo.user);
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  }
+
+  deleteAnonymousAccount() {
+    return new Promise((resolve, reject) => {
+      if (firebase.auth().currentUser) {
+        if (firebase.auth().currentUser.isAnonymous) {
+          firebase.auth().currentUser.delete().then(() => {
+            resolve();
+          }).catch((error) => {
+            reject(error);
+          });
+        } else {
+          reject({code: "Current user is not anonymous."});
+        }
+      } else {
+        reject({code: "Currently no user logged in."});
+      }
+    });
+  }
+
+  linkWithEmail(email: string, password: string) {
+    return new Promise<firebase.auth.UserCredential>((resolve, reject) => {
+      let user = firebase.auth().currentUser;
+
+      if (user) {
+        if (user.isAnonymous) {
+          let credential = firebase.auth.EmailAuthProvider.credential(email, password);
+
+          firebase.auth().currentUser.linkWithCredential(credential).then((userCredential) => {
+            resolve(userCredential);
+          }).catch((error) => {
+            reject(error);
+          });
+        } else {
+          reject({code: 'auth/email-already-in-use'});
+        }
+      } else {
+        reject({code: "auth/user-not-found"});
       }
     });
   }

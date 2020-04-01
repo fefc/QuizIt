@@ -22,14 +22,14 @@
         <br>
         <p>{{ 'LOG_IN_INFO' | translate }}</p>
         <br>
-        <button ion-button color="primary" (click)="startLogin()">
+        <button ion-button color="primary" (click)="openLoginPage()">
           {{ 'LOG_IN' | translate }}
         </button>
         <p class="sign-in">{{ 'DONT_HAVE_ACCOUNT' | translate }}</p>
         <button ion-button color="light" (click)="openSignUpPage()">
           {{ 'SIGN_UP' | translate }}
         </button>
-        <button ion-button color="light" (click)="openSignUpPage()">
+        <button ion-button color="light" (click)="signInAnonymously()">
           {{ 'SKIP' | translate }}
         </button>
 

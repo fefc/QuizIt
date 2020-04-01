@@ -9,6 +9,8 @@ import { UserProfile } from '../../models/user-profile';
 import { AuthenticationProvider } from '../../providers/authentication/authentication';
 import { ConnectionProvider } from '../../providers/connection/connection';
 
+import { LoginPage } from '../../pages/login/login';
+
 const MAX_PICTURE_WIDTH: number = 512;
 const MAX_PICTURE_HEIGHT: number = 512;
 
@@ -190,8 +192,8 @@ export class UserProfilePage {
 
             this.authProv.deleteAccount(data.email, data.password).then(() => {
               //Has been deleted online, need to update local data, so save()
-              this.save();
               loading.dismiss();
+              this.dismiss();
               this.showOnlineAlert('DELETE_ACCOUNT', 'DELETE_ACCOUNT_CONFIRMATION');
             }).catch((error) => {
               loading.dismiss();
@@ -203,6 +205,47 @@ export class UserProfilePage {
     });
 
     alert.present();
+  }
+
+  deleteAnonymousAccount() {
+    let alert = this.alertCtrl.create({
+      title: this.translate.instant('DELETE_ACCOUNT'),
+      message: this.translate.instant('DELETE_ACCOUNT_INFO'),
+      enableBackdropDismiss: false,
+      buttons: [
+        {
+          text: this.translate.instant('CANCEL'),
+          role: 'cancel'
+        },
+        {
+          text: this.translate.instant('OK'),
+          handler: data => {
+            let loading = this.loadingCtrl.create({
+              content: this.translate.instant('DELETING')
+            });
+
+            loading.present();
+
+            this.authProv.deleteAnonymousAccount().then(() => {
+              //Has been deleted online, need to update local data, so save()
+              loading.dismiss();
+              this.dismiss();
+              this.showOnlineAlert('DELETE_ACCOUNT', 'DELETE_ACCOUNT_CONFIRMATION');
+            }).catch((error) => {
+              loading.dismiss();
+              this.showOnlineAlert('DELETE_ACCOUNT', error.code);
+            });
+          }
+        }
+      ]
+    });
+
+    alert.present();
+  }
+
+  linkAccount() {
+    let modal = this.modalCtrl.create(LoginPage, {signUpScreen: true});
+    modal.present();
   }
 
   showOnlineAlert(title: string, message: string) {
