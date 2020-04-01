@@ -49,15 +49,21 @@ export class ConnectionProvider {
       let connectSubscription = this.network.onchange().subscribe((state) => {
         if (state.type != 'offline') {
           this.connected = true;
-          firebase.firestore().enableNetwork().then(() => {observer.next(this.connected);});
+          firebase.firestore().enableNetwork().then(() => observer.next(this.connected));
         } else {
           this.connected = false;
-          firebase.firestore().disableNetwork().then(() => {observer.next(this.connected);});
+          firebase.firestore().disableNetwork().then(() => observer.next(this.connected));
         }
       });
 
       //Execute once at subscribtion.
-      observer.next(this.connected);
+      if (this.network.type !== this.network.Connection.NONE) {
+        this.connected = true;
+        firebase.firestore().enableNetwork().then(() => observer.next(this.connected));
+      } else {
+        this.connected = false;
+        firebase.firestore().disableNetwork().then(() => observer.next(this.connected));
+      }
 
       return () => {
         connectSubscription.unsubscribe();
