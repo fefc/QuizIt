@@ -40,6 +40,37 @@ export class ConnectionProvider {
         this.connected = false;
         firebase.firestore().disableNetwork().then(() => resolve());
       }
+
+      this.cleanNativeStorage().catch((error) => console.log(error));
+    });
+  }
+
+  cleanNativeStorage() {
+    return new Promise((resolve, reject) => {
+      this.nativeStorage.keys().then((keys) => {
+        let now: number = new Date().getTime();
+        let promises = [];
+
+        keys.forEach((key) => {
+          promises.push(this.nativeStorage.getItem(key));
+        });
+
+        Promise.all(promises).then((objects) => {
+          objects.forEach((object) => {
+            if (object.validUntil) {
+              if (new Date(object.validUntil).getTime() < now) {
+                this.nativeStorage.remove(keys[objects.indexOf(object)]);
+              }
+            }
+          });
+
+          resolve();
+        }).catch((error) => {
+          reject(error);
+        });
+      }).catch((error) => {
+        reject(error);
+      });
     });
   }
 
@@ -109,15 +140,12 @@ export class ConnectionProvider {
 
         this.file.checkFile(sourceDir, fileName).then(() => {
           //File pending locally
-          console.log('file pending');
           resolve(true);
         }).catch((error) => {
           //No file pending
-          console.log('file not exsistancs');
           resolve(false);
         });
       } else {
-        console.log('fullLocalath not valid');
         resolve(false);
       }
     });
@@ -129,13 +157,24 @@ export class ConnectionProvider {
         if (this.connected) {
           firebase.storage().ref().child(reference).getDownloadURL().then((url) => {
             if (!this.serviceWorkerAvailable) {
-              this.nativeStorage.setItem(reference, url); //No need to wait for it beeing done
+              firebase.storage().ref().child(reference).getMetadata().then((metadata) => {
+                let maxAge: number = metadata.cacheControl ? Number(metadata.cacheControl.match('max-age=([0-9]+)[\s;]*')[1]) : undefined;
+
+                if (maxAge) {
+                  this.nativeStorage.setItem(reference, {
+                    url: url,
+                    validUntil: new Date(new Date().getTime() + maxAge * 0.95 * 1000)
+                  }); //No need to wait for it beeing done
+                  //Remove 5% to be sure this time is in the valid range
+                }
+              }).catch((error) => {
+              });
             }
             resolve(url);
           }).catch((error) => {
             if (!this.serviceWorkerAvailable) {
-              this.nativeStorage.getItem(reference).then((cachedUrl) => {
-                resolve(cachedUrl);
+              this.nativeStorage.getItem(reference).then((cachedData) => {
+                resolve(cachedData.url);
               }).catch((error) => {
                 reject('Could not getCachedUrl from getStorageUrl.')
               });
@@ -145,8 +184,8 @@ export class ConnectionProvider {
           });
         } else {
           if (!this.serviceWorkerAvailable) {
-            this.nativeStorage.getItem(reference).then((cachedUrl) => {
-              resolve(cachedUrl);
+            this.nativeStorage.getItem(reference).then((cachedData) => {
+              resolve(cachedData.url);
             }).catch((error) => {
               reject('Could not getCachedUrl from getStorageUrl.')
             });
