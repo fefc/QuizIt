@@ -103,19 +103,11 @@ export class UserProfilesProvider {
               console.log(error);
             }
 
-            if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
-              if (pendingUpload) {
-                this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
-              } else {
-                this.profile.avatarUrl = undefined;
-              }
-            } else {
-              this.getAvatar(this.profile).then((url) => {
-                this.profile.avatarUrl = url;
-              }).catch((error) => {
-                this.profile.avatarUrl = undefined;
-             });
-            }
+            this.getAvatar(this.profile).then((url) => {
+              this.profile.avatarUrl = url;
+            }).catch((error) => {
+              this.profile.avatarUrl = undefined;
+           });
           } else {
             this.profile.avatarUrl = undefined;
           }
@@ -163,6 +155,10 @@ export class UserProfilesProvider {
   }
 
   getAvatar(profile: UserProfile) {
-    return this.connProv.getStorageUrl('U/' + profile.uuid + '/' + profile.avatar);
+    if (['file:///', 'filesystem:'].some(extension => profile.avatar.startsWith(extension))) {
+        return this.connProv.getLocalFileUrl(profile.avatar);
+    } else {
+      return this.connProv.getStorageUrl('U/' + profile.uuid + '/' + profile.avatar);
+    }
   }
 }
