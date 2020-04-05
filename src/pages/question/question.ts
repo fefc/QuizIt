@@ -1,11 +1,6 @@
-import * as firebase from "firebase/app";
-import 'firebase/storage';
-
 import { Component, ViewChild } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, ModalController, AlertController, ToastController, NavParams, Slides, FabContainer, reorderArray } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
-import { File } from '@ionic-native/file';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -13,8 +8,9 @@ import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 
-import { QuestionExtraPage } from '../question-extra/question-extra';
+import { ConnectionProvider } from '../../providers/connection/connection';
 
+import { QuestionExtraPage } from '../question-extra/question-extra';
 
 const MAX_PICTURE_WIDTH: number = 1920;
 const MAX_PICTURE_HEIGHT: number = 1080;
@@ -29,12 +25,9 @@ export class QuestionPage {
   private QuestionType = QuestionType; //for use in Angluar html
   private categorys: Array<Category>;
   private question: Question;
-  private attachementDir: string;
   private previousType: QuestionType;
   private previousAnswers: Array<string>;
   private previousRightAnswer: number;
-
-  private pictures: Array<SafeUrl>;
 
   private newQuestion: boolean;
 
@@ -48,10 +41,9 @@ export class QuestionPage {
               public modalCtrl: ModalController,
               private alertCtrl: AlertController,
               private toastCtrl: ToastController,
-              private file: File,
               private imagePicker: ImagePicker,
-              private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
+              private connProv: ConnectionProvider,
               private translate: TranslateService,
               params: NavParams) {
 
@@ -72,25 +64,24 @@ export class QuestionPage {
         answers: ['','','',''],
         extras: [],
         categoryUuid: this.categorys[0].uuid,
-        authorId: -1
+        authorId: -1,
+        answersUrl: new Array<any>(4),
+        extrasUrl: []
       };
-
-      this.attachementDir = '';
-      this.pictures = [];
     }
     else {
       this.question = JSON.parse(JSON.stringify(params.data.question));
+      this.newQuestion = false;
 
-      this.attachementDir = params.data.quizUuid + '/' + this.question.uuid + '/';
-      this.pictures = new Array<SafeUrl>(this.question.answers.length);
-
-      if (this.question.type == QuestionType.rightPicture) {
-        for (let i: number = 0; i < this.question.answers.length; i++) {
-          this.renderPicture(false, this.attachementDir + this.question.answers[i], i);
+      if (this.question.type === QuestionType.rightPicture) {
+        for (let i = 0; i < this.question.answers.length; i++) {
+          if (['file:///', 'filesystem:'].some(extension => this.question.answers[i].startsWith(extension))) {
+            setTimeout(async () =>  {
+              this.question.answersUrl[i] = await this.connProv.getLocalFileUrl(this.question.answers[i]);
+            }, 0); //Constructor can't get aysnc so let's do it my way.
+          }
         }
       }
-
-      this.newQuestion = false;
     }
 
     if (this.question.type === QuestionType.rightPicture) {
@@ -274,16 +265,12 @@ export class QuestionPage {
   openMobileImagePicker(maximumImagesCount: number) {
     let maxImages: number = maximumImagesCount - this.question.answers.length;
 
-    this.imagePicker.getPictures({maximumImagesCount: maxImages, width: MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
-      let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
-      let decodedURI: string = '';
-
+    this.imagePicker.getPictures({maximumImagesCount: maxImages, width: MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then(async (results) => {
       for (var i = 0; i < results.length; i++) {
-        decodedURI = decodeURIComponent(results[i]);
+        let decodedURI = decodeURIComponent(results[i]);
 
         this.question.answers.push(decodedURI);
-        this.pictures.push(undefined);
-        this.renderPicture(true, decodedURI.replace(decodedCacheDirectoryURI, ''), this.pictures.length - 1);
+        this.question.answersUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -291,13 +278,10 @@ export class QuestionPage {
   }
 
   replacePictureMobile(val: number) {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
-      if (results.length === 1) {
-        let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
-        let decodedURI: string = decodeURIComponent(results[0]);
-
-        this.question.answers[val] = decodedURI;
-        this.renderPicture(true, decodedURI.replace(decodedCacheDirectoryURI, ''), val);
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then(async (results) => {
+      if (results.length > 0) {
+        this.question.answers[val] = decodeURIComponent(results[0]);
+        this.question.answersUrl[val] = await this.connProv.getLocalFileUrl(this.question.answers[val]);
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -312,7 +296,7 @@ export class QuestionPage {
     }
 
     this.question.answers.splice(val, 1);
-    this.pictures.splice(val, 1);
+    this.question.answersUrl.splice(val, 1);
 
     val = val - 1;
 
@@ -325,7 +309,7 @@ export class QuestionPage {
   }
 
   openQuestionExtraPage() {
-    let modal = this.modalCtrl.create(QuestionExtraPage, {title: this.question.question, extras: this.question.extras, attachementDir: this.attachementDir}, {cssClass: 'modal-fullscreen'});
+    let modal = this.modalCtrl.create(QuestionExtraPage, {title: this.question.question, extras: this.question.extras, extrasUrl: this.question.extrasUrl}, {cssClass: 'modal-fullscreen'});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {
@@ -388,22 +372,5 @@ export class QuestionPage {
 
   dismiss() {
     this.viewCtrl.dismiss();
-  }
-
-  renderPicture(local: boolean, fileName: string, position: number) {
-    if (local) {
-      this.file.readAsDataURL(this.file.cacheDirectory, fileName).then((picture) => {
-        this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
-        this.slides.update();
-      }).catch((error) => {
-        console.log("Something went wrong when reading pictures.", error);
-      });
-    } else {
-      firebase.storage().ref().child(fileName).getDownloadURL().then((url) => {
-        this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
-      }).catch((error) => {
-        console.log("Something went wrong when reading pictures from firebase.", error);
-      });
-    }
   }
 }

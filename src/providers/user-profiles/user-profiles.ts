@@ -58,7 +58,7 @@ export class UserProfilesProvider {
   saveToOnline(profile: UserProfile) {
     return new Promise(async (resolve, reject) => {
       try {
-        profile.avatar = await this.uploadAvatar(profile);
+        profile.avatar = await this.connProv.uploadFile('U/' + profile.uuid + '/', profile.avatar);
       } catch (error) {
         console.log(error);
       }
@@ -103,7 +103,7 @@ export class UserProfilesProvider {
               console.log(error);
             }
 
-            this.getAvatar(this.profile).then((url) => {
+            this.connProv.getFileUrl('U/' + this.profile.uuid + '/', this.profile.avatar, pendingUpload).then((url) => {
               this.profile.avatarUrl = url;
             }).catch((error) => {
               this.profile.avatarUrl = undefined;
@@ -140,25 +140,5 @@ export class UserProfilesProvider {
     else return changes;
   }
 
-  uploadAvatar(profile: UserProfile) {
-    return new Promise<string>((resolve, reject) => {
-      if (['file:///', 'filesystem:'].some(extension => profile.avatar.startsWith(extension))) {
-        this.connProv.uploadFileOnline('U/' + profile.uuid + '/', profile.avatar).then((fileName) => {
-          resolve(fileName);
-        }).catch((error) => {
-          reject(error);
-        });
-      } else {
-        reject('Nothing to upload.');
-      }
-    });
-  }
 
-  getAvatar(profile: UserProfile) {
-    if (['file:///', 'filesystem:'].some(extension => profile.avatar.startsWith(extension))) {
-        return this.connProv.getLocalFileUrl(profile.avatar);
-    } else {
-      return this.connProv.getStorageUrl('U/' + profile.uuid + '/' + profile.avatar);
-    }
-  }
 }

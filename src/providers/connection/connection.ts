@@ -31,7 +31,7 @@ export class ConnectionProvider {
     }
   }
 
-  init() {
+  public init() {
     return new Promise((resolve, reject) => {
       if (this.network.type !== this.network.Connection.NONE) {
         this.connected = true;
@@ -45,7 +45,7 @@ export class ConnectionProvider {
     });
   }
 
-  cleanNativeStorage() {
+  private cleanNativeStorage() {
     return new Promise((resolve, reject) => {
       this.nativeStorage.keys().then((keys) => {
         let now: number = new Date().getTime();
@@ -74,7 +74,7 @@ export class ConnectionProvider {
     });
   }
 
-  connectionStateChanges() {
+  public connectionStateChanges() {
     return new Observable<boolean>((observer) => {
 
       let connectSubscription = this.network.onchange().subscribe((state) => {
@@ -103,35 +103,7 @@ export class ConnectionProvider {
     });
   }
 
-  uploadFileOnline(reference: string, fullLocalPath: string) {
-    return new Promise<string>((resolve, reject) => {
-      var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
-      var sourceDir = fullLocalPath.substring(0, indexOfSlash);
-      var fileName = fullLocalPath.substring(indexOfSlash);
-
-      if (this.connected) {
-        this.file.readAsArrayBuffer(sourceDir, fileName).then((arrayBuffer) => {
-          var fileRef = firebase.storage().ref().child(reference + fileName);
-
-          fileRef.put(arrayBuffer, { 'cacheControl': 'private, max-age=15552000' }).then((snap) => {
-            this.file.removeFile(sourceDir, fileName).then(() => {
-              resolve(fileName);
-            }).catch((error) => {
-              resolve(fileName);
-            });
-          }).catch((error) => {
-            reject(error.code);
-          });
-        }).catch((error) => {
-          reject(error);
-        });
-      } else {
-        reject('storage/retry-limit-exceeded');
-      }
-    });
-  }
-
-  checkPendingUpload(fullLocalPath: string) {
+  public checkPendingUpload(fullLocalPath: string) {
     return new Promise<boolean>((resolve, reject) => {
       if (['file:///', 'filesystem:'].some(extension => fullLocalPath.startsWith(extension))) {
         var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
@@ -151,7 +123,53 @@ export class ConnectionProvider {
     });
   }
 
-  getStorageUrl(reference: string) {
+  public uploadFile(reference: string, fullLocalPath: string) {
+    return new Promise<string>((resolve, reject) => {
+      var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
+      var sourceDir = fullLocalPath.substring(0, indexOfSlash);
+      var fileName = fullLocalPath.substring(indexOfSlash);
+
+      if (['file:///', 'filesystem:'].some(extension => fullLocalPath.startsWith(extension))) {
+        if (this.connected) {
+          this.file.readAsArrayBuffer(sourceDir, fileName).then((arrayBuffer) => {
+            var fileRef = firebase.storage().ref().child(reference + fileName);
+
+            fileRef.put(arrayBuffer, { 'cacheControl': 'private, max-age=15552000' }).then((snap) => {
+              this.file.removeFile(sourceDir, fileName).then(() => {
+                resolve(fileName);
+              }).catch((error) => {
+                resolve(fileName);
+              });
+            }).catch((error) => {
+              reject(error.code);
+            });
+          }).catch((error) => {
+            reject(error);
+          });
+        } else {
+          reject('storage/retry-limit-exceeded');
+        }
+      } else {
+        reject('Nothing to upload.');
+      }
+    });
+  }
+
+  public getFileUrl(dirReference: string, fileReference: string, pendingUpload: boolean) {
+    if (['file:///', 'filesystem:'].some(extension => fileReference.startsWith(extension))) {
+      if (pendingUpload) {
+        //It is possible to have a file startingWith file:/// but coming from another device, so need to check pendingUpload
+        //Pending tells us if the file is available locally
+        return this.getLocalFileUrl(fileReference);
+      } else {
+        return new Promise<any>((resolve) => resolve(undefined));
+      }
+    } else {
+      return this.getStorageUrl(dirReference + fileReference);
+    }
+  }
+
+  private getStorageUrl(reference: string) {
     return new Promise<string>((resolve, reject) => {
       if (reference) {
         if (this.connected) {
@@ -176,10 +194,13 @@ export class ConnectionProvider {
               this.nativeStorage.getItem(reference).then((cachedData) => {
                 resolve(cachedData.url);
               }).catch((error) => {
-                reject('Could not getCachedUrl from getStorageUrl.')
+                console.log('Could not getCachedUrl from getStorageUrl.');
+                resolve(undefined);
               });
             } else {
-              reject('Could not getStorageUrl from firebase.');
+              reject();
+              console.log('Could not getStorageUrl from firebase.');
+              resolve(undefined);
             }
           });
         } else {
@@ -187,19 +208,22 @@ export class ConnectionProvider {
             this.nativeStorage.getItem(reference).then((cachedData) => {
               resolve(cachedData.url);
             }).catch((error) => {
-              reject('Could not getCachedUrl from getStorageUrl.')
+              console.log('Could not getCachedUrl from getStorageUrl.');
+              resolve(undefined);
             });
           } else {
-            reject('Could not getStorageUrl from firebase.');
+            console.log('Could not getStorageUrl from firebase.');
+            resolve(undefined);
           }
         }
       } else {
-        reject("No reference, can't getStorageUrl.");
+        console.log("No reference, can't getStorageUrl.");
+        resolve(undefined);
       }
     });
   }
 
-  getLocalFileUrl(fullLocalPath: string): Promise<SafeUrl> {
+  public getLocalFileUrl(fullLocalPath: string): Promise<SafeUrl> {
     let convertedUrl: string = (<any> window).Ionic.WebView.convertFileSrc(fullLocalPath);
 
     if (convertedUrl.includes('http://')) {

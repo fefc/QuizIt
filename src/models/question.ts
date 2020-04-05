@@ -23,6 +23,8 @@ export interface Question {
   rightAnswer: number,
   answers: Array<string>,
   extras: Array<string>,
+  answersUrl?: Array<any>,
+  extrasUrl?: Array<any>,
   categoryUuid: string,
   authorId: number,
   selected?: boolean,

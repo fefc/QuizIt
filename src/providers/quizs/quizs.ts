@@ -7,6 +7,7 @@ import { Observable } from "rxjs/Observable"
 import { Subscription } from "rxjs/Subscription";
 import { File } from '@ionic-native/file';
 
+import { ConnectionProvider } from '../connection/connection';
 import { AuthenticationProvider } from '../authentication/authentication';
 
 declare var JJzip: any;
@@ -23,9 +24,10 @@ enum AttachementType {
   extras
 }
 
-interface AttachementsResult {
+interface AttachementResult {
+  index: number,
   type: AttachementType,
-  fileNames: Array<string>
+  fileName: string
 }
 
 interface FirebaseSnapshot {
@@ -51,7 +53,10 @@ export class QuizsProvider {
   private profileUuid: string;
   private quizsChangesSubscription: Subscription;
 
-  constructor(private file: File, private authProv: AuthenticationProvider) {
+  constructor(
+    private file: File,
+    private connProv: ConnectionProvider,
+    private authProv: AuthenticationProvider) {
     this.quizs = new Array<Quiz>();
   }
 
@@ -204,13 +209,11 @@ export class QuizsProvider {
   }
 
   private questionChangesOnSnapshot(quizUuid: string, questionUuid: string): () => void {
-    return firebase.firestore().collection('Q').doc(quizUuid).collection('Q').doc(questionUuid).onSnapshot((doc) => {
+    return firebase.firestore().collection('Q').doc(quizUuid).collection('Q').doc(questionUuid).onSnapshot(async (doc) => {
       let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
-      let data = doc.data();
 
-      console.log('questionChangesOnSnapshot', doc.id, ' => ', data, ' status ', doc);
-
-      if (quiz) {
+      if (doc.exists && quiz) {
+        let data = doc.data();
         let question: Question = quiz.questions.find((q) => q.uuid === doc.id);
 
         if (question) {
@@ -225,7 +228,7 @@ export class QuizsProvider {
           question.hide = data.hide,
           question.draft = data.draft
         } else {
-          let formatedData: Question = {
+          question = {
             uuid: doc.id,
             afterQuestionUuid: data.afterQuestionUuid,
             question: data.question,
@@ -239,12 +242,73 @@ export class QuizsProvider {
             draft: data.draft
           }
 
-          quiz.questions.push(formatedData);
+          quiz.questions.push(question);
         }
+
+        //Check attachements
+        var checkPromises = [];
+        var getAttachementPromises = [];
+        var pendingUploads: Array<boolean> = [];
+        const storageRef: string = 'Q/' + quizUuid + '/Q/' + questionUuid + '/';
+
+        for (let i = 0; i < question.extras.length; i++) {
+          pendingUploads.push(false);
+          checkPromises.push(this.connProv.checkPendingUpload(question.extras[i]));
+        }
+
+        if (question.type === QuestionType.rightPicture) {
+          for (let i = 0; i < question.answers.length; i++) {
+            pendingUploads.push(false);
+            checkPromises.push(this.connProv.checkPendingUpload(question.answers[i]));
+          }
+        }
+
+        try {
+          pendingUploads = await Promise.all(checkPromises);
+
+          if (pendingUploads.some((p) => p === true)) {
+            await this.saveQuestionOnline(quiz, JSON.parse(JSON.stringify(question)));
+          }
+        } catch (error) {
+          console.log(error);
+        }
+
+        for (let i = 0; i < question.extras.length; i++) {
+          getAttachementPromises.push(this.connProv.getFileUrl(storageRef, question.extras[i], pendingUploads[i]));
+        }
+
+        if (question.type === QuestionType.rightPicture) {
+          for (let i = 0; i < question.answers.length; i++) {
+            getAttachementPromises.push(this.connProv.getFileUrl(storageRef, question.answers[i], pendingUploads[i + question.extras.length]));
+          }
+        }
+
+        Promise.all(getAttachementPromises).then((attachements) => {
+          if (!question.extrasUrl) question.extrasUrl = [];
+          if (!question.answersUrl) question.answersUrl = [];
+
+          for (let i = 0; i < question.extras.length; i++) {
+            question.extrasUrl[i] = attachements[i];
+          }
+
+          if (question.extras.length === 0) {
+            question.extrasUrl = [];
+          }
+
+          if (question.type === QuestionType.rightPicture) {
+            for (let i = 0; i < question.answers.length; i++) {
+              question.answersUrl[i] = attachements[i + question.extras.length];
+            }
+          } else {
+            question.answersUrl = [];
+          }
+        }).catch((error) => {
+          console.log(error);
+        });
 
         quiz.questions = this.orderQuestionsFromOnline(quiz.questions);
       } else {
-        console.log('questionChangesOnSnapshot, quiz does not exists anymore');
+        console.log('questionChangesOnSnapshot, quiz or question does not exists anymore.');
       }
     }, (error) => {
       console.log('questionChangesOnSnapshot error: ', error);
@@ -428,7 +492,46 @@ export class QuizsProvider {
   }
 
   public saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      //Make sure to have a reference (id) before handling attachements
+      let questionRef;
+
+      if (question.uuid) {
+        questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
+      }
+      else {
+        questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
+      }
+
+      try {
+        let uploadPromises = []
+        const storageRef: string = 'Q/' + quiz.uuid + '/Q/' + questionRef.id + '/';
+
+        for (let i = 0; i < question.extras.length; i++) {
+          uploadPromises.push(this.connProv.uploadFile(storageRef, question.extras[i]));
+        }
+
+        if (question.type === QuestionType.rightPicture) {
+          for (let i = 0; i < question.answers.length; i++) {
+            uploadPromises.push(this.connProv.uploadFile(storageRef, question.answers[i]));
+          }
+        }
+
+        let attachementResults: Array<string> = await Promise.all(uploadPromises.map(p => p.catch(e => undefined)));
+
+        for (let i = 0; i < question.extras.length; i++) {
+          if (attachementResults[i]) question.extras[i] = attachementResults[i];
+        }
+
+        if (question.type === QuestionType.rightPicture) {
+          for (let i = 0; i < question.answers.length; i++) {
+            if (attachementResults[i + question.extras.length]) question.answers[i] = attachementResults[i + question.extras.length];
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+
       let batch = firebase.firestore().batch();
 
       if (newCategory) {
@@ -444,65 +547,23 @@ export class QuizsProvider {
         question.categoryUuid = newCategory.uuid;
       }
 
-      //Make sure to have a reference (id) before handling attachements
-      let questionRef;
+      //Do the normal stuff
+      let changes = this.getQuestionPropertiesChanges(quiz, question);
 
-      if (question.uuid) {
-        questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid);
-      }
-      else {
-        questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
-      }
-
-      //Check attachements
-      var promises = [];
-
-      //First check question answers (pictures)
-      promises.push(this.saveAttachementsOnline(quiz.uuid, questionRef.id, AttachementType.answers, question.answers.filter((a) => a.startsWith("file:///") || a.startsWith("filesystem:"))));
-      promises.push(this.saveAttachementsOnline(quiz.uuid, questionRef.id, AttachementType.extras, question.extras.filter((e) => e.startsWith("file:///") || e.startsWith("filesystem:"))));
-
-      //Update answers so that they contain only fileName and not fullPath
-      Promise.all(promises).then((attachementResults) => {
-        for (let result of attachementResults) {
-          let attachementIndex: number;
-
-          if (result.type === AttachementType.answers) {
-            //set correct answers
-            for (let fileName of result.fileNames) {
-              attachementIndex = question.answers.findIndex((a) => a.endsWith(fileName));
-
-              question.answers[attachementIndex] = fileName;
-            }
-          } else if (result.type === AttachementType.extras) {
-            //set correct extras
-            for (let fileName of result.fileNames) {
-              attachementIndex = question.extras.findIndex((e) => e.endsWith(fileName));
-
-              question.extras[attachementIndex] = fileName;
-            }
-          }
+      if (changes) {
+        if (question.uuid) {
+          batch.update(questionRef, changes);
+        }
+        else {
+          batch.set(questionRef, changes);
         }
 
-        //Do the normal stuff
-        let changes = this.getQuestionPropertiesChanges(quiz, question);
-
-        if (changes) {
-          if (question.uuid) {
-            batch.update(questionRef, changes);
-          }
-          else {
-            batch.set(questionRef, changes);
-          }
-
-          // Commit the batch
-          batch.commit();
-          resolve();
-        } else {
-          resolve();
-        }
-      }).catch((error) => {
-        reject("Could not update players online");
-      });
+        // Commit the batch
+        batch.commit();
+        resolve();
+      } else {
+        resolve();
+      }
     });
   }
 
@@ -697,48 +758,6 @@ export class QuizsProvider {
     }
 
     return sortedCategorys;
-  }
-
-  saveAttachementsOnline(quizUuid: string, questionUuid: string, type: AttachementType, attachements: Array<string>) {
-    return new Promise<AttachementsResult>((resolve, reject) => {
-      var promises = [];
-
-      var result: AttachementsResult = {
-        type: type,
-        fileNames: []
-      };
-
-      for (let attachement of attachements) {
-        promises.push(this.uploadFileOnline(quizUuid, questionUuid, attachement));
-      }
-
-      Promise.all(promises).then((fileNames) => {
-        result.fileNames = fileNames;
-        resolve(result);
-      }).catch((error) => {
-        reject(error);
-      });
-    });
-  }
-
-  uploadFileOnline(quizUuid: string, questionUuid: string, fullLocalPath: string) {
-    return new Promise((resolve, reject) => {
-      var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
-      var sourceDir = fullLocalPath.substring(0, indexOfSlash);
-      var fileName = fullLocalPath.substring(indexOfSlash);
-
-      this.file.readAsArrayBuffer(sourceDir, fileName).then((arrayBuffer) => {
-        var fileRef = firebase.storage().ref().child(quizUuid + '/' + questionUuid + '/' + fileName);
-
-        fileRef.put(arrayBuffer).then(() => {
-          resolve(fileName);
-        }).catch((error) => {
-          reject(error);
-        });
-      }).catch((error) => {
-        reject(error);
-      });
-    });
   }
 
   private getSettingsPropertiesChanges(quiz: Quiz, title: string, settings: QuizSettings) {

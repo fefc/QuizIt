@@ -13,10 +13,10 @@
 
 <ion-content>
   <p class="information" *ngIf="currentExtraType === ExtraType.none">{{ 'NO_INTRO_INFO' | translate }}</p>
-  <p class="information" *ngIf="currentExtraType !== ExtraType.none && !renderedExtra"><ion-spinner name="dots" color="primary"></ion-spinner></p>
-  <canvas *ngIf="currentExtraType === ExtraType.picture && renderedExtra" [style.background-image]="renderedExtra"></canvas>
-  <video controls autoplay *ngIf="currentExtraType === ExtraType.video && renderedExtra">
-    <source [src]="renderedExtra"/>
+  <p class="information" *ngIf="currentExtraType !== ExtraType.none && extrasUrl.length < 1"><ion-spinner name="dots" color="primary"></ion-spinner></p>
+  <img *ngIf="currentExtraType === ExtraType.picture && !extrasUrl.length < 1" [src]="extrasUrl[0]"/>
+  <video controls autoplay *ngIf="currentExtraType === ExtraType.video && !extrasUrl.length < 1">
+    <source [src]="extrasUrl[0]"/>
   </video>
 </ion-content>
 

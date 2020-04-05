@@ -1,15 +1,12 @@
-import * as firebase from "firebase/app";
-import 'firebase/storage';
-
 import { Component } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, NavParams } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
-import { File } from '@ionic-native/file';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ExtraType } from '../../models/question';
+
+import { ConnectionProvider } from '../../providers/connection/connection';
 
 const MAX_PICTURE_WIDTH: number = 1920;
 const MAX_PICTURE_HEIGHT: number = 1080;
@@ -24,41 +21,51 @@ export class QuestionExtraPage {
 
   private title: string;
   private extras: Array<string>;
-  private attachementDir: string;
+  private extrasUrl: Array<any>;
 
   private currentExtraType: ExtraType;
-  private renderedExtra: SafeUrl;
 
   constructor(private platform: Platform,
               public viewCtrl: ViewController,
-              private file: File,
               private imagePicker: ImagePicker,
-              private sanitizer: DomSanitizer,
               private androidPermissions: AndroidPermissions,
+              private connProv: ConnectionProvider,
               private translate: TranslateService,
               params: NavParams) {
 
-    this.currentExtraType = undefined;
-    this.renderedExtra = undefined;
+    this.currentExtraType = ExtraType.none;
+    this.extrasUrl = [];
 
     if (params.data) {
       this.title = params.data.title;
       this.extras = JSON.parse(JSON.stringify(params.data.extras));
-      this.attachementDir = params.data.attachementDir;
+      if (params.data.extrasUrl) {
+        this.extrasUrl = JSON.parse(JSON.stringify(params.data.extrasUrl));
+      } else {
+        this.extrasUrl = [];
+      }
+
+      console.log(this.extras, ' urls ', this.extrasUrl);
 
       if (this.extras.length > 0) {
-        if (this.extras[0].startsWith(this.file.cacheDirectory)) {
-          //It might be an extra that has not already been saved to dataDirectory
-          this.renderExtra(true, this.extras[0].replace(this.file.cacheDirectory, ''));
+        if (['file:///', 'filesystem:'].some(extension => this.extras[0].startsWith(extension))) {
+          setTimeout(async () =>  {
+            this.extrasUrl.push(await this.connProv.getLocalFileUrl(this.extras[0]));
+
+            if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
+              this.currentExtraType = ExtraType.video;
+            } else {
+              this.currentExtraType = ExtraType.picture;
+            }
+          }, 0); //Constructor can't get aysnc so let's do it my way.
         } else {
-          //Or it might be an extra that has already been saved to dataDirectory
-          this.renderExtra(false, this.attachementDir + this.extras[0]);
+          if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
+            this.currentExtraType = ExtraType.video;
+          } else {
+            this.currentExtraType = ExtraType.picture;
+          }
         }
-      } else {
-        this.currentExtraType = ExtraType.none;
       }
-    } else {
-      this.currentExtraType = ExtraType.none;
     }
   }
 
@@ -84,17 +91,21 @@ export class QuestionExtraPage {
 
   //https://stackoverflow.com/a/52970316
   openMobileImagePicker() {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width: MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90, allow_video: true}).then((results) => {
-      let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
-      let decodedURI: string = '';
-
+    this.imagePicker.getPictures({maximumImagesCount: 1, width: MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90, allow_video: true}).then(async (results) => {
       if (results.length > 0) {
-        decodedURI = decodeURIComponent(results[0]);
+        this.currentExtraType = ExtraType.none;
 
         this.extras = [];
-        this.extras.push(decodedURI);
+        this.extrasUrl = [];
 
-        this.renderExtra(true, decodedURI.replace(decodedCacheDirectoryURI, ''));
+        this.extras.push(decodeURIComponent(results[0]));
+        this.extrasUrl.push(await this.connProv.getLocalFileUrl(this.extras[0]));
+
+        if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
+          this.currentExtraType = ExtraType.video;
+        } else {
+          this.currentExtraType = ExtraType.picture;
+        }
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -103,9 +114,8 @@ export class QuestionExtraPage {
 
   deleteExtras() {
     this.currentExtraType = ExtraType.none;
-    this.renderedExtra = undefined;
-
     this.extras = [];
+    this.extrasUrl = [];
   }
 
   save() {
@@ -114,33 +124,5 @@ export class QuestionExtraPage {
 
   dismiss() {
     this.viewCtrl.dismiss();
-  }
-
-  renderExtra(local: boolean, fileName: string) {
-    if (local) {
-      this.file.readAsDataURL(this.file.cacheDirectory, fileName).then((picture) => {
-        if (['.mp4', '.webm', '.ogg'].some(extension => fileName.endsWith(extension))) {
-          this.currentExtraType = ExtraType.video;
-          this.renderedExtra = this.sanitizer.bypassSecurityTrustUrl(picture);
-        } else {
-          this.currentExtraType = ExtraType.picture;
-          this.renderedExtra = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
-        }
-      }).catch((error) => {
-        console.log("Something went wrong when reading pictures.", error);
-      });
-    } else {
-      firebase.storage().ref().child(fileName).getDownloadURL().then((url) => {
-        if (['.mp4', '.webm', '.ogg'].some(extension => fileName.endsWith(extension))) {
-          this.currentExtraType = ExtraType.video;
-          this.renderedExtra = this.sanitizer.bypassSecurityTrustUrl(url);
-        } else {
-          this.currentExtraType = ExtraType.picture;
-          this.renderedExtra = this.sanitizer.bypassSecurityTrustStyle(`url('${url}')`);
-        }
-      }).catch((error) => {
-        console.log("Something went wrong when reading pictures from firebase.", error);
-      });
-    }
   }
 }
