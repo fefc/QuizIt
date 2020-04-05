@@ -200,7 +200,8 @@ export class AppComponent {
     this.menuCtrl.close('menu-one');
     this.menuCtrl.enable(true, 'menu-one');
 
-    if (this.nav.getActive().component !== HomePage) {
+    if (!this.nav.getViews().some((v) => v.component === HomePage)) {
+      console.log('setting rooot');
       this.nav.setRoot(HomePage);
     }
   }
@@ -209,7 +210,7 @@ export class AppComponent {
     this.menuCtrl.close('menu-one');
     this.menuCtrl.enable(false, 'menu-one');
 
-    if (this.nav.getActive().component !== StartPage) {
+    if (!this.nav.getViews().some((v) => v.component === StartPage)) {
       this.nav.setRoot(StartPage);
     }
   }
