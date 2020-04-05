@@ -60,7 +60,10 @@ export class AppComponent {
   private authStateChangesSubscription: Subscription;
   private connectionStateChangesSubscription: Subscription;
 
-  constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
+  private splashScreenIsThere: boolean = true;
+
+  constructor(private platform: Platform, statusBar: StatusBar,
+    private splashScreen: SplashScreen,
     public menuCtrl: MenuController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
@@ -75,6 +78,8 @@ export class AppComponent {
     private connProv: ConnectionProvider,
     private translate: TranslateService,
     private globalization: Globalization) {
+
+    this.splashScreenIsThere = true;
 
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
@@ -127,14 +132,14 @@ export class AppComponent {
 
                 Promise.all(promises).then(() => {
                   this.openHomePage();
-                  splashScreen.hide(); //This should only happen once please!
+                  this.hideSplashScreen();
 
                   if (this.profilesProv.profile.nickname.length < 3) {
                     this.openUserProfilePage(true);
                   }
                 }).catch((errors) => {
                   this.openGeneralErrorPage(errors);
-                  splashScreen.hide();
+                  this.hideSplashScreen();
                 });
               }, (error) => {
                 console.log(error);
@@ -145,18 +150,25 @@ export class AppComponent {
               this.quizsProv.stopSync();
 
               this.openStartPage();
-              splashScreen.hide(); //This should only happen once please!
+              this.hideSplashScreen();
             }
           }, (error) => {
             this.openGeneralErrorPage(error);
-            splashScreen.hide();
+            this.hideSplashScreen();
           });
         });
       }).catch((error) => {
         this.openGeneralErrorPage(error);
-        splashScreen.hide();
+        this.hideSplashScreen();
       });
     });
+  }
+
+  hideSplashScreen() {
+    if (this.splashScreenIsThere) {
+      this.splashScreen.hide();
+      this.splashScreenIsThere = false;
+    }
   }
 
   openUserProfilePage(profileMustBeUpdated?: boolean) {
