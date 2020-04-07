@@ -219,7 +219,11 @@ export class AppComponent {
     //this.menuCtrl.close('menu-one');
     //To not close menu, so that if barcode scanning is cancelled it does not close the app
     //But closes the menu instead
-    this.startScanning();
+    this.nav.popToRoot().then(() => {
+      this.startScanning();
+    }).catch((error) => {
+      console.log(error);
+    });
   }
 
   openAboutPage() {
