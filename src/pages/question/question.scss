@@ -16,7 +16,18 @@ page-question {
 
     ion-slide {
       .slide-zoom {
-        height: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+
+          object-fit: contain;
+        }
       }
 
       ion-spinner {
@@ -26,16 +37,6 @@ page-question {
         left: 0;
         right: 0;
         margin: auto;
-      }
-
-      canvas {
-        width: 100%;
-        height: 100%;
-        margin: auto;
-
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
       }
 
       .checkmark {
