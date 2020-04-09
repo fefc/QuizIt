@@ -9,31 +9,35 @@
 <ion-content>
   <ion-grid>
     <ion-row>
-      <ion-col col-12 col-sm-6>
+      <ion-col col-12 col-sm-6 class="hidden-sm-down">
         <div class="empty-space"></div>
-        <h2 class="title">{{ 'WELCOME_START' | translate }}</h2>
         <img src="assets/svgs/icon.svg" class="slide-image">
-        <p>{{ 'INTRO_START' | translate }}</p>
-        <p>{{ 'SETUP_PROFILE_START' | translate }}</p>
         <div class="empty-space"></div>
       </ion-col>
       <ion-col col-12 col-sm-6>
         <div class="empty-space"></div>
+        <h2 class="title">{{ 'WELCOME_START' | translate }}</h2>
+        <p>{{ 'INTRO_START' | translate }}</p>
         <br>
-        <p>{{ 'LOG_IN_INFO' | translate }}</p>
-        <br>
-        <button ion-button color="primary" (click)="openLoginPage()">
-          {{ 'LOG_IN' | translate }}
-        </button>
-        <p class="sign-in">{{ 'DONT_HAVE_ACCOUNT' | translate }}</p>
-        <button ion-button color="light" (click)="openSignUpPage()">
-          {{ 'SIGN_UP' | translate }}
-        </button>
-        <button ion-button color="light" (click)="signInAnonymously()">
-          {{ 'SKIP' | translate }}
-        </button>
-
+        <p>
+          <button ion-button color="primary" (click)="openLoginPage()">
+            {{ 'LOG_IN' | translate }}
+          </button>
+        </p>
+        <p>{{ 'DONT_HAVE_ACCOUNT' | translate }}</p>
+        <p>
+          <button ion-button color="light" (click)="openSignUpPage()">
+            {{ 'SIGN_UP' | translate }}
+          </button>
+        </p>
+        <p>{{ 'OR_START' | translate }}</p>
+        <p>
+          <button ion-button clear color="fulllight" (click)="signInAnonymously()">
+            {{ 'SIGN_UP_ANONYMOUSLY' | translate }}
+          </button>
+        </p>
         <div class="empty-space"></div>
+        <p>{{ 'LOG_IN_INFO' | translate }}</p>
       </ion-col>
     </ion-row>
   </ion-grid>
