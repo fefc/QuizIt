@@ -34,7 +34,7 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
+  <ion-list *ngIf="quizsProv.quizs.length > 0">
     <!-- set tap event after press to avoid multi execution. See https://forum.ionicframework.com/t/using-tap-and-press-on-same-element-both-gesture-events-are-fired/76406/4 -->
     <ion-item tappable *ngFor="let quiz of quizsProv.quizs" (press)="selectQuiz(quiz)" (tap)="openQuizQuestionsPage($event, quiz)">
         <ion-icon *ngIf="quiz.selected" name="checkbox" color="primary" item-end></ion-icon>
@@ -51,7 +51,21 @@
         </ion-buttons>
       </ion-item>
   </ion-list>
-
+  <div *ngIf="quizsProv.quizs.length < 1" class="start-infos">
+    <div class="empty-space"></div>
+    <p>
+      {{ 'HOME_WANT_TO_JOIN' | translate }}
+      <br><br>
+      {{ 'HOME_WANT_TO_JOIN_MENU_LEFT' | translate }} <ion-icon name="menu"></ion-icon> {{ 'HOME_WANT_TO_JOIN_MENU_RIGHT' | translate }} <ion-icon name="game-controller-b"></ion-icon> !
+    </p>
+    <div class="empty-space"></div>
+    <p>
+      {{ 'HOME_WANT_TO_CREATE' | translate }}
+      <br><br>
+      {{ 'HOME_WANT_TO_CREATE_LEFT' | translate }}  <ion-icon name="quiz-it-icon"></ion-icon>!
+    </p>
+    <div class="empty-space"></div>
+  </div>
   <ion-fab right bottom>
   <button ion-fab (click)="openQuizNewPage()">
     <ion-icon name="quiz-it-icon"></ion-icon>
