@@ -151,6 +151,7 @@
   "HOME_WANT_TO_JOIN_MENU_RIGHT": "on the left, you will find the button",
   "HOME_WANT_TO_CREATE": "Do you want to create a Quiz?",
   "HOME_WANT_TO_CREATE_LEFT": "It starts at the bottom right, with the button",
+  "QUIZ_QUESTIONS_EMPTY": "This quiz is has no questions, add one with the '+' button.",
   "auth/email-already-in-use": "Your email address is already registered, please login or reset your password.",
   "auth/invalid-email": "Your email address is not valid, please use a valid email address.",
   "auth/operation-not-allowed": "Creating an account with email is not allowed.",

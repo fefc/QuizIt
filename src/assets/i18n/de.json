@@ -151,6 +151,7 @@
   "HOME_WANT_TO_JOIN_MENU_RIGHT": "Links, dann finden Sie dem Knopf",
   "HOME_WANT_TO_CREATE": "Möchten Sie ein Quiz erstellen?",
   "HOME_WANT_TO_CREATE_LEFT": "Das passiert unten rechts mit dem Knopf",
+  "QUIZ_QUESTIONS_EMPTY": "Dieses Quiz hat keine Fragen, fügen Sie eine mit dem '+' Knopf hinzu.",
   "auth/email-already-in-use": "Ihre E-Mail-Adresse ist bereits registriert. Bitte melden Sie sich an oder setzen Sie Ihr Passwort zurück.",
   "auth/invalid-email": "Ihre E-Mail-Adresse ist ungültig. Bitte verwenden Sie eine gültige E-Mail-Adresse.",
   "auth/operation-not-allowed": "Das Erstellen eines Kontos mit E-Mail ist nicht zulässig.",

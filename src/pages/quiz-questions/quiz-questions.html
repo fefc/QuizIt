@@ -28,7 +28,7 @@
 </ion-header>
 
 <ion-content>
-  <ion-list [reorder]="showReorderCategorys" (ionItemReorder)="reorderCategorys($event)">
+  <ion-list *ngIf="quiz.questions.length > 0 || quiz.categorys.length > 1" [reorder]="showReorderCategorys" (ionItemReorder)="reorderCategorys($event)">
     <ion-item-group class="category-questions" *ngFor="let category of quiz.categorys">
       <ion-item-divider>
         <ion-label>{{ category.name }}</ion-label>
@@ -51,7 +51,11 @@
       </ion-item-group>
     </ion-item-group>
   </ion-list>
-
+  <div *ngIf="quiz.questions.length < 1 && quiz.categorys.length < 2" class="start-infos">
+    <div class="empty-space"></div>
+    <p>{{ 'QUIZ_QUESTIONS_EMPTY' | translate }}</p>
+    <div class="empty-space"></div>
+  </div>
   <ion-fab right bottom>
   <button ion-fab (click)="openQuestionPage()">
     <ion-icon name="add"></ion-icon>
