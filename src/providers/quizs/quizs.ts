@@ -111,6 +111,8 @@ export class QuizsProvider {
             snapshots.push({uuid: quiz.uuid, subscription: this.quizChanges(quiz).subscribe()});
           }
         }, 1000);
+        //This timer is mandatory because firestore rules might have a small bug?
+        //QuizChanges will fail is timer < 500 because of permissions
 
       }, (error) => {
         console.log('quizsChanges onSnapshot error: ', error);
