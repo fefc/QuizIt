@@ -369,7 +369,6 @@ export class QuizsProvider {
 
   public createQuizOnline(quiz: Quiz) {
     return new Promise((resolve, reject) => {
-      console.log('createQuizOnline');
       let batch = firebase.firestore().batch();
 
       let newQuizRef = firebase.firestore().collection('Q').doc();
@@ -395,7 +394,10 @@ export class QuizsProvider {
       }
 
       batch.commit();
-      resolve();
+
+      setTimeout(() => {
+        resolve(newQuizRef.id);
+      }, 2000); //This timer is mandatory because of quizChanges timer
     });
   }
 

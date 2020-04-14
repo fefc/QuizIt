@@ -73,9 +73,14 @@ export class HomePage {
 
         loading.present();
 
-        this.quizsProv.createQuizOnline(data).then(() => {
+        this.quizsProv.createQuizOnline(data).then((quizUuid) => {
           loading.dismiss();
-          //this.openQuizQuestionsPage(null, newQuiz);
+
+          let newQuiz: Quiz = this.quizsProv.quizs.find((q) => q.uuid === quizUuid);
+
+          if (newQuiz) {
+            this.openQuizQuestionsPage(undefined, newQuiz);
+          }
         }).catch((error) => {
           loading.dismiss();
           alert('Unable to create Quiz.');
