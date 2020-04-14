@@ -99,8 +99,16 @@ export class QuizsProvider {
 
         setTimeout(() => {
           for (let index of addedIndexes) {
-            let doc = querySnapshot.docs[index];
-            snapshots.push({uuid: doc.id, subscription: this.quizChanges(doc.id).subscribe()});
+            let quiz: Quiz = {
+              uuid: querySnapshot.docs[index].id,
+              title: undefined,
+              creationDate: undefined,
+              settings: undefined,
+              categorys: [],
+              questions: [],
+            };
+
+            snapshots.push({uuid: quiz.uuid, subscription: this.quizChanges(quiz).subscribe()});
           }
         }, 1000);
 
@@ -118,16 +126,16 @@ export class QuizsProvider {
     });
   }
 
-  private quizChanges(quizUuid: string) {
+  private quizChanges(quiz: Quiz) {
     return new Observable<boolean>(observer => {
       //First register for quiz data changes
-      const unsubscribeQuizSnapshot = this.quizChangesOnSnapshot(quizUuid);
+      const unsubscribeQuizSnapshot = this.quizChangesOnSnapshot(quiz);
 
       //Then register for categorys changes
-      const unsubscribeQuizcategorys = this.categorysChanges(quizUuid).subscribe();
+      const unsubscribeQuizcategorys = this.categorysChanges(quiz).subscribe();
 
       //Then register for questions changes
-      const unsubscribeQuizQuestions = this.questionsChanges(quizUuid).subscribe();
+      const unsubscribeQuizQuestions = this.questionsChanges(quiz).subscribe();
 
       return () => {
         unsubscribeQuizQuestions.unsubscribe();
@@ -138,29 +146,18 @@ export class QuizsProvider {
     });
   }
 
-  private quizChangesOnSnapshot(quizUuid: string): () => void {
-    return firebase.firestore().collection('Q').doc(quizUuid).onSnapshot((quizDoc) => {
-      console.log('quizChangesOnSnapshot', quizDoc.id, ' => ', quizDoc.data(), ' status ', quizDoc);
-      console.log('meta ', quizDoc.metadata);
+  private quizChangesOnSnapshot(quiz: Quiz): () => void {
+    return firebase.firestore().collection('Q').doc(quiz.uuid).onSnapshot((doc) => {
+      if (doc.exists) {
+        let data = doc.data();
 
-      let quizData = quizDoc.data();
-      let quizIndex: number = this.quizs.findIndex((q) => q.uuid === quizDoc.id);
+        quiz.title = data.title;
+        quiz.creationDate = 0;
+        quiz.settings = data.settings;
 
-      if (quizIndex !== -1) {
-        this.quizs[quizIndex].title = quizData.title;
-        this.quizs[quizIndex].creationDate = 0;
-        this.quizs[quizIndex].settings = quizData.settings;
-      } else {
-        let quiz: Quiz = {
-          uuid: quizDoc.id,
-          title: quizData.title,
-          creationDate: 0,
-          settings: quizData.settings,
-          categorys: [],
-          questions: [],
-        };
-
-        this.quizs.push(quiz);
+        if (!this.quizs.some((q) => q.uuid === quiz.uuid)) {
+          this.quizs.push(quiz);
+        }
       }
     }, (error) => {
       console.log('quizChangesOnSnapshot error: ', error);
@@ -168,18 +165,13 @@ export class QuizsProvider {
     });
   }
 
-  private questionsChanges(quizUuid: string):  Observable<void> {
+  private questionsChanges(quiz: Quiz):  Observable<void> {
     return new Observable<void>(observer => {
       let snapshots: Array<FirebaseSnapshot> = new Array<FirebaseSnapshot>();
 
-      const unsubscribe = firebase.firestore().collection('Q').doc(quizUuid).collection('Q').onSnapshot((querySnapshot) => {
-        console.log('meta ', querySnapshot.metadata);
-
-
-        let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
+      const unsubscribe = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').onSnapshot((querySnapshot) => {
         let currentUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
         let addedIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
-
 
         for (let snapshot of snapshots) {
           if (!currentUuids.some(uuid => uuid === snapshot.uuid)) {
@@ -191,8 +183,21 @@ export class QuizsProvider {
         quiz.questions = quiz.questions.filter((q) => currentUuids.some((uuid) => uuid === q.uuid));
 
         for (let index of addedIndexes) {
-          let doc = querySnapshot.docs[index];
-            snapshots.push({uuid: doc.id, unsubscribe: this.questionChangesOnSnapshot(quiz.uuid, doc.id)});
+          let question: Question = {
+            uuid: querySnapshot.docs[index].id,
+            afterQuestionUuid: undefined,
+            question: undefined,
+            type: undefined,
+            rightAnswer: undefined,
+            answers: undefined,
+            extras: undefined,
+            categoryUuid: undefined,
+            authorId: undefined,
+            hide: undefined,
+            draft: undefined
+          }
+
+          snapshots.push({uuid: question.uuid, unsubscribe: this.questionChangesOnSnapshot(quiz, question)});
         }
       }, (error) => {
         console.log('questionsChanges onSnapshot error: ', error);
@@ -208,40 +213,23 @@ export class QuizsProvider {
     });
   }
 
-  private questionChangesOnSnapshot(quizUuid: string, questionUuid: string): () => void {
-    return firebase.firestore().collection('Q').doc(quizUuid).collection('Q').doc(questionUuid).onSnapshot(async (doc) => {
-      let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
-
-      if (doc.exists && quiz) {
+  private questionChangesOnSnapshot(quiz: Quiz, question: Question): () => void {
+    return firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc(question.uuid).onSnapshot(async (doc) => {
+      if (doc.exists) {
         let data = doc.data();
-        let question: Question = quiz.questions.find((q) => q.uuid === doc.id);
 
-        if (question) {
-          question.afterQuestionUuid = data.afterQuestionUuid,
-          question.question = data.question,
-          question.type = data.type,
-          question.rightAnswer = data.rightAnswer,
-          question.answers = data.answers,
-          question.extras = data.extras,
-          question.categoryUuid = data.categoryUuid,
-          question.authorId = data.authorId,
-          question.hide = data.hide,
-          question.draft = data.draft
-        } else {
-          question = {
-            uuid: doc.id,
-            afterQuestionUuid: data.afterQuestionUuid,
-            question: data.question,
-            type: data.type,
-            rightAnswer: data.rightAnswer,
-            answers: data.answers,
-            extras: data.extras,
-            categoryUuid: data.categoryUuid,
-            authorId: data.authorId,
-            hide: data.hide,
-            draft: data.draft
-          }
+        question.afterQuestionUuid = data.afterQuestionUuid,
+        question.question = data.question,
+        question.type = data.type,
+        question.rightAnswer = data.rightAnswer,
+        question.answers = data.answers,
+        question.extras = data.extras,
+        question.categoryUuid = data.categoryUuid,
+        question.authorId = data.authorId,
+        question.hide = data.hide,
+        question.draft = data.draft
 
+        if (!quiz.questions.some((q) => q.uuid === question.uuid)) {
           quiz.questions.push(question);
         }
 
@@ -249,7 +237,7 @@ export class QuizsProvider {
         var checkPromises = [];
         var getAttachementPromises = [];
         var pendingUploads: Array<boolean> = [];
-        const storageRef: string = 'Q/' + quizUuid + '/Q/' + questionUuid + '/';
+        const storageRef: string = 'Q/' + quiz.uuid + '/Q/' + question.uuid + '/';
 
         for (let i = 0; i < question.extras.length; i++) {
           pendingUploads.push(false);
@@ -315,13 +303,11 @@ export class QuizsProvider {
     });
   }
 
-
-  categorysChanges(quizUuid: string):  Observable<void> {
+  private categorysChanges(quiz: Quiz):  Observable<void> {
     return new Observable<void>(observer => {
       let snapshots: Array<FirebaseSnapshot> = new Array<FirebaseSnapshot>();
 
-      const unsubscribe = firebase.firestore().collection('Q').doc(quizUuid).collection('C').onSnapshot((querySnapshot) => {
-        let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
+      const unsubscribe = firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').onSnapshot((querySnapshot) => {
         let currentUuids: Array<string> = querySnapshot.docs.map((doc) => doc.id);
         let addedIndexes: Array<number> = querySnapshot.docChanges().filter((c) => c.type === 'added').map((c) => c.newIndex);
 
@@ -336,8 +322,13 @@ export class QuizsProvider {
         quiz.categorys = quiz.categorys.filter((c) => currentUuids.some((uuid) => uuid === c.uuid));
 
         for (let index of addedIndexes) {
-          let doc = querySnapshot.docs[index];
-            snapshots.push({uuid: doc.id, unsubscribe: this.categoryChangesOnSnapshot(quiz.uuid, doc.id)});
+          let category: Category = {
+            uuid: querySnapshot.docs[index].id,
+            afterCategoryUuid: undefined,
+            name: undefined
+          }
+
+          snapshots.push({uuid: category.uuid, unsubscribe: this.categoryChangesOnSnapshot(quiz, category)});
         }
       }, (error) => {
         console.log('categorysChanges onSnapshot error: ', error);
@@ -353,27 +344,16 @@ export class QuizsProvider {
     });
   }
 
-  categoryChangesOnSnapshot(quizUuid: string, categoryUuid: string): () => void {
-    return firebase.firestore().collection('Q').doc(quizUuid).collection('C').doc(categoryUuid).onSnapshot((doc) => {
-      let quiz: Quiz = this.quizs.find((q) => q.uuid === quizUuid);
-      let data = doc.data();
+  private categoryChangesOnSnapshot(quiz: Quiz, category: Category): () => void {
+    return firebase.firestore().collection('Q').doc(quiz.uuid).collection('C').doc(category.uuid).onSnapshot((doc) => {
+      if (doc.exists) {
+        let data = doc.data();
 
-      console.log('questionChangesOnSnapshot', doc.id, ' => ', data, ' status ', doc);
+        category.afterCategoryUuid = data.afterCategoryUuid,
+        category.name = data.name
 
-      if (quiz) {
-        let category: Category = quiz.categorys.find((c) => c.uuid === doc.id);
-
-        if (category) {
-          category.afterCategoryUuid = data.afterCategoryUuid,
-          category.name = data.name
-        } else {
-          let formatedData: Category = {
-            uuid: doc.id,
-            afterCategoryUuid: data.afterCategoryUuid,
-            name: data.name
-          }
-
-          quiz.categorys.push(formatedData);
+        if (!quiz.categorys.some((c) => c.uuid === category.uuid)) {
+          quiz.categorys.push(category);
         }
 
         quiz.categorys = this.orderCategorysFromOnline(quiz.categorys);
@@ -416,13 +396,6 @@ export class QuizsProvider {
       resolve();
     });
   }
-
-  /*public deleteQuizOnline(quiz: Quiz) {
-    return new Promise((resolve, reject) => {
-      let batch = firebase.firestore().batch();
-
-    });
-  }*/
 
   public deleteQuizsOnline() {
     return new Promise((resolve, reject) => {
