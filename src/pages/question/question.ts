@@ -79,7 +79,15 @@ export class QuestionPage {
             setTimeout(async () =>  {
               this.question.answersUrl[i] = await this.connProv.getLocalFileUrl(this.question.answers[i]);
             }, 0); //Constructor can't get aysnc so let's do it my way.
+          } else {
+            this.connProv.cacheUrl(this.question.answersUrl[i]);
           }
+        }
+      }
+
+      for (let i = 0; i < this.question.extras.length; i++) {
+        if (!['file:///', 'filesystem:'].some(extension => this.question.extras[i].startsWith(extension))) {
+          this.connProv.cacheUrl(this.question.extrasUrl[i]);
         }
       }
     }

@@ -45,6 +45,12 @@ export class ConnectionProvider {
     });
   }
 
+  public cacheUrl(url: string) {
+    if (this.serviceWorkerAvailable) {
+      window.navigator.serviceWorker.controller.postMessage({command: 'add', url: url});
+    }
+  }
+
   private cleanNativeStorage() {
     return new Promise((resolve, reject) => {
       this.nativeStorage.keys().then((keys) => {
