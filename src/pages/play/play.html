@@ -65,9 +65,9 @@
   <!--Extra Zone-->
   <div class="extra" *ngIf="displayExtras"
     [@extraAnimation]="{value: '', params: {time: commonAnimationDuration}}">
-    <canvas *ngIf="currentExtraType === ExtraType.picture" [style.background-image]="currentExtras[0]"></canvas>
+    <img *ngIf="currentExtraType === ExtraType.picture" [src]="currentQuestions[currentQuestion].extrasUrl[0]"/>
     <video #extraVideo *ngIf="currentExtraType === ExtraType.video">
-      <source [src]="currentExtras[0]"/>
+      <source [src]="currentQuestions[currentQuestion].extrasUrl[0]"/>
     </video>
   </div>
 
@@ -104,7 +104,7 @@
   <div class="picture" *ngIf="displayPictures"
           [@pictureInOutAnimation]="{value: '', params: {time: commonAnimationDuration}}"
           [@pictureTransitionAnimation]="{value: currentPictureCounter, params: {time: commonAnimationDuration}}">
-    <canvas [style.background-image]="currentPictures[this.gameProv.currentPicture]"></canvas>
+    <img [src]="currentQuestions[currentQuestion].answersUrl[this.gameProv.currentPicture]"/>
   </div>
 
   <!-- Manual mode fabs -->

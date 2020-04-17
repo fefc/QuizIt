@@ -2,7 +2,6 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
-import { File } from '@ionic-native/file';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { Insomnia } from '@ionic-native/insomnia';
@@ -21,6 +20,7 @@ import { Player } from '../../models/player';
 import { GameState } from '../../models/game';
 
 import { GameProvider } from '../../providers/game/game';
+import { ConnectionProvider } from '../../providers/connection/connection';
 
 enum ScreenStateType {
   start,
@@ -240,8 +240,6 @@ export class PlayPage {
   private currentQuestions: Array<Question>;
 
   private currentPictureCounter: number;
-  private currentPictures: Array<SafeUrl>;
-  private currentExtras: Array<SafeUrl>;
   private currentExtraType: ExtraType;
 
   private qrCode: string;
@@ -253,12 +251,12 @@ export class PlayPage {
               private actionSheetCtrl: ActionSheetController,
               public modalCtrl: ModalController,
               private toastCtrl: ToastController,
-              private file: File,
               private androidFullScreen: AndroidFullScreen,
               private screenOrientation: ScreenOrientation,
               private sanitizer:DomSanitizer,
               private insomnia: Insomnia,
               private gameProv: GameProvider,
+              private connProv: ConnectionProvider,
               private translate: TranslateService,
               params: NavParams) {
 
@@ -291,7 +289,7 @@ export class PlayPage {
 
     this.qrCode = '';
 
-    this.quiz = params.data.quiz;
+    this.quiz = JSON.parse(JSON.stringify(params.data.quiz));
 
     if (!this.quiz) {
       this.navCtrl.pop();
@@ -371,13 +369,29 @@ export class PlayPage {
             //The barcode has been Successfully created, everything is ready now
             this.qrCode = 'data:image/png;base64, ' + base64;
 
+            for (let question of this.quiz.questions) {
+              for (let i: number = 0; i < question.answers.length; i++) {
+                if (['file:///', 'filesystem:'].some(extension => question.answers[i].startsWith(extension))) {
+                  setTimeout(async () =>  {
+                    question.answersUrl[i] = await this.connProv.getLocalFileUrl(this.currentQuestions[this.currentQuestion].answers[i]);
+                  }, 0); //Constructor can't get aysnc so let's do it my way.
+                }
+              }
+
+              for (let i: number = 0; i < question.extras.length; i++) {
+                if (['file:///', 'filesystem:'].some(extension => question.extras[i].startsWith(extension))) {
+                  setTimeout(async () =>  {
+                    question.extrasUrl[i] = await this.connProv.getLocalFileUrl(this.currentQuestions[this.currentQuestion].extras[i]);
+                  }, 0); //Constructor can't get aysnc so let's do it my way.
+                }
+              }
+            }
+
             this.currentQuestion = 0;
             this.currentQuestions = this.getQuestionsFromCategory(this.currentCategories[this.currentCategory]);
 
             this.gameProv.currentPicture = 0;
             this.currentPictureCounter = 0;
-            this.currentPictures = [];
-            this.currentExtras = [];
 
             this.screenState = ScreenStateType.playersJoining;
             this.displayPlayers = true;
@@ -467,89 +481,46 @@ export class PlayPage {
       this.switchPicturesTimer  = undefined;
 
       if (this.currentQuestion < this.currentQuestions.length) {
-        var promises = [];
-
-        this.currentExtras = [];
         this.currentExtraType = ExtraType.none;
+        this.gameProv.currentPicture = 0;
+        this.currentPictureCounter = 0;
 
-        //Add extras to be loaded
-        for (let i: number = 0; i < this.currentQuestions[this.currentQuestion].extras.length; i++) {
-          promises.push(this.file.readAsDataURL(this.file.dataDirectory, this.getExtraPath(this.currentQuestions[this.currentQuestion], i)));
-        }
+        this.screenState = ScreenStateType.displayExtra;
 
-        Promise.all(promises).then((extras) => {
-          for (let i: number = 0; i < extras.length; i++) {
-            //No need to worry about the order, the order is preserved with Promise.all
-            if (['.mp4', '.webm', '.ogg'].some(extension => this.currentQuestions[this.currentQuestion].extras[i].endsWith(extension))) {
-              this.currentExtras.push(this.sanitizer.bypassSecurityTrustUrl(extras[i]));
-              this.currentExtraType = ExtraType.video;
-            } else {
-              this.currentExtras.push(this.sanitizer.bypassSecurityTrustStyle(`url('${extras[i]}')`));
-              this.currentExtraType = ExtraType.picture;
-            }
+        if (this.currentQuestions[this.currentQuestion].extras.length > 0) {
+          if (['.mp4', '.webm', '.ogg'].some(extension => this.currentQuestions[this.currentQuestion].extras[0].endsWith(extension))) {
+            this.currentExtraType = ExtraType.video;
+          } else {
+            this.currentExtraType = ExtraType.picture;
           }
 
-          promises = [];
+          setTimeout(() => {
+            this.displayExtras = true;
 
-          if (this.currentQuestions[this.currentQuestion].type == QuestionType.rightPicture) {
-
-            this.gameProv.currentPicture = 0;
-            this.currentPictureCounter = 0;
-            this.currentPictures = [];
-
-            for (let i: number = 0; i < this.currentQuestions[this.currentQuestion].answers.length; i++) {
-              promises.push(this.file.readAsDataURL(this.file.dataDirectory, this.getPicturePath(this.currentQuestions[this.currentQuestion], i)));
-            }
-          }
-
-          Promise.all(promises).then((pictures) => {
-            for (let picture of pictures) {
-              //No need to worry about the order, the order is preserved with Promise.all
-              this.currentPictures.push(this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`));
-            }
-
-            this.screenState = ScreenStateType.displayExtra;
-
-            if (this.currentQuestions[this.currentQuestion].extras.length > 0) {
+            if (this.currentExtraType === ExtraType.video) {
               setTimeout(() => {
-                this.displayExtras = true;
+                this.extraVideo.nativeElement.play(); //Once animation is done, start the video
 
-                if (this.currentExtraType === ExtraType.video) {
-                  setTimeout(() => {
-                    this.extraVideo.nativeElement.play(); //Once animation is done, start the video
-
-                    this.extraVideo.nativeElement.onended = () => {
-                      this.displayExtras = false;
-                      setTimeout(() => this.next(), this.commonAnimationDuration);
-                    };
-
-                  }, this.commonAnimationDuration);
-
-                } else {
-                  setTimeout(() => {
-                    this.displayExtras = false;
-                    setTimeout(() => this.next(), this.commonAnimationDuration);
-
-                  }, this.extraDisplayDuration);
-                }
+                this.extraVideo.nativeElement.onended = () => {
+                  this.displayExtras = false;
+                  setTimeout(() => this.next(), this.commonAnimationDuration);
+                };
 
               }, this.commonAnimationDuration);
 
             } else {
-              this.next();
+              setTimeout(() => {
+                this.displayExtras = false;
+                setTimeout(() => this.next(), this.commonAnimationDuration);
+
+              }, this.extraDisplayDuration);
             }
-          }).catch(() => {
-            console.log('Something went wrong when reading pictures.');
 
-            this.screenState = ScreenStateType.loadNextQuestion;
-            this.hidePlayers();
-          });
-        }).catch(() => {
-          console.log('Something went wrong when reading extras.');
+          }, this.commonAnimationDuration);
 
-          this.screenState = ScreenStateType.loadNextQuestion;
-          this.hidePlayers();
-        });
+        } else {
+          this.next();
+        }
       }
       else {
         this.screenState = ScreenStateType.loadNextCategory;
@@ -637,14 +608,6 @@ export class PlayPage {
 
   getQuestionsFromCategory(category: Category) {
     return this.quiz.questions.filter((question) => question.categoryUuid === category.uuid && !question.draft && !question.hide);
-  }
-
-  getPicturePath(question: Question, answerIndex: number) {
-    return this.quiz.uuid + '/' + question.uuid + '/' + question.answers[answerIndex];
-  }
-
-  getExtraPath(question: Question, extraIndex: number) {
-    return this.quiz.uuid + '/' + question.uuid + '/' + question.extras[extraIndex];
   }
 
   getPlayerHeight() {
