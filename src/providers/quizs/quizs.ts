@@ -231,6 +231,9 @@ export class QuizsProvider {
         question.hide = data.hide,
         question.draft = data.draft
 
+        if (!question.extrasUrl) question.extrasUrl = [];
+        if (!question.answersUrl) question.answersUrl = [];
+
         if (!quiz.questions.some((q) => q.uuid === question.uuid)) {
           quiz.questions.push(question);
         }
@@ -274,9 +277,6 @@ export class QuizsProvider {
         }
 
         Promise.all(getAttachementPromises).then((attachements) => {
-          if (!question.extrasUrl) question.extrasUrl = [];
-          if (!question.answersUrl) question.answersUrl = [];
-
           for (let i = 0; i < question.extras.length; i++) {
             question.extrasUrl[i] = attachements[i];
           }
@@ -508,7 +508,7 @@ export class QuizsProvider {
           }
         } catch (error) {
           console.log(error);
-        }        
+        }
       }
 
       let batch = firebase.firestore().batch();

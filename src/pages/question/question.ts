@@ -65,7 +65,7 @@ export class QuestionPage {
         extras: [],
         categoryUuid: this.categorys[0].uuid,
         authorId: -1,
-        answersUrl: new Array<any>(4),
+        answersUrl: [],
         extrasUrl: []
       };
     }
