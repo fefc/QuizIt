@@ -342,7 +342,7 @@ export class QuizQuestionsPage {
             data.question.afterQuestionUuid = (this.quiz.questions.length > 0 ? this.quiz.questions[this.quiz.questions.length - 1].uuid : 'first');
           }
 
-          this.quizsProv.saveQuestionOnline(this.quiz, data.question, data.newCategory).then(() => {
+          this.quizsProv.saveQuestionOnline(this.quiz, data.question, data.newCategory, true).then(() => {
             loading.dismiss();
           }).catch((error) => {
             loading.dismiss();

@@ -468,7 +468,7 @@ export class QuizsProvider {
     });
   }
 
-  public saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category) {
+  public saveQuestionOnline(quiz: Quiz, question: Question, newCategory?: Category, skipUpload?: boolean) {
     return new Promise(async (resolve, reject) => {
       //Make sure to have a reference (id) before handling attachements
       let questionRef;
@@ -480,33 +480,35 @@ export class QuizsProvider {
         questionRef = firebase.firestore().collection('Q').doc(quiz.uuid).collection('Q').doc();
       }
 
-      try {
-        let uploadPromises = []
-        const storageRef: string = 'Q/' + quiz.uuid + '/Q/' + questionRef.id + '/';
+      if (!skipUpload) {
+        try {
+          let uploadPromises = []
+          const storageRef: string = 'Q/' + quiz.uuid + '/Q/' + questionRef.id + '/';
 
-        for (let i = 0; i < question.extras.length; i++) {
-          uploadPromises.push(this.connProv.uploadFile(storageRef, question.extras[i]));
-        }
-
-        if (question.type === QuestionType.rightPicture) {
-          for (let i = 0; i < question.answers.length; i++) {
-            uploadPromises.push(this.connProv.uploadFile(storageRef, question.answers[i]));
+          for (let i = 0; i < question.extras.length; i++) {
+            uploadPromises.push(this.connProv.uploadFile(storageRef, question.extras[i]));
           }
-        }
 
-        let attachementResults: Array<string> = await Promise.all(uploadPromises.map(p => p.catch(e => undefined)));
-
-        for (let i = 0; i < question.extras.length; i++) {
-          if (attachementResults[i]) question.extras[i] = attachementResults[i];
-        }
-
-        if (question.type === QuestionType.rightPicture) {
-          for (let i = 0; i < question.answers.length; i++) {
-            if (attachementResults[i + question.extras.length]) question.answers[i] = attachementResults[i + question.extras.length];
+          if (question.type === QuestionType.rightPicture) {
+            for (let i = 0; i < question.answers.length; i++) {
+              uploadPromises.push(this.connProv.uploadFile(storageRef, question.answers[i]));
+            }
           }
-        }
-      } catch (error) {
-        console.log(error);
+
+          let attachementResults: Array<string> = await Promise.all(uploadPromises.map(p => p.catch(e => undefined)));
+
+          for (let i = 0; i < question.extras.length; i++) {
+            if (attachementResults[i]) question.extras[i] = attachementResults[i];
+          }
+
+          if (question.type === QuestionType.rightPicture) {
+            for (let i = 0; i < question.answers.length; i++) {
+              if (attachementResults[i + question.extras.length]) question.answers[i] = attachementResults[i + question.extras.length];
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }        
       }
 
       let batch = firebase.firestore().batch();
