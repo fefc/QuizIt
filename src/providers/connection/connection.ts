@@ -56,8 +56,6 @@ export class ConnectionProvider {
       const fileEntry = await this.file.resolveLocalFilesystemUrl(filePath);
       const fileMetaData = await this.getMetadata(fileEntry);
 
-      console.log(fileMetaData.size);
-      console.log((fileMetaData.size > maxSize) ? false : true);
       return (fileMetaData.size > maxSize) ? false : true;
     } catch(error) {
       console.log(error);

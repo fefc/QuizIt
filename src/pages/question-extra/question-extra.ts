@@ -47,8 +47,6 @@ export class QuestionExtraPage {
         this.extrasUrl = [];
       }
 
-      console.log(this.extras, ' urls ', this.extrasUrl);
-
       if (this.extras.length > 0) {
         if (['file:///', 'filesystem:'].some(extension => this.extras[0].startsWith(extension))) {
           setTimeout(async () =>  {

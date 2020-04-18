@@ -201,7 +201,6 @@ export class AppComponent {
     this.menuCtrl.enable(true, 'menu-one');
 
     if (!this.nav.getViews().some((v) => v.component === HomePage)) {
-      console.log('setting rooot');
       this.nav.setRoot(HomePage);
     }
   }
