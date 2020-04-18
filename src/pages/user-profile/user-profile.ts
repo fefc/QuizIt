@@ -13,6 +13,7 @@ import { LoginPage } from '../../pages/login/login';
 
 const MAX_PICTURE_WIDTH: number = 512;
 const MAX_PICTURE_HEIGHT: number = 512;
+const MAX_FILE_SIZE: number = 512000; //OCTETS
 
 @Component({
   selector: 'page-user-profile',
@@ -307,11 +308,33 @@ export class UserProfilePage {
   openMobileImagePicker() {
     this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then(async (results) => {
       if (results.length === 1) {
-        this.profile.avatar = decodeURIComponent(results[0]);
-        this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
+        let decodedURI = decodeURIComponent(results[0]);
+
+        if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
+          this.profile.avatar = decodeURIComponent(decodedURI);
+          this.profile.avatarUrl = await this.connProv.getLocalFileUrl(decodedURI);
+        } else {
+          this.showFileToBigAlert();
+        }
+
+
       }
     }).catch(() => {
       alert('Could not get images.');
     });
+  }
+
+  showFileToBigAlert() {
+    let error = this.alertCtrl.create({
+      title: this.translate.instant('ERROR_FILE_TOO_BIG'),
+      message: this.translate.instant('ERROR_FILE_TOO_BIG_INFO') + ' ' + (MAX_FILE_SIZE / 1000) + 'KB.',
+      buttons: [
+        {
+          text: this.translate.instant('OK'),
+          role: 'ok',
+        }
+      ]
+    });
+    error.present();
   }
 }

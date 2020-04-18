@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Platform, ViewController, NavParams } from 'ionic-angular';
+import { Platform, ViewController, AlertController, NavParams } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { TranslateService } from '@ngx-translate/core';
@@ -10,6 +10,7 @@ import { ConnectionProvider } from '../../providers/connection/connection';
 
 const MAX_PICTURE_WIDTH: number = 1920;
 const MAX_PICTURE_HEIGHT: number = 1080;
+const MAX_FILE_SIZE: number = 27000000; //OCTETS
 
 @Component({
   selector: 'page-question-extra',
@@ -27,6 +28,7 @@ export class QuestionExtraPage {
 
   constructor(private platform: Platform,
               public viewCtrl: ViewController,
+              private alertCtrl: AlertController,
               private imagePicker: ImagePicker,
               private androidPermissions: AndroidPermissions,
               private connProv: ConnectionProvider,
@@ -98,13 +100,19 @@ export class QuestionExtraPage {
         this.extras = [];
         this.extrasUrl = [];
 
-        this.extras.push(decodeURIComponent(results[0]));
-        this.extrasUrl.push(await this.connProv.getLocalFileUrl(this.extras[0]));
+        let decodedURI = decodeURIComponent(results[0]);
 
-        if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
-          this.currentExtraType = ExtraType.video;
+        if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
+          this.extras.push(decodedURI);
+          this.extrasUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
+
+          if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
+            this.currentExtraType = ExtraType.video;
+          } else {
+            this.currentExtraType = ExtraType.picture;
+          }
         } else {
-          this.currentExtraType = ExtraType.picture;
+          this.showFileToBigAlert();
         }
       }
     }).catch(() => {
@@ -124,5 +132,19 @@ export class QuestionExtraPage {
 
   dismiss() {
     this.viewCtrl.dismiss();
+  }
+
+  showFileToBigAlert() {
+    let error = this.alertCtrl.create({
+      title: this.translate.instant('ERROR_FILE_TOO_BIG'),
+      message: this.translate.instant('ERROR_FILE_TOO_BIG_INFO') + ' ' + (MAX_FILE_SIZE / 1000000) + 'MB.',
+      buttons: [
+        {
+          text: this.translate.instant('OK'),
+          role: 'ok',
+        }
+      ]
+    });
+    error.present();
   }
 }

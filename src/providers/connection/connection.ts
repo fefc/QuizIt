@@ -51,6 +51,26 @@ export class ConnectionProvider {
     }
   }
 
+  public async isFileSizeValid(filePath: string, maxSize: number) {
+    try {
+      const fileEntry = await this.file.resolveLocalFilesystemUrl(filePath);
+      const fileMetaData = await this.getMetadata(fileEntry);
+
+      console.log(fileMetaData.size);
+      console.log((fileMetaData.size > maxSize) ? false : true);
+      return (fileMetaData.size > maxSize) ? false : true;
+    } catch(error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  private getMetadata(fileEntry: any) {
+    return new Promise<any>((resolve, reject) => {
+      fileEntry.getMetadata((metaData) => { resolve(metaData) }, (error) => { reject(error) });
+    });
+  }
+
   private cleanNativeStorage() {
     return new Promise((resolve, reject) => {
       this.nativeStorage.keys().then((keys) => {

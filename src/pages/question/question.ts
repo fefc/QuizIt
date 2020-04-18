@@ -14,6 +14,7 @@ import { QuestionExtraPage } from '../question-extra/question-extra';
 
 const MAX_PICTURE_WIDTH: number = 1920;
 const MAX_PICTURE_HEIGHT: number = 1080;
+const MAX_FILE_SIZE: number = 2000000; //OCTETS
 
 @Component({
   selector: 'page-question',
@@ -277,8 +278,12 @@ export class QuestionPage {
       for (var i = 0; i < results.length; i++) {
         let decodedURI = decodeURIComponent(results[i]);
 
-        this.question.answers.push(decodedURI);
-        this.question.answersUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
+        if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
+          this.question.answers.push(decodedURI);
+          this.question.answersUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
+        } else {
+          this.showFileToBigAlert();
+        }
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -288,8 +293,14 @@ export class QuestionPage {
   replacePictureMobile(val: number) {
     this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then(async (results) => {
       if (results.length > 0) {
-        this.question.answers[val] = decodeURIComponent(results[0]);
-        this.question.answersUrl[val] = await this.connProv.getLocalFileUrl(this.question.answers[val]);
+        let decodedURI = decodeURIComponent(results[0]);
+
+        if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
+          this.question.answers[val] = decodedURI;
+          this.question.answersUrl[val] = await this.connProv.getLocalFileUrl(decodedURI);
+        } else {
+          this.showFileToBigAlert();
+        }
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -380,5 +391,19 @@ export class QuestionPage {
 
   dismiss() {
     this.viewCtrl.dismiss();
+  }
+
+  showFileToBigAlert() {
+    let error = this.alertCtrl.create({
+      title: this.translate.instant('ERROR_FILE_TOO_BIG'),
+      message: this.translate.instant('ERROR_FILE_TOO_BIG_INFO') + ' ' + (MAX_FILE_SIZE / 1000000) + 'MB.',
+      buttons: [
+        {
+          text: this.translate.instant('OK'),
+          role: 'ok',
+        }
+      ]
+    });
+    error.present();
   }
 }
