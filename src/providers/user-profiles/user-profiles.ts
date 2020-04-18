@@ -58,7 +58,7 @@ export class UserProfilesProvider {
   saveToOnline(profile: UserProfile) {
     return new Promise(async (resolve, reject) => {
       try {
-        profile.avatar = await this.connProv.uploadFile('U/' + profile.uuid + '/', profile.avatar);
+        profile.avatar = await this.connProv.uploadFile('U/' + profile.uuid + '/', profile.avatar, profile.uuid);
       } catch (error) {
         console.log(error);
       }

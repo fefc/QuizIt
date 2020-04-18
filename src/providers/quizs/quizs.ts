@@ -8,7 +8,6 @@ import { Subscription } from "rxjs/Subscription";
 import { File } from '@ionic-native/file';
 
 import { ConnectionProvider } from '../connection/connection';
-import { AuthenticationProvider } from '../authentication/authentication';
 
 declare var JJzip: any;
 
@@ -55,8 +54,7 @@ export class QuizsProvider {
 
   constructor(
     private file: File,
-    private connProv: ConnectionProvider,
-    private authProv: AuthenticationProvider) {
+    private connProv: ConnectionProvider) {
     this.quizs = new Array<Quiz>();
   }
 
@@ -375,10 +373,10 @@ export class QuizsProvider {
 
       batch.set(newQuizRef, {title: quiz.title, settings: quiz.settings});
 
-      let quizUserRef = newQuizRef.collection('U').doc(this.authProv.getUser().uid);
+      let quizUserRef = newQuizRef.collection('U').doc(this.profileUuid);
       batch.set(quizUserRef, {});
 
-      let userQuizRef = firebase.firestore().collection('U').doc(this.authProv.getUser().uid).collection('Q').doc(newQuizRef.id);
+      let userQuizRef = firebase.firestore().collection('U').doc(this.profileUuid).collection('Q').doc(newQuizRef.id);
       batch.set(userQuizRef, {});
 
       for (let i = 0; i < quiz.categorys.length ; i++) {
@@ -486,12 +484,12 @@ export class QuizsProvider {
           const storageRef: string = 'Q/' + quiz.uuid + '/Q/' + questionRef.id + '/';
 
           for (let i = 0; i < question.extras.length; i++) {
-            uploadPromises.push(this.connProv.uploadFile(storageRef, question.extras[i]));
+            uploadPromises.push(this.connProv.uploadFile(storageRef, question.extras[i], this.profileUuid));
           }
 
           if (question.type === QuestionType.rightPicture) {
             for (let i = 0; i < question.answers.length; i++) {
-              uploadPromises.push(this.connProv.uploadFile(storageRef, question.answers[i]));
+              uploadPromises.push(this.connProv.uploadFile(storageRef, question.answers[i], this.profileUuid));
             }
           }
 

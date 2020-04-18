@@ -129,7 +129,7 @@ export class ConnectionProvider {
     });
   }
 
-  public uploadFile(reference: string, fullLocalPath: string) {
+  public uploadFile(reference: string, fullLocalPath: string, userId: string) {
     return new Promise<string>((resolve, reject) => {
       var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
       var sourceDir = fullLocalPath.substring(0, indexOfSlash);
@@ -140,7 +140,7 @@ export class ConnectionProvider {
           this.file.readAsArrayBuffer(sourceDir, fileName).then((arrayBuffer) => {
             var fileRef = firebase.storage().ref().child(reference + fileName);
 
-            fileRef.put(arrayBuffer, { 'cacheControl': 'private, max-age=15552000' }).then((snap) => {
+            fileRef.put(arrayBuffer, { 'cacheControl': 'private, max-age=15552000', customMetadata: {'owners': userId} }).then((snap) => {
               this.file.removeFile(sourceDir, fileName).then(() => {
                 resolve(fileName);
               }).catch((error) => {
