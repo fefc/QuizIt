@@ -45,7 +45,7 @@ export class ConnectionProvider {
   }
 
   public cacheUrl(url: string) {
-    if (this.serviceWorkerAvailable) {
+    if (this.serviceWorkerAvailable && url.startsWith('https://firebasestorage.googleapis.com')) {
       window.navigator.serviceWorker.controller.postMessage({command: 'add', url: url});
     }
   }
@@ -81,8 +81,10 @@ export class ConnectionProvider {
         Promise.all(promises).then((objects) => {
           objects.forEach((object) => {
             if (object.validUntil) {
-              if (new Date(object.validUntil).getTime() < now) {
-                this.nativeStorage.remove(keys[objects.indexOf(object)]);
+              if (object.validUntil !== -1) {
+                if (new Date(object.validUntil).getTime() < now) {
+                  this.nativeStorage.remove(keys[objects.indexOf(object)]);
+                }
               }
             }
           });
@@ -158,7 +160,10 @@ export class ConnectionProvider {
             var fileRef = firebase.storage().ref().child(reference + fileName);
 
             fileRef.put(arrayBuffer, { 'cacheControl': 'private, max-age=15552000', customMetadata: {'owners': userId} }).then((snap) => {
-              this.file.removeFile(sourceDir, fileName).then(() => {
+              this.nativeStorage.setItem(reference + fileName, {
+                url: fullLocalPath,
+                validUntil: -1
+              }).then(() => {
                 resolve(fileName);
               }).catch((error) => {
                 resolve(fileName);
@@ -178,21 +183,39 @@ export class ConnectionProvider {
     });
   }
 
-  public getFileUrl(dirReference: string, fileReference: string, pendingUpload: boolean) {
-    if (['file:///', 'filesystem:'].some(extension => fileReference.startsWith(extension))) {
-      if (pendingUpload) {
+  public getFileUrl(dirReference: string, fileReference: string) {
+    return new Promise<string | SafeUrl>((resolve, reject) => {
+      if (['file:///', 'filesystem:'].some(extension => fileReference.startsWith(extension))) {
         //It is possible to have a file startingWith file:/// but coming from another device, so need to check pendingUpload
         //Pending tells us if the file is available locally
-        return this.getLocalFileUrl(fileReference);
+        this.getLocalFileUrl(fileReference).then((localUrl) => {
+          resolve(localUrl);
+        }).catch(() => {
+          resolve(undefined);
+        });
       } else {
-        return new Promise<any>((resolve) => resolve(undefined));
+        this.nativeStorage.getItem(dirReference + fileReference).then((cachedData) => {
+          this.getLocalFileUrl(cachedData.url).then((localUrl) => {
+            resolve(localUrl);
+          }).catch(() => {
+            this.getStorageUrl(dirReference + fileReference).then((url) => {
+              resolve(url);
+            }).catch(() => {
+              resolve(undefined);
+            });
+          });
+        }).catch((error) => {
+          this.getStorageUrl(dirReference + fileReference).then((url) => {
+            resolve(url);
+          }).catch(() => {
+            resolve(undefined);
+          });
+        });
       }
-    } else {
-      return this.getStorageUrl(dirReference + fileReference);
-    }
+    });
   }
 
-  private getStorageUrl(reference: string) {
+  private getStorageUrl(reference: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       if (reference) {
         if (this.connected) {
@@ -210,6 +233,8 @@ export class ConnectionProvider {
                 }
               }).catch((error) => {
               });
+            } else {
+              this.cacheUrl(url);
             }
             resolve(url);
           }).catch((error) => {
@@ -247,26 +272,30 @@ export class ConnectionProvider {
   }
 
   public getLocalFileUrl(fullLocalPath: string): Promise<SafeUrl> {
-    let convertedUrl: string = (<any> window).Ionic.WebView.convertFileSrc(fullLocalPath);
-
-    if (convertedUrl.includes('http://')) {
-      return new Promise<SafeUrl>((resolve, reject) => {
-        resolve(this.sanitizer.bypassSecurityTrustUrl(convertedUrl));
-      });
-    } else  {
-      //On some browser convertFileSrc does not work properly (firefox at the moment)
-      //In this case we are going to read the file and give the DataUrl back
+    return new Promise<SafeUrl>((resolve, reject) => {
       var indexOfSlash: number = fullLocalPath.lastIndexOf('/') + 1;
       var sourceDir = fullLocalPath.substring(0, indexOfSlash);
       var fileName = fullLocalPath.substring(indexOfSlash);
 
-      return new Promise<SafeUrl>((resolve, reject) => {
-        this.file.readAsDataURL(sourceDir, fileName).then((dataUrl) => {
-          resolve(this.sanitizer.bypassSecurityTrustUrl(dataUrl));
-        }).catch((error) => {
-          resolve(undefined);
-        })
+      this.file.checkFile(sourceDir, fileName).then(() => {
+        //File available locally
+        let convertedUrl: string = (<any> window).Ionic.WebView.convertFileSrc(fullLocalPath);
+
+        if (convertedUrl.includes('http://')) {
+          resolve(this.sanitizer.bypassSecurityTrustUrl(convertedUrl));
+        } else  {
+          //On some browser convertFileSrc does not work properly (firefox at the moment)
+          //In this case we are going to read the file and give the DataUrl back
+          this.file.readAsDataURL(sourceDir, fileName).then((dataUrl) => {
+            resolve(this.sanitizer.bypassSecurityTrustUrl(dataUrl));
+          }).catch((error) => {
+            reject(error);
+          });
+        }
+      }).catch((error) => {
+        //File does not exists locally
+        reject(error);
       });
-    }
+    });
   }
 }

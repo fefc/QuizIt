@@ -224,23 +224,20 @@ export class QuizsProvider {
         //Check attachements
         var checkPromises = [];
         var getAttachementPromises = [];
-        var pendingUploads: Array<boolean> = [];
         const storageRef: string = 'Q/' + quiz.uuid + '/Q/' + question.uuid + '/';
 
         for (let i = 0; i < question.extras.length; i++) {
-          pendingUploads.push(false);
           checkPromises.push(this.connProv.checkPendingUpload(question.extras[i]));
         }
 
         if (question.type === QuestionType.rightPicture) {
           for (let i = 0; i < question.answers.length; i++) {
-            pendingUploads.push(false);
             checkPromises.push(this.connProv.checkPendingUpload(question.answers[i]));
           }
         }
 
         try {
-          pendingUploads = await Promise.all(checkPromises);
+          let pendingUploads = await Promise.all(checkPromises);
 
           if (pendingUploads.some((p) => p === true)) {
             await this.saveQuestionOnline(quiz, JSON.parse(JSON.stringify(question)));
@@ -250,12 +247,12 @@ export class QuizsProvider {
         }
 
         for (let i = 0; i < question.extras.length; i++) {
-          getAttachementPromises.push(this.connProv.getFileUrl(storageRef, question.extras[i], pendingUploads[i]));
+          getAttachementPromises.push(this.connProv.getFileUrl(storageRef, question.extras[i]));
         }
 
         if (question.type === QuestionType.rightPicture) {
           for (let i = 0; i < question.answers.length; i++) {
-            getAttachementPromises.push(this.connProv.getFileUrl(storageRef, question.answers[i], pendingUploads[i + question.extras.length]));
+            getAttachementPromises.push(this.connProv.getFileUrl(storageRef, question.answers[i]));
           }
         }
 

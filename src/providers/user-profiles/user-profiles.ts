@@ -87,14 +87,13 @@ export class UserProfilesProvider {
       const unsubscribe = firebase.firestore().collection('U').doc(this.profile.uuid).onSnapshot(async (profileDoc) => {
         if (profileDoc.exists) {
           let profileData = profileDoc.data();
-          let pendingUpload:boolean = false;
 
           this.profile.avatar = profileData.avatar;
           this.profile.nickname = profileData.nickname;
 
           if (this.profile.avatar) {
             try {
-               pendingUpload = await this.connProv.checkPendingUpload(this.profile.avatar);
+               let pendingUpload = await this.connProv.checkPendingUpload(this.profile.avatar);
 
               if (pendingUpload) {
                 await this.saveToOnline(JSON.parse(JSON.stringify(this.profile)));
@@ -103,7 +102,7 @@ export class UserProfilesProvider {
               console.log(error);
             }
 
-            this.connProv.getFileUrl('U/' + this.profile.uuid + '/', this.profile.avatar, pendingUpload).then((url) => {
+            this.connProv.getFileUrl('U/' + this.profile.uuid + '/', this.profile.avatar).then((url) => {
               this.profile.avatarUrl = url;
             }).catch((error) => {
               this.profile.avatarUrl = undefined;

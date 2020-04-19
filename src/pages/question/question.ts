@@ -32,6 +32,8 @@ export class QuestionPage {
 
   private newQuestion: boolean;
 
+  private storageRef: string;
+
   @ViewChild(Slides) slides: Slides;
   @ViewChild('slidesFab') slidesFab : FabContainer;
 
@@ -47,6 +49,8 @@ export class QuestionPage {
               params: NavParams) {
 
     this.newQuestion = true;
+    this.storageRef = '';
+
     //To avoid warings on ionic build
     this.newQuestion = this.newQuestion;
 
@@ -73,24 +77,20 @@ export class QuestionPage {
     else {
       this.question = JSON.parse(JSON.stringify(params.data.question));
       this.newQuestion = false;
+      this.storageRef = 'Q/' + params.data.quizUuid + '/Q/' + this.question.uuid + '/';
 
       if (this.question.type === QuestionType.rightPicture) {
         for (let i = 0; i < this.question.answers.length; i++) {
-          if (['file:///', 'filesystem:'].some(extension => this.question.answers[i].startsWith(extension))) {
+          if (typeof this.question.answersUrl[i] !== 'string') {
+            this.question.answersUrl[i] = undefined;
             setTimeout(async () =>  {
-              this.question.answersUrl[i] = await this.connProv.getLocalFileUrl(this.question.answers[i]);
+              this.question.answersUrl[i] = await this.connProv.getFileUrl(this.storageRef, this.question.answers[i]);
             }, 0); //Constructor can't get aysnc so let's do it my way.
-          } else {
-            this.connProv.cacheUrl(this.question.answersUrl[i]);
           }
         }
       }
 
-      for (let i = 0; i < this.question.extras.length; i++) {
-        if (!['file:///', 'filesystem:'].some(extension => this.question.extras[i].startsWith(extension))) {
-          this.connProv.cacheUrl(this.question.extrasUrl[i]);
-        }
-      }
+      //
     }
 
     if (this.question.type === QuestionType.rightPicture) {
@@ -280,7 +280,12 @@ export class QuestionPage {
 
         if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
           this.question.answers.push(decodedURI);
+          try {
           this.question.answersUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
+          } catch (error) {
+            console.log(error);
+            this.question.answers.pop();
+          }
         } else {
           this.showFileToBigAlert();
         }
@@ -297,7 +302,12 @@ export class QuestionPage {
 
         if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
           this.question.answers[val] = decodedURI;
+          try {
           this.question.answersUrl[val] = await this.connProv.getLocalFileUrl(decodedURI);
+          } catch (error) {
+            console.log(error);
+            this.question.answers.splice(val, 1);
+          }
         } else {
           this.showFileToBigAlert();
         }
@@ -328,7 +338,7 @@ export class QuestionPage {
   }
 
   openQuestionExtraPage() {
-    let modal = this.modalCtrl.create(QuestionExtraPage, {title: this.question.question, extras: this.question.extras, extrasUrl: this.question.extrasUrl}, {cssClass: 'modal-fullscreen'});
+    let modal = this.modalCtrl.create(QuestionExtraPage, {storageRef: this.storageRef, title: this.question.question, extras: this.question.extras, extrasUrl: this.question.extrasUrl}, {cssClass: 'modal-fullscreen'});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {

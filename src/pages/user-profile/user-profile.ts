@@ -51,9 +51,10 @@ export class UserProfilePage {
     } else {
       this.profile = JSON.parse(JSON.stringify(params.data.profile));
 
-      if (['file:///', 'filesystem:'].some(extension => this.profile.avatar.startsWith(extension))) {
+      if (typeof this.profile.avatarUrl !== 'string') {
+        this.profile.avatarUrl = undefined;
         setTimeout(async () =>  {
-          this.profile.avatarUrl = await this.connProv.getLocalFileUrl(this.profile.avatar);
+          this.profile.avatarUrl = await this.connProv.getFileUrl('U/' + this.profile.uuid + '/', this.profile.avatar);
         }, 0); //Constructor can't get aysnc so let's do it my way.
       }
     }
@@ -313,8 +314,14 @@ export class UserProfilePage {
         let decodedURI = decodeURIComponent(results[0]);
 
         if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
-          this.profile.avatar = decodeURIComponent(decodedURI);
-          this.profile.avatarUrl = await this.connProv.getLocalFileUrl(decodedURI);
+          try {
+            this.profile.avatar = decodeURIComponent(decodedURI);
+            this.profile.avatarUrl = await this.connProv.getLocalFileUrl(decodedURI);
+          } catch(error) {
+            console.log(error);
+            this.profile.avatar = undefined;
+            this.profile.avatarUrl = undefined;
+          };
         } else {
           this.showFileToBigAlert();
         }

@@ -51,9 +51,10 @@ export class QuestionExtraPage {
       }
 
       if (this.extras.length > 0) {
-        if (['file:///', 'filesystem:'].some(extension => this.extras[0].startsWith(extension))) {
+        if (typeof this.extrasUrl[0] !== 'string') {
+          this.extrasUrl[0] = undefined;
           setTimeout(async () =>  {
-            this.extrasUrl.push(await this.connProv.getLocalFileUrl(this.extras[0]));
+            this.extrasUrl[0] = await this.connProv.getFileUrl(params.data.storageRef, this.extras[0]);
 
             if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
               this.currentExtraType = ExtraType.video;
@@ -103,13 +104,20 @@ export class QuestionExtraPage {
           this.extras = [];
           this.extrasUrl = [];
 
-          this.extras.push(decodedURI);
-          this.extrasUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
+          try {
+            this.extras.push(decodedURI);
+            this.extrasUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
 
-          if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
-            this.currentExtraType = ExtraType.video;
-          } else {
-            this.currentExtraType = ExtraType.picture;
+            if (['.mp4', '.webm', '.ogg'].some(extension => this.extras[0].endsWith(extension))) {
+              this.currentExtraType = ExtraType.video;
+            } else {
+              this.currentExtraType = ExtraType.picture;
+            }
+          } catch (error) {
+            console.log(error);
+            this.currentExtraType = ExtraType.none;
+            this.extras = [];
+            this.extrasUrl = [];
           }
         } else {
           this.showFileToBigAlert();

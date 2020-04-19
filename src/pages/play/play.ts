@@ -374,18 +374,21 @@ export class PlayPage {
             this.qrCode = 'data:image/png;base64, ' + base64;
 
             for (let question of this.quiz.questions) {
+              const storageRef: string = 'Q/' + this.quiz.uuid + '/Q/' + question.uuid + '/';
               for (let i: number = 0; i < question.answers.length; i++) {
-                if (['file:///', 'filesystem:'].some(extension => question.answers[i].startsWith(extension))) {
+                if (typeof question.answersUrl[i] !== 'string') {
+                  question.answersUrl[i] = undefined;
                   setTimeout(async () =>  {
-                    question.answersUrl[i] = await this.connProv.getLocalFileUrl(this.currentQuestions[this.currentQuestion].answers[i]);
+                    question.answersUrl[i] = await this.connProv.getFileUrl(storageRef, question.answers[i]);
                   }, 0); //Constructor can't get aysnc so let's do it my way.
                 }
               }
 
               for (let i: number = 0; i < question.extras.length; i++) {
-                if (['file:///', 'filesystem:'].some(extension => question.extras[i].startsWith(extension))) {
+                if (typeof question.extrasUrl[i] !== 'string') {
+                  question.extrasUrl[i] = undefined;
                   setTimeout(async () =>  {
-                    question.extrasUrl[i] = await this.connProv.getLocalFileUrl(this.currentQuestions[this.currentQuestion].extras[i]);
+                    question.extrasUrl[i] = await this.connProv.getFileUrl(storageRef, question.extras[i]);
                   }, 0); //Constructor can't get aysnc so let's do it my way.
                 }
               }
