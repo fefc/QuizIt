@@ -116,8 +116,8 @@ export class AppComponent {
 
       //Initialize Firebase
       firebase.initializeApp(FIREBASE_CONFIG);
-      firebase.storage().setMaxOperationRetryTime(1);
-      firebase.storage().setMaxUploadRetryTime(1);
+      firebase.storage().setMaxOperationRetryTime(2);
+      firebase.storage().setMaxUploadRetryTime(2);
 
       firebase.firestore().enablePersistence().then(() => {
 
