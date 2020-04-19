@@ -7,9 +7,6 @@
       {{selectedQuizs === 0 ? 'QuizPad' : selectedQuizs + ' ' +  ('SELECTED' | translate) }}
     </ion-title>
     <ion-buttons end *ngIf="selectedQuizs === 0">
-      <button *ngIf="platform.is('core')" ion-button icon-only (click)="import()">
-        <ion-icon name="folder-open"></ion-icon>
-      </button>
       <button ion-button icon-only (click)="openMenu($event)">
         <ion-icon name="more"></ion-icon>
       </button>
