@@ -146,6 +146,8 @@ export class AppComponent {
               this.profilesProv.stopSync();
               this.quizsProv.stopSync();
 
+              this.connProv.cleanNativeStorage(true);
+
               this.openStartPage();
               this.hideSplashScreen();
             }
