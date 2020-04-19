@@ -16,15 +16,13 @@ const MAX_PICTURE_WIDTH: number = 1920;
 const MAX_PICTURE_HEIGHT: number = 1080;
 const MAX_FILE_SIZE: number = 2000000; //OCTETS
 
-const MAX_PICTURES: number = 5;
-
-
 @Component({
   selector: 'page-question',
   templateUrl: 'question.html'
 })
 
 export class QuestionPage {
+  private readonly MAX_PICTURES = 5; //for use in Angluar html
   private QuestionType = QuestionType; //for use in Angluar html
   private categorys: Array<Category>;
   private question: Question;
