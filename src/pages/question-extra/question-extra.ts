@@ -155,4 +155,15 @@ export class QuestionExtraPage {
     });
     error.present();
   }
+
+  extraIsAvailable() {
+    let isAvailable: boolean = false;
+
+    if (this.extrasUrl.length > 0) {
+      if (this.extrasUrl[0] !== undefined) {
+        isAvailable = true;
+      }
+    }
+    return isAvailable;
+  }
 }

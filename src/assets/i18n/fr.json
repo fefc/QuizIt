@@ -154,6 +154,7 @@
   "QUIZ_QUESTIONS_EMPTY": "Ce quiz n'a pas de questions, ajoutez-en un avec le bouton '+'.",
   "ERROR_FILE_TOO_BIG": "Fichier trop lourd",
   "ERROR_FILE_TOO_BIG_INFO": "La taille maximal pour les fichiers est de",
+  "FILE_NOT_AVAILABLE": "Le fichier n'est pas disponible pour le moment, réessayer plus tard.",
   "auth/email-already-in-use": "Votre adresse e-mail est déjà enregistrée, veuillez vous connecter ou réinitialiser votre mot de passe.",
   "auth/invalid-email": "Votre adresse email n'est pas valide, veuillez utiliser une adresse email valide.",
   "auth/operation-not-allowed": "La création d'un compte avec email n'est pas autorisée.",

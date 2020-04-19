@@ -13,9 +13,10 @@
 
 <ion-content>
   <p class="information" *ngIf="currentExtraType === ExtraType.none">{{ 'NO_INTRO_INFO' | translate }}</p>
-  <p class="information" *ngIf="currentExtraType !== ExtraType.none && extrasUrl.length < 1"><ion-spinner name="dots" color="primary"></ion-spinner></p>
-  <img *ngIf="currentExtraType === ExtraType.picture && !extrasUrl.length < 1" [src]="extrasUrl[0]"/>
-  <video controls autoplay *ngIf="currentExtraType === ExtraType.video && !extrasUrl.length < 1">
+  <p class="information" *ngIf="currentExtraType !== ExtraType.none && !extraIsAvailable()">
+    {{ 'FILE_NOT_AVAILABLE' | translate }}</p>
+  <img *ngIf="currentExtraType === ExtraType.picture && extraIsAvailable()" [src]="extrasUrl[0]"/>
+  <video controls autoplay *ngIf="currentExtraType === ExtraType.video && extraIsAvailable()">
     <source [src]="extrasUrl[0]"/>
   </video>
 </ion-content>
