@@ -45,8 +45,12 @@ export class ConnectionProvider {
   }
 
   public cacheUrl(url: string) {
-    if (this.serviceWorkerAvailable && url.startsWith('https://firebasestorage.googleapis.com')) {
-      window.navigator.serviceWorker.controller.postMessage({command: 'add', url: url});
+    try {
+      if (this.serviceWorkerAvailable && url.startsWith('https://firebasestorage.googleapis.com')) {
+        window.navigator.serviceWorker.controller.postMessage({command: 'add', url: url});
+      }  
+    } catch (error) {
+      console.log(error);
     }
   }
 
