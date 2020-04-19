@@ -247,7 +247,7 @@ export class ConnectionProvider {
               });
             } else {
               reject();
-              console.log('Could not getStorageUrl from firebase.');
+              console.log('Could not getStorageUrl from firebase.', error);
               resolve(undefined);
             }
           });
