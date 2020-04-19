@@ -96,14 +96,13 @@ export class QuestionExtraPage {
   openMobileImagePicker() {
     this.imagePicker.getPictures({maximumImagesCount: 1, width: MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90, allow_video: true}).then(async (results) => {
       if (results.length > 0) {
-        this.currentExtraType = ExtraType.none;
-
-        this.extras = [];
-        this.extrasUrl = [];
-
         let decodedURI = decodeURIComponent(results[0]);
-
         if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
+          this.currentExtraType = ExtraType.none;
+
+          this.extras = [];
+          this.extrasUrl = [];
+
           this.extras.push(decodedURI);
           this.extrasUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
 
