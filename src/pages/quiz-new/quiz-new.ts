@@ -3,7 +3,6 @@ import { ViewController, Slides } from 'ionic-angular';
 
 import { Quiz } from '../../models/quiz';
 import { DefaultQuizSettings } from '../../models/quiz-settings';
-import { QuizSettings } from '../../models/quiz-settings';
 
 @Component({
   selector: 'page-quiz-new',

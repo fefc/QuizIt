@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ViewController, NavParams } from 'ionic-angular';
+import { NavParams } from 'ionic-angular';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({

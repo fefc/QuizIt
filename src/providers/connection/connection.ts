@@ -5,7 +5,6 @@ import 'firebase/firestore';
 
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable"
-import { Subscription } from "rxjs/Subscription";
 
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { File } from '@ionic-native/file';

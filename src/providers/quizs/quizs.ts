@@ -15,17 +15,6 @@ import { Question } from '../../models/question';
 import { QuestionType } from '../../models/question';
 import { Category } from '../../models/category';
 
-enum AttachementType {
-  answers,
-  extras
-}
-
-interface AttachementResult {
-  index: number,
-  type: AttachementType,
-  fileName: string
-}
-
 interface FirebaseSnapshot {
   readonly uuid: string,
   readonly unsubscribe: () => void

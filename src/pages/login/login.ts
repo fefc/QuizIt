@@ -10,7 +10,7 @@ import { AuthenticationProvider } from '../../providers/authentication/authentic
 })
 export class LoginPage {
 
-  private signUpScreen: boolean;
+  private signUpScreen: boolean; //for use in Angular html
 
   private email: string;
   private password: string;
@@ -22,7 +22,9 @@ export class LoginPage {
     private authProv: AuthenticationProvider,
     private translate: TranslateService,
     params: NavParams) {
-
+    //To avoid warings on ionic build
+    this.signUpScreen = this.signUpScreen;
+    
     if (params.data.signUpScreen) {
       this.signUpScreen = true;
     } else {

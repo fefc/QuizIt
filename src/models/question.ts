@@ -1,5 +1,3 @@
-import { Category } from './category';
-
 export enum QuestionType {
   classic = 1,
   stopwatch = 2,

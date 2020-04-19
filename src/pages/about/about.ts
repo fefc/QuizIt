@@ -10,6 +10,9 @@ export class AboutPage {
   private versionNumber: string; //for use in Angular html
 
   constructor(public viewCtrl: ViewController, private appVersion: AppVersion) {
+    //To avoid warings on ionic build
+    this.versionNumber = this.versionNumber;
+    
     if (appVersion) {
       this.appVersion.getVersionNumber().then((version) => {
         this.versionNumber = version;

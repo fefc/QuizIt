@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Platform, NavController, ModalController, LoadingController, PopoverController } from 'ionic-angular';
+import { NavController, ModalController, LoadingController, PopoverController } from 'ionic-angular';
 import { TranslateService } from '@ngx-translate/core';
 
 import { Quiz } from '../../models/quiz';
@@ -25,7 +25,6 @@ export class HomePage {
   @ViewChild('fileInput') fileInput: ElementRef; //Picture selector for browser
 
   constructor(
-    private platform: Platform,
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,

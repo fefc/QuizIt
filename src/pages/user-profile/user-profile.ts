@@ -23,7 +23,7 @@ const MAX_FILE_SIZE: number = 512000; //OCTETS
 export class UserProfilePage {
   private profile: UserProfile;
 
-  private profileMustBeUpdated: boolean;
+  private profileMustBeUpdated: boolean; //for use in Angular html
 
   constructor(private platform: Platform,
               public modalCtrl: ModalController,
@@ -38,7 +38,9 @@ export class UserProfilePage {
               params: NavParams) {
 
     this.profileMustBeUpdated = params.data.profileMustBeUpdated;
-
+    //To avoid warings on ionic build
+    this.profileMustBeUpdated = this.profileMustBeUpdated;
+    
     //lets make deep copies, so that we don't modfiy anything before user confirmation
     if (!params.data.profile) {
       this.profile = {

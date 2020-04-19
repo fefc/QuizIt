@@ -20,11 +20,11 @@ const MAX_FILE_SIZE: number = 27000000; //OCTETS
 export class QuestionExtraPage {
   private ExtraType = ExtraType; //for use in Angular html
 
-  private title: string;
+  private title: string; //for use in Angular html
   private extras: Array<string>;
   private extrasUrl: Array<any>;
 
-  private currentExtraType: ExtraType;
+  private currentExtraType: ExtraType; //for use in Angular html
 
   constructor(private platform: Platform,
               public viewCtrl: ViewController,
@@ -34,6 +34,9 @@ export class QuestionExtraPage {
               private connProv: ConnectionProvider,
               private translate: TranslateService,
               params: NavParams) {
+
+    //To avoid warings on ionic build
+    this.title = this.title;
 
     this.currentExtraType = ExtraType.none;
     this.extrasUrl = [];

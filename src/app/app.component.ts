@@ -1,5 +1,4 @@
 import { Component, ViewChild } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { Platform, MenuController, ModalController, LoadingController, AlertController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -57,7 +56,6 @@ const FIREBASE_CONFIG = {
 export class AppComponent {
   @ViewChild('content') nav;
 
-  private authStateChangesSubscription: Subscription;
   private connectionStateChangesSubscription: Subscription;
 
   private splashScreenIsThere: boolean = true;
@@ -69,7 +67,6 @@ export class AppComponent {
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private screenOrientation: ScreenOrientation,
-    private sanitizer:DomSanitizer,
     private barcodeScanner: BarcodeScanner,
     private profilesProv: UserProfilesProvider,
     private quizsProv: QuizsProvider,
@@ -122,7 +119,7 @@ export class AppComponent {
       firebase.firestore().enablePersistence().then(() => {
 
         this.connProv.init().then(() => {
-          this.authStateChangesSubscription = this.authProv.authStateChanges().subscribe((loggedIn) => {
+          this.authProv.authStateChanges().subscribe((loggedIn) => {
             if (loggedIn) {
               this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
                 let promises = [];

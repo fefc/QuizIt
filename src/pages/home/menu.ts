@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Platform, ViewController } from 'ionic-angular';
+import { ViewController } from 'ionic-angular';
 
 @Component({
   styles: [`
@@ -15,8 +15,7 @@ import { Platform, ViewController } from 'ionic-angular';
 })
 
 export class HomeMenu {
-  constructor(private platform: Platform,
-              public viewCtrl: ViewController) {
+  constructor(public viewCtrl: ViewController) {
 
   }
 

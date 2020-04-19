@@ -16,13 +16,15 @@ const MAX_PICTURE_WIDTH: number = 1920;
 const MAX_PICTURE_HEIGHT: number = 1080;
 const MAX_FILE_SIZE: number = 2000000; //OCTETS
 
+const MAX_PICTURES: number = 5;
+
+
 @Component({
   selector: 'page-question',
   templateUrl: 'question.html'
 })
 
 export class QuestionPage {
-  private maxPictures: number = 5;
   private QuestionType = QuestionType; //for use in Angluar html
   private categorys: Array<Category>;
   private question: Question;
@@ -34,8 +36,6 @@ export class QuestionPage {
 
   @ViewChild(Slides) slides: Slides;
   @ViewChild('slidesFab') slidesFab : FabContainer;
-
-  private replacePictureIndex: number;
 
   constructor(private platform: Platform,
               public viewCtrl: ViewController,
@@ -49,6 +49,8 @@ export class QuestionPage {
               params: NavParams) {
 
     this.newQuestion = true;
+    //To avoid warings on ionic build
+    this.newQuestion = this.newQuestion;
 
     //lets make deep copies, so that we don't modfiy anything before user confirmation
     this.categorys = JSON.parse(JSON.stringify(params.data.categorys));

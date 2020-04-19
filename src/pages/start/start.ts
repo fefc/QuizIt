@@ -4,7 +4,6 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { AuthenticationProvider } from '../../providers/authentication/authentication';
 
-import { HomePage } from '../../pages/home/home';
 import { LoginPage } from '../../pages/login/login';
 
 @Component({

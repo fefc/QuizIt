@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { Platform, ActionSheetController, ModalController, NavController, ToastController, NavParams } from 'ionic-angular';
 import { trigger, keyframes, style, animate, transition } from '@angular/animations';
 import { AndroidFullScreen } from '@ionic-native/android-full-screen';
@@ -260,6 +260,7 @@ export class PlayPage {
               private translate: TranslateService,
               params: NavParams) {
 
+
     this.screenState = ScreenStateType.start;
     this.currentExtraType = ExtraType.none;
 
@@ -275,6 +276,8 @@ export class PlayPage {
     this.pause = false;
 
     //To avoid warings on ionic build
+    this.backgroundImage = this.backgroundImage;
+
     this.startMessage = this.startMessage;
     this.endMessage = this.endMessage;
 
@@ -288,6 +291,7 @@ export class PlayPage {
     this.showExit = this.showExit;
 
     this.qrCode = '';
+    this.qrCode = this.qrCode;
 
     this.quiz = JSON.parse(JSON.stringify(params.data.quiz));
 
