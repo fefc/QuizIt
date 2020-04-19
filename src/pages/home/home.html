@@ -20,16 +20,10 @@
       </button>
     </ion-buttons>
     <ion-buttons right *ngIf="selectedQuizs > 0">
-      <button *ngIf="selectedQuizs === 1" ion-button icon-only (click)="export()">
-        <ion-icon name="download"></ion-icon>
-      </button>
       <button ion-button icon-only (click)="deleteSelected()">
         <ion-icon name="trash"></ion-icon>
       </button>
     </ion-buttons>
-    <div ng-controller="myCtrl">
-      <input #fileInput type="file" style="display: none" (change)="importBrowser()" accept="application/zip"/>
-    </div>
   </ion-navbar>
 </ion-header>
 

@@ -1,10 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Platform, NavController, ModalController, AlertController, LoadingController, PopoverController } from 'ionic-angular';
-import { AndroidPermissions } from '@ionic-native/android-permissions';
-import { FileChooser } from '@ionic-native/file-chooser';
-import { FileOpener } from '@ionic-native/file-opener';
-import { FilePath } from '@ionic-native/file-path';
-import { File } from '@ionic-native/file';
+import { Platform, NavController, ModalController, LoadingController, PopoverController } from 'ionic-angular';
 import { TranslateService } from '@ngx-translate/core';
 
 import { Quiz } from '../../models/quiz';
@@ -34,13 +29,7 @@ export class HomePage {
     public navCtrl: NavController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
-    private alertCtrl: AlertController,
     private popoverCtrl: PopoverController,
-    private androidPermissions: AndroidPermissions,
-    private fileChooser: FileChooser,
-    private fileOpener: FileOpener,
-    private filePath: FilePath,
-    private file: File,
     private quizsProv: QuizsProvider,
     private translate: TranslateService) {
 
@@ -55,8 +44,6 @@ export class HomePage {
       if (data) {
         if (data.index === 0) {
           this.openQuizNewPage();
-        } else if (data.index === 1) {
-          setTimeout(() => this.import(), 0); //Wired trick to make it work in browser //DOES NOT WORK!
         }
       }
     });
@@ -149,150 +136,5 @@ export class HomePage {
       deleting.dismiss();
       alert('Unable to delete selected quizs.');
     });
-  }
-
-  export() {
-    let quiz: Quiz = this.quizsProv.quizs.find((q) => q.selected);
-    quiz.selected = false;
-    this.selectedQuizs -= 1;
-
-    let loading = this.loadingCtrl.create({
-      content: this.translate.instant('EXPORTING')
-    });
-
-    loading.present();
-
-    this.quizsProv.zip(quiz).then((data: any) => {
-      if (this.platform.is('core')) {
-        this.fileOpener.open(data.cordovaFilePath + data.filePath, 'application/zip').then(() => {
-          loading.dismiss();
-        }).catch((error) => {
-          loading.dismiss();
-          alert("Something went wrong while exporting the quiz. " + error);
-        });
-      } else if (this.platform.is('android')) {
-        this.androidPermissions.hasPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
-          .then(status => {
-            if (status.hasPermission) {
-              this.exportFileToAndroidDownload(data).then((url) => {
-                loading.dismiss();
-              }).catch((error) => {
-                loading.dismiss();
-                alert(error);
-              });
-            }
-            else {
-              this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
-                .then(status => {
-                  if(status.hasPermission) {
-                    this.exportFileToAndroidDownload(data).then((url) => {
-                      loading.dismiss();
-                    }).catch((error) => {
-                      loading.dismiss();
-                      alert(error);
-                    });
-                  }
-                });
-            }
-          });
-      } else {
-        loading.dismiss();
-        alert("Export function is not supported.");
-      }
-    }).catch((err) => {
-      alert(err);
-    });
-  }
-
-  exportFileToAndroidDownload(data) {
-    return new Promise((resolve, reject) => {
-      this.file.moveFile(data.cordovaFilePath,  data.filePath, this.file.externalRootDirectory, data.filePath).then(() => {
-        let message = this.alertCtrl.create({
-          title: this.translate.instant('EXPORTED_QUIZ'),
-          message: this.file.externalRootDirectory + data.filePath,
-          buttons: [
-            {
-              text: this.translate.instant('OK'),
-              role: 'ok',
-            }
-          ]
-        });
-
-        message.present();
-
-        resolve();
-      }).catch(() => {
-        reject("Something went wrong while export the quiz.");
-      })
-    });
-  }
-
-  import() {
-    if(this.platform.is('android')) {
-      this.fileChooser.open().then((uri) => {
-        this.filePath.resolveNativePath(uri).then((nativePath) => {
-          var relativePath: string = nativePath.replace(this.file.externalRootDirectory, ''); //TODO this is buggy and only allows zip from internal root storage
-          var fileName: string = nativePath.split("/").pop();
-          this.file.copyFile(this.file.externalRootDirectory, relativePath, this.file.cacheDirectory, fileName).then(() => {
-            let loading = this.loadingCtrl.create({
-              content: this.translate.instant('IMPORTING')
-            });
-
-            loading.present();
-
-            this.quizsProv.unzip(this.file.cacheDirectory, fileName).then(() => {
-              loading.dismiss();
-            }).catch((error) => {
-              loading.dismiss();
-              alert(error);
-            });
-          }).catch((error) => {
-            alert(error);
-          })
-
-        }).catch((error) => {
-          console.log(error);
-          alert(error);
-        });
-      }).catch((error) => {
-        console.log(error);
-        alert(error);
-      });
-    } else if (this.platform.is('core')) {
-        this.fileInput.nativeElement.click();
-    } else {
-      alert("Import is not supported on the platform yet.");
-    }
-  }
-
-  importBrowser() {
-    let loading = this.loadingCtrl.create({
-      content: this.translate.instant('IMPORTING')
-    });
-
-    loading.present();
-
-    let file: any = this.fileInput.nativeElement.files[0];
-
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = (e: any) => {
-      var fileName: string = file.name;
-
-      this.file.writeFile(this.file.cacheDirectory, fileName, e.target.result, { replace: true }).then(() => {
-        this.quizsProv.unzip(this.file.cacheDirectory, fileName).then(() => {
-          loading.dismiss();
-        }).catch((error) => {
-          loading.dismiss();
-          console.log(error);
-          alert(error);
-        });
-
-      }).catch((error) => {
-        loading.dismiss();
-        console.log(error);
-        alert(error);
-      });
-    };
   }
 }
