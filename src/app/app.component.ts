@@ -115,8 +115,8 @@ export class AppComponent {
       firebase.initializeApp(FIREBASE_CONFIG);
       firebase.storage().setMaxOperationRetryTime(2);
       firebase.storage().setMaxUploadRetryTime(2);
-//{ synchronizeTabs: true }
-      firebase.firestore().enablePersistence().then(() => {
+
+      firebase.firestore().enablePersistence({ synchronizeTabs: true }).then(() => {
 
         this.connProv.init().then(() => {
           this.authProv.authStateChanges().subscribe((loggedIn) => {
