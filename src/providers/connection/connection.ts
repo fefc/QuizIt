@@ -48,7 +48,7 @@ export class ConnectionProvider {
     try {
       if (this.serviceWorkerAvailable && url.startsWith('https://firebasestorage.googleapis.com')) {
         window.navigator.serviceWorker.controller.postMessage({command: 'add', url: url});
-      }  
+      }
     } catch (error) {
       console.log(error);
     }
@@ -222,7 +222,7 @@ export class ConnectionProvider {
   private getStorageUrl(reference: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       if (reference) {
-        if (this.connected) {
+        if (this.connected || this.serviceWorkerAvailable) {
           firebase.storage().ref().child(reference).getDownloadURL().then((url) => {
             if (!this.serviceWorkerAvailable) {
               firebase.storage().ref().child(reference).getMetadata().then((metadata) => {
