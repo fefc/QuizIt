@@ -75,28 +75,26 @@ export class ConnectionProvider {
   public cleanNativeStorage(deleteAll?: boolean) {
     return new Promise((resolve, reject) => {
       this.nativeStorage.keys().then((keys) => {
+
         let now: number = new Date().getTime();
         let promises = [];
 
         keys.forEach((key) => {
-          promises.push(this.nativeStorage.getItem(key));
-        });
-
-        Promise.all(promises).then((objects) => {
-          objects.forEach((object) => {
+          this.nativeStorage.getItem(key).then((object) => {
             if (object.validUntil) {
-              if (object.validUntil !== -1 || deleteAll) {
-                if (new Date(object.validUntil).getTime() < now || deleteAll) {
-                  this.nativeStorage.remove(keys[objects.indexOf(object)]);
+              if (deleteAll) {
+                this.nativeStorage.remove(key).catch((error) => console.log(error));
+              } else {
+                if (object.validUntil !== -1) {
+                  if (new Date(object.validUntil).getTime() < now) {
+                    this.nativeStorage.remove(key).catch((error) => console.log(error));
+                  }
                 }
               }
             }
-          });
-
-          resolve();
-        }).catch((error) => {
-          reject(error);
+          }).catch((error) => {});
         });
+        resolve();
       }).catch((error) => {
         reject(error);
       });
