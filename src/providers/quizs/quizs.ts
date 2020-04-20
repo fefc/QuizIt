@@ -82,14 +82,18 @@ export class QuizsProvider {
 
         setTimeout(() => {
           for (let index of addedIndexes) {
-            let quiz: Quiz = {
-              uuid: querySnapshot.docs[index].id,
-              title: undefined,
-              creationDate: undefined,
-              settings: undefined,
-              categorys: [],
-              questions: [],
-            };
+            let quiz: Quiz = this.quizs.find((q) => q.uuid === querySnapshot.docs[index].id);
+
+            if (!quiz) {
+              quiz = {
+                uuid: querySnapshot.docs[index].id,
+                title: undefined,
+                creationDate: undefined,
+                settings: undefined,
+                categorys: [],
+                questions: [],
+              };
+            }
 
             snapshots.push({uuid: quiz.uuid, subscription: this.quizChanges(quiz).subscribe()});
           }
@@ -168,18 +172,22 @@ export class QuizsProvider {
         quiz.questions = quiz.questions.filter((q) => currentUuids.some((uuid) => uuid === q.uuid));
 
         for (let index of addedIndexes) {
-          let question: Question = {
-            uuid: querySnapshot.docs[index].id,
-            afterQuestionUuid: undefined,
-            question: undefined,
-            type: undefined,
-            rightAnswer: undefined,
-            answers: undefined,
-            extras: undefined,
-            categoryUuid: undefined,
-            authorId: undefined,
-            hide: undefined,
-            draft: undefined
+          let question: Question = quiz.questions.find((q) => q.uuid === querySnapshot.docs[index].id);
+
+          if (!question) {
+            question = {
+              uuid: querySnapshot.docs[index].id,
+              afterQuestionUuid: undefined,
+              question: undefined,
+              type: undefined,
+              rightAnswer: undefined,
+              answers: undefined,
+              extras: undefined,
+              categoryUuid: undefined,
+              authorId: undefined,
+              hide: undefined,
+              draft: undefined
+            }
           }
 
           snapshots.push({uuid: question.uuid, unsubscribe: this.questionChangesOnSnapshot(quiz, question)});
@@ -304,10 +312,14 @@ export class QuizsProvider {
         quiz.categorys = quiz.categorys.filter((c) => currentUuids.some((uuid) => uuid === c.uuid));
 
         for (let index of addedIndexes) {
-          let category: Category = {
-            uuid: querySnapshot.docs[index].id,
-            afterCategoryUuid: undefined,
-            name: undefined
+          let category: Category = quiz.categorys.find((c) => c.uuid === querySnapshot.docs[index].id);
+
+          if (!category) {
+            category = {
+              uuid: querySnapshot.docs[index].id,
+              afterCategoryUuid: undefined,
+              name: undefined
+            }
           }
 
           snapshots.push({uuid: category.uuid, unsubscribe: this.categoryChangesOnSnapshot(quiz, category)});
