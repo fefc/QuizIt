@@ -1,5 +1,4 @@
 import { Component, ViewChild } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { Platform, MenuController, ModalController, LoadingController, AlertController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -7,15 +6,21 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation';
 import { BarcodeScanner, BarcodeScannerOptions } from '@ionic-native/barcode-scanner';
 import { TranslateService } from '@ngx-translate/core';
 import { Globalization } from '@ionic-native/globalization';
+import { Subscription } from "rxjs/Subscription";
 import * as firebase from "firebase/app";
+import 'firebase/storage';
 
 import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
 import { GameProvider } from '../providers/game/game';
 import { GameControllerProvider } from '../providers/game-controller/game-controller';
+import { AuthenticationProvider } from '../providers/authentication/authentication';
+import { ConnectionProvider } from '../providers/connection/connection';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
+import { GeneralErrorPage } from '../pages/general-error/general-error';
+
 import { UserProfilePage } from '../pages/user-profile/user-profile';
 import { HomePage } from '../pages/home/home';
 import { GameControllerPage } from '../pages/game-controller/game-controller';
@@ -34,38 +39,44 @@ const BARECODE_SCANNER_OPTIONS: BarcodeScannerOptions = {
 };
 
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDR9qWel2I2_PCpZwn_crw-SH-uAug5zIw",
-  authDomain: "quizpad-ff712.firebaseapp.com",
-  databaseURL: "https://quizpad-ff712.firebaseio.com",
-  projectId: "quizpad-ff712",
-  storageBucket: "quizpad-ff712.appspot.com",
-  messagingSenderId: "699661197913",
-  appId: "1:699661197913:web:2abeed2df8580fa9"
+  apiKey: "AIzaSyDmh327-FUVK-AMc92f4p7cR5ze4D7SoeE",
+  authDomain: "quizpaddev.firebaseapp.com",
+  databaseURL: "https://quizpaddev.firebaseio.com",
+  projectId: "quizpaddev",
+  storageBucket: "quizpaddev.appspot.com",
+  messagingSenderId: "362454844307",
+  appId: "1:362454844307:web:eb20bf8206ae88a4"
 };
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  providers: [UserProfilesProvider, QuizsProvider, GameProvider, GameControllerProvider]
+  providers: [UserProfilesProvider, QuizsProvider, GameProvider, GameControllerProvider, AuthenticationProvider, ConnectionProvider]
 })
 export class AppComponent {
   @ViewChild('content') nav;
 
-  rootPage:any;
+  private connectionStateChangesSubscription: Subscription;
 
-  constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
+  private splashScreenIsThere: boolean = true;
+
+  constructor(private platform: Platform, statusBar: StatusBar,
+    private splashScreen: SplashScreen,
     public menuCtrl: MenuController,
     public modalCtrl: ModalController,
     public loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private screenOrientation: ScreenOrientation,
-    private sanitizer:DomSanitizer,
     private barcodeScanner: BarcodeScanner,
     private profilesProv: UserProfilesProvider,
     private quizsProv: QuizsProvider,
     private gameControllerProv: GameControllerProvider,
+    private authProv: AuthenticationProvider,
+    private connProv: ConnectionProvider,
     private translate: TranslateService,
     private globalization: Globalization) {
+
+    this.splashScreenIsThere = true;
 
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
@@ -87,9 +98,6 @@ export class AppComponent {
         translate.setDefaultLang('en');
       });
 
-      // Initialize Firebase
-      firebase.initializeApp(FIREBASE_CONFIG);
-
       //Eventually lock screen orientation on some devices
       if (platform.is('android')) {
         //width is dependent on screen orientation
@@ -98,30 +106,76 @@ export class AppComponent {
         this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT);
         //}
       }
-      this.profilesProv.loadFromStorage().then(() => {
-        if (this.profilesProv.profiles.length > 0) {
-          this.quizsProv.loadFromStorage().then(() => {
-            //statusBar.styleDefault();
-            this.rootPage = HomePage;
+
+      //Initialize root element
+      this.nav.setRoot(StartPage);
+      this.menuCtrl.enable(false, 'menu-one');
+
+      //Initialize Firebase
+      firebase.initializeApp(FIREBASE_CONFIG);
+      firebase.storage().setMaxOperationRetryTime(2);
+      firebase.storage().setMaxUploadRetryTime(2);
+
+      firebase.firestore().enablePersistence({ synchronizeTabs: true }).then(() => {
+
+        this.connProv.init().then(() => {
+          this.authProv.authStateChanges().subscribe((loggedIn) => {
+            if (loggedIn) {
+              this.connectionStateChangesSubscription = this.connProv.connectionStateChanges().subscribe((connected) => {
+                let promises = [];
+
+                promises.push(this.profilesProv.sync(this.authProv.getUser().uid));
+                promises.push(this.quizsProv.sync(this.authProv.getUser().uid));
+
+                Promise.all(promises).then(() => {
+                  this.openHomePage();
+                  this.hideSplashScreen();
+
+                  if (this.profilesProv.profile.nickname.length < 3) {
+                    this.openUserProfilePage(true);
+                  }
+                }).catch((errors) => {
+                  this.openGeneralErrorPage(errors[0].code, errors[0].message);
+                  this.hideSplashScreen();
+                });
+              }, (error) => {
+                console.log(error);
+              });
+            } else {
+              if (this.connectionStateChangesSubscription) this.connectionStateChangesSubscription.unsubscribe();
+              this.profilesProv.stopSync();
+              this.quizsProv.stopSync();
+
+              this.connProv.cleanNativeStorage(true);
+
+              this.openStartPage();
+              this.hideSplashScreen();
+            }
+          }, (error) => {
+            this.openGeneralErrorPage('auth/state-unknown', error);
+            this.hideSplashScreen();
           });
-        } else {
-          this.rootPage = StartPage;
-          this.menuCtrl.enable(false, 'menu-one');
-        }
-        splashScreen.hide();
-      }).catch(() => {
+        });
+      }).catch((error) => {
+        this.openGeneralErrorPage(error.code, error.message);
+        this.hideSplashScreen();
       });
     });
   }
 
-  renderPicture(base64: string) {
-    return this.sanitizer.bypassSecurityTrustUrl(base64);
+  hideSplashScreen() {
+    if (this.splashScreenIsThere) {
+      this.splashScreen.hide();
+      this.splashScreenIsThere = false;
+    }
   }
 
-  openUserProfilePage() {
+  openUserProfilePage(profileMustBeUpdated?: boolean) {
     this.menuCtrl.close('menu-one');
 
-    let modal = this.modalCtrl.create(UserProfilePage, {profile: this.profilesProv.profiles[0]});
+    let modal = this.modalCtrl.create(UserProfilePage,
+      {profile: this.profilesProv.profile, profileMustBeUpdated: profileMustBeUpdated},
+      {enableBackdropDismiss: profileMustBeUpdated ? false : true});
     modal.present();
     modal.onDidDismiss((data) => {
       if (data) {
@@ -131,9 +185,7 @@ export class AppComponent {
 
         loading.present();
 
-        this.profilesProv.profiles[0] = data;
-
-        this.profilesProv.saveToStorage(data).then(() => {
+        this.profilesProv.saveToOnline(data).then(() => {
           loading.dismiss();
         }).catch(() => {
           loading.dismiss();
@@ -145,9 +197,19 @@ export class AppComponent {
 
   openHomePage() {
     this.menuCtrl.close('menu-one');
+    this.menuCtrl.enable(true, 'menu-one');
 
-    if (this.nav.getActive().component !== HomePage) {
+    if (!this.nav.getViews().some((v) => v.component === HomePage)) {
       this.nav.setRoot(HomePage);
+    }
+  }
+
+  openStartPage() {
+    this.menuCtrl.close('menu-one');
+    this.menuCtrl.enable(false, 'menu-one');
+
+    if (!this.nav.getViews().some((v) => v.component === StartPage)) {
+      this.nav.setRoot(StartPage);
     }
   }
 
@@ -155,7 +217,11 @@ export class AppComponent {
     //this.menuCtrl.close('menu-one');
     //To not close menu, so that if barcode scanning is cancelled it does not close the app
     //But closes the menu instead
-    this.startScanning();
+    this.nav.popToRoot().then(() => {
+      this.startScanning();
+    }).catch((error) => {
+      console.log(error);
+    });
   }
 
   openAboutPage() {
@@ -163,6 +229,12 @@ export class AppComponent {
 
     let modal = this.modalCtrl.create(AboutPage);
     modal.present();
+  }
+
+  openGeneralErrorPage(code: string, error: any) {
+    this.menuCtrl.close('menu-one');
+    this.menuCtrl.enable(false, 'menu-one');
+    this.nav.setRoot(GeneralErrorPage, {code: code, error: error});
   }
 
   startScanning() {
@@ -189,9 +261,8 @@ export class AppComponent {
 
     loading.present();
 
-    this.resizeAvatar(this.profilesProv.profiles[0].avatar).then((resizedAvatar) => {
-
-      this.gameControllerProv.joinGame(gameID, alternativeNickname ? alternativeNickname : this.profilesProv.profiles[0].nickname, resizedAvatar).then(() => {
+    this.resizeAvatar().then((resizedAvatar) => {
+      this.gameControllerProv.joinGame(gameID, alternativeNickname ? alternativeNickname : this.profilesProv.profile.nickname, resizedAvatar).then(() => {
         loading.dismiss();
         this.nav.push(GameControllerPage);
       }).catch((error) => {
@@ -250,17 +321,18 @@ export class AppComponent {
     message.present();
   }
 
-  resizeAvatar(base64Avatar: string) {
+  resizeAvatar() {
     return new Promise<string>((resolve, reject) => {
       //First resize the image
       //The zoom it like avatar displayed
       //https://zocada.com/compress-resize-images-javascript-browser/
       //https://stackoverflow.com/a/28048865/7890583
-      let img = new Image();
-      img.src = base64Avatar;
-      img.onload = (pic: any) => {
+
+      if (this.profilesProv.profile.avatarUrl) {
+        let img = <HTMLImageElement> document.getElementById('avatar');
+
         let canvas = document.createElement('canvas');
-        let imgRatio: number = img.width / img.height;
+        let imgRatio: number = img.naturalWidth / img.naturalHeight;
         let zoom: number;
         let newImgHeight: number;
         let newImgWidth: number;
@@ -271,13 +343,13 @@ export class AppComponent {
         canvas.height = 200;
 
         if (imgRatio > 1) {
-          zoom = img.height / canvas.height;
+          zoom = img.naturalHeight / canvas.height;
           newImgHeight = canvas.height;
-          newImgWidth = img.width / zoom;
+          newImgWidth = img.naturalWidth / zoom;
           widthMargin = -(newImgWidth / 2) + (canvas.width / 2);
         } else {
-          zoom = img.width / canvas.width;
-          newImgHeight = img.height / zoom;
+          zoom = img.naturalWidth / canvas.width;
+          newImgHeight = img.naturalHeight / zoom;
           newImgWidth = canvas.width;
           heightMargin = -(newImgHeight / 2) + (canvas.height / 2);
         }
@@ -285,9 +357,7 @@ export class AppComponent {
         let ctx = canvas.getContext('2d');
         ctx.drawImage(img, widthMargin, heightMargin, newImgWidth, newImgHeight);
         resolve(ctx.canvas.toDataURL('image/jpeg', 0.8));
-      };
-
-      img.onerror = (error : any) => {
+      } else {
         resolve('');
       }
     });

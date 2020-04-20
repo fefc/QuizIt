@@ -109,7 +109,7 @@ export class GameControllerProvider {
 
   gameStateChanges() {
     return new Observable<GameState>(observer => {
-      firebase.firestore().collection('G').doc(this.game.uuid).onSnapshot(docSnapshot => {
+      const unsubscribe = firebase.firestore().collection('G').doc(this.game.uuid).onSnapshot(docSnapshot => {
         if (docSnapshot.exists) {
           observer.next(docSnapshot.data().S);
         } else {
@@ -118,15 +118,14 @@ export class GameControllerProvider {
       });
 
       return () => {
-        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).onSnapshot(() => {});
-        unsub();
+        unsubscribe();
       };
     });
   }
 
   playerStatsChanges() {
     return new Observable<PlayerStats>(observer => {
-      firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.player.uuid).collection('L').doc('S').onSnapshot(docSnapshot => {
+      const unsubscribe = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.player.uuid).collection('L').doc('S').onSnapshot(docSnapshot => {
         if (docSnapshot.exists) {
           observer.next({
             position: docSnapshot.data().R,
@@ -142,8 +141,7 @@ export class GameControllerProvider {
       });
 
       return () => {
-        let unsub = firebase.firestore().collection('G').doc(this.game.uuid).collection('P').doc(this.player.uuid).collection('L').doc('S').onSnapshot(() => {});
-        unsub();
+        unsubscribe();
       };
     });
   }

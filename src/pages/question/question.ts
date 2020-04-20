@@ -1,8 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Platform, ViewController, ModalController, AlertController, ToastController, NavParams, Slides, FabContainer, reorderArray } from 'ionic-angular';
 import { ImagePicker } from '@ionic-native/image-picker';
-import { File } from '@ionic-native/file';
 import { AndroidPermissions } from '@ionic-native/android-permissions';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -10,11 +8,13 @@ import { Category } from '../../models/category';
 import { QuestionType } from '../../models/question';
 import { Question } from '../../models/question';
 
-import { QuestionExtraPage } from '../question-extra/question-extra';
+import { ConnectionProvider } from '../../providers/connection/connection';
 
+import { QuestionExtraPage } from '../question-extra/question-extra';
 
 const MAX_PICTURE_WIDTH: number = 1920;
 const MAX_PICTURE_HEIGHT: number = 1080;
+const MAX_FILE_SIZE: number = 2000000; //OCTETS
 
 @Component({
   selector: 'page-question',
@@ -22,37 +22,37 @@ const MAX_PICTURE_HEIGHT: number = 1080;
 })
 
 export class QuestionPage {
-  private maxPictures: number = 5;
+  private readonly MAX_PICTURES = 5; //for use in Angluar html
   private QuestionType = QuestionType; //for use in Angluar html
   private categorys: Array<Category>;
   private question: Question;
-  private attachementDir: string;
   private previousType: QuestionType;
   private previousAnswers: Array<string>;
   private previousRightAnswer: number;
 
-  private pictures: Array<SafeUrl>;
-
   private newQuestion: boolean;
+
+  private storageRef: string;
 
   @ViewChild(Slides) slides: Slides;
   @ViewChild('slidesFab') slidesFab : FabContainer;
-
-  private replacePictureIndex: number;
 
   constructor(private platform: Platform,
               public viewCtrl: ViewController,
               public modalCtrl: ModalController,
               private alertCtrl: AlertController,
               private toastCtrl: ToastController,
-              private file: File,
               private imagePicker: ImagePicker,
-              private sanitizer:DomSanitizer,
               private androidPermissions: AndroidPermissions,
+              private connProv: ConnectionProvider,
               private translate: TranslateService,
               params: NavParams) {
 
     this.newQuestion = true;
+    this.storageRef = '';
+
+    //To avoid warings on ionic build
+    this.newQuestion = this.newQuestion;
 
     //lets make deep copies, so that we don't modfiy anything before user confirmation
     this.categorys = JSON.parse(JSON.stringify(params.data.categorys));
@@ -60,31 +60,37 @@ export class QuestionPage {
     if (!params.data.question) {
       this.question = {
         uuid: '',
+        afterQuestionUuid: '',
         question: '',
         type: QuestionType.classic,
         rightAnswer: -1,
+        draft: true,
+        hide: false,
         answers: ['','','',''],
         extras: [],
-        category: {name: this.categorys[0].name},
-        authorId: -1
+        categoryUuid: this.categorys[0].uuid,
+        authorId: -1,
+        answersUrl: [],
+        extrasUrl: []
       };
-
-      this.attachementDir = '';
-      this.pictures = [];
     }
     else {
       this.question = JSON.parse(JSON.stringify(params.data.question));
+      this.newQuestion = false;
+      this.storageRef = 'Q/' + params.data.quizUuid + '/Q/' + this.question.uuid + '/';
 
-      this.attachementDir = params.data.quizUuid + '/' + this.question.uuid + '/';
-      this.pictures = new Array<SafeUrl>(this.question.answers.length);
-
-      if (this.question.type == QuestionType.rightPicture) {
-        for (let i: number = 0; i < this.question.answers.length; i++) {
-          this.renderPicture(this.file.dataDirectory, this.attachementDir + this.question.answers[i], i);
+      if (this.question.type === QuestionType.rightPicture) {
+        for (let i = 0; i < this.question.answers.length; i++) {
+          if (typeof this.question.answersUrl[i] !== 'string') {
+            this.question.answersUrl[i] = undefined;
+            setTimeout(async () =>  {
+              this.question.answersUrl[i] = await this.connProv.getFileUrl(this.storageRef, this.question.answers[i]);
+            }, 0); //Constructor can't get aysnc so let's do it my way.
+          }
         }
       }
 
-      this.newQuestion = false;
+      //
     }
 
     if (this.question.type === QuestionType.rightPicture) {
@@ -143,7 +149,7 @@ export class QuestionPage {
   }
 
   categoryChange(val: string) {
-    if (val === "new") {
+    if (val === "newVal") {
       let alert = this.alertCtrl.create({
         title: this.translate.instant('NEW_CATEGORY'),
         inputs: [
@@ -157,18 +163,27 @@ export class QuestionPage {
             text: this.translate.instant('CANCEL'),
             role: 'cancel',
             handler: data => {
-              this.question.category.name = this.categorys[0].name;
+              this.question.categoryUuid = this.categorys[0].uuid;
             }
           },
           {
             text: this.translate.instant('CREATE'),
             handler: data => {
               if (data.categoryName.length > 3 && this.categorys.findIndex((category) => category.name === data.categoryName) === -1 ) {
-                this.categorys.push({name: data.categoryName});
-                this.question.category.name = data.categoryName;
+
+                let indexOfNew: number = this.categorys.findIndex((category) => category.uuid === 'new');
+
+                if (indexOfNew === -1){
+                  this.categorys.push({uuid: 'new', afterCategoryUuid: this.categorys[this.categorys.length - 1].uuid, name: data.categoryName});
+                } else {
+                  this.categorys[indexOfNew].afterCategoryUuid = this.categorys[this.categorys.length - 1].uuid;
+                  this.categorys[indexOfNew].name = data.categoryName;
+                }
+
+                this.question.categoryUuid = 'new';
               }
               else {
-                this.question.category.name = this.categorys[0].name;
+                this.question.categoryUuid = this.categorys[0].uuid;
 
                 let error = this.alertCtrl.create({
                   title: this.translate.instant('ERROR_CREATING_CATEGORY'),
@@ -259,16 +274,21 @@ export class QuestionPage {
   openMobileImagePicker(maximumImagesCount: number) {
     let maxImages: number = maximumImagesCount - this.question.answers.length;
 
-    this.imagePicker.getPictures({maximumImagesCount: maxImages, width: MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
-      let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
-      let decodedURI: string = '';
-
+    this.imagePicker.getPictures({maximumImagesCount: maxImages, width: MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then(async (results) => {
       for (var i = 0; i < results.length; i++) {
-        decodedURI = decodeURIComponent(results[i]);
+        let decodedURI = decodeURIComponent(results[i]);
 
-        this.question.answers.push(decodedURI);
-        this.pictures.push(undefined);
-        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), this.pictures.length - 1);
+        if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
+          this.question.answers.push(decodedURI);
+          try {
+          this.question.answersUrl.push(await this.connProv.getLocalFileUrl(decodedURI));
+          } catch (error) {
+            console.log(error);
+            this.question.answers.pop();
+          }
+        } else {
+          this.showFileToBigAlert();
+        }
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -276,13 +296,21 @@ export class QuestionPage {
   }
 
   replacePictureMobile(val: number) {
-    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then((results) => {
-      if (results.length === 1) {
-        let decodedCacheDirectoryURI: string = decodeURIComponent(this.file.cacheDirectory);
-        let decodedURI: string = decodeURIComponent(results[0]);
+    this.imagePicker.getPictures({maximumImagesCount: 1, width:MAX_PICTURE_WIDTH, height: MAX_PICTURE_HEIGHT, quality: 90}).then(async (results) => {
+      if (results.length > 0) {
+        let decodedURI = decodeURIComponent(results[0]);
 
-        this.question.answers[val] = decodedURI;
-        this.renderPicture(this.file.cacheDirectory, decodedURI.replace(decodedCacheDirectoryURI, ''), val);
+        if (await this.connProv.isFileSizeValid(decodedURI, MAX_FILE_SIZE)) {
+          this.question.answers[val] = decodedURI;
+          try {
+          this.question.answersUrl[val] = await this.connProv.getLocalFileUrl(decodedURI);
+          } catch (error) {
+            console.log(error);
+            this.question.answers.splice(val, 1);
+          }
+        } else {
+          this.showFileToBigAlert();
+        }
       }
     }).catch(() => {
       alert('Could not get images.');
@@ -297,7 +325,7 @@ export class QuestionPage {
     }
 
     this.question.answers.splice(val, 1);
-    this.pictures.splice(val, 1);
+    this.question.answersUrl.splice(val, 1);
 
     val = val - 1;
 
@@ -310,7 +338,7 @@ export class QuestionPage {
   }
 
   openQuestionExtraPage() {
-    let modal = this.modalCtrl.create(QuestionExtraPage, {title: this.question.question, extras: this.question.extras, attachementDir: this.attachementDir}, {cssClass: 'modal-fullscreen'});
+    let modal = this.modalCtrl.create(QuestionExtraPage, {storageRef: this.storageRef, title: this.question.question, extras: this.question.extras, extrasUrl: this.question.extrasUrl}, {cssClass: 'modal-fullscreen'});
     modal.present();
     modal.onDidDismiss(data => {
       if (data) {
@@ -356,12 +384,18 @@ export class QuestionPage {
   }
 
   save() {
+    let newCategory: Category = undefined;
+
+    if (this.question.categoryUuid === 'new') {
+      newCategory = this.categorys.find((category) => category.uuid === 'new');
+    }
+
     if (this.enableSaveButton()) {
-      this.question.draft = undefined;
-      this.viewCtrl.dismiss({question: this.question});
+      this.question.draft = false;
+      this.viewCtrl.dismiss({question: this.question, newCategory: newCategory});
     } else if (this.enableDraftButton()) {
       this.question.draft = true;
-      this.viewCtrl.dismiss({question: this.question});
+      this.viewCtrl.dismiss({question: this.question, newCategory: newCategory});
     }
   }
 
@@ -369,12 +403,17 @@ export class QuestionPage {
     this.viewCtrl.dismiss();
   }
 
-  renderPicture(directory: string, fileName: string, position: number) {
-    this.file.readAsDataURL(directory, fileName).then((picture) => {
-      this.pictures[position] = this.sanitizer.bypassSecurityTrustStyle(`url('${picture}')`);
-      this.slides.update();
-    }).catch((error) => {
-      console.log("Something went wrong when reading pictures.", error);
+  showFileToBigAlert() {
+    let error = this.alertCtrl.create({
+      title: this.translate.instant('ERROR_FILE_TOO_BIG'),
+      message: this.translate.instant('ERROR_FILE_TOO_BIG_INFO') + ' ' + (MAX_FILE_SIZE / 1000000) + 'MB.',
+      buttons: [
+        {
+          text: this.translate.instant('OK'),
+          role: 'ok',
+        }
+      ]
     });
+    error.present();
   }
 }

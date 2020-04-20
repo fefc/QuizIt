@@ -19,9 +19,9 @@
     </ion-item>
     <ion-item>
       <ion-label>{{ 'CATEGORY' | translate }}</ion-label>
-      <ion-select [(ngModel)]="question.category.name" interface="popover" (ionChange)="categoryChange($event)">
-        <ion-option *ngFor="let category of categorys" [value]="category.name">{{category.name}}</ion-option>
-        <ion-option value="new">{{ 'NEW_CATEGORY' | translate }}</ion-option>
+      <ion-select [(ngModel)]="question.categoryUuid" interface="popover" (ionChange)="categoryChange($event)">
+        <ion-option *ngFor="let category of categorys" [value]="category.uuid">{{category.name}}</ion-option>
+        <ion-option value="newVal">{{ 'NEW_CATEGORY' | translate }}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item>
@@ -48,8 +48,8 @@
 
   <ion-slides *ngIf="question.type === QuestionType.rightPicture" centeredSlides pager>
     <ion-slide *ngFor="let answer of question.answers; let i = index; trackBy:indexTracker">
-      <ion-spinner *ngIf="!pictures[i]" name="dots" color="primary"></ion-spinner>
-      <canvas *ngIf="pictures[i]" [style.background-image]="pictures[i]"></canvas>
+      <p *ngIf="!question.answersUrl[i]">{{ 'FILE_NOT_AVAILABLE' | translate }}</p>
+      <img *ngIf="question.answersUrl[i]" [src]="question.answersUrl[i]"/>
       <ion-icon *ngIf="i === question.rightAnswer" name="checkmark-circle-outline" color="primary" class="checkmark"></ion-icon>
     </ion-slide>
   </ion-slides>
@@ -59,7 +59,7 @@
     <ion-fab-list side="right">
       <!-- realIndex: https://github.com/ionic-team/ionic/issues/12297#issuecomment-329772167 -->
       <!-- realIndex can be undefined when no one ever moved the slides -->
-      <button ion-fab (click)="openImagePicker(maxPictures)" *ngIf="question.answers.length < maxPictures"><ion-icon name="add"></ion-icon></button>
+      <button ion-fab (click)="openImagePicker(MAX_PICTURES)" *ngIf="question.answers.length < MAX_PICTURES"><ion-icon name="add"></ion-icon></button>
       <button ion-fab (click)="replacePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="create"></ion-icon></button>
       <button ion-fab (click)="deletePicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="trash"></ion-icon></button>
       <button ion-fab (click)="rightPicture(slides.realIndex ? slides.realIndex : 0)" *ngIf="question.answers.length > 0"><ion-icon name="checkmark"></ion-icon></button>

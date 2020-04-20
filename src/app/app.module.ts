@@ -3,7 +3,6 @@ import { ErrorHandler, NgModule } from '@angular/core';
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
-import { IonicStorageModule } from '@ionic/storage';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ImagePicker } from '@ionic-native/image-picker';
 import { File } from '@ionic-native/file';
@@ -20,6 +19,8 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { Globalization } from '@ionic-native/globalization';
+import { Network } from '@ionic-native/network';
+import { NativeStorage } from '@ionic-native/native-storage';
 
 import { AppComponent } from './app.component';
 
@@ -27,11 +28,16 @@ import { UserProfilesProvider } from '../providers/user-profiles/user-profiles';
 import { QuizsProvider } from '../providers/quizs/quizs';
 import { GameProvider } from '../providers/game/game';
 import { GameControllerProvider } from '../providers/game-controller/game-controller';
+import { AuthenticationProvider } from '../providers/authentication/authentication';
+import { ConnectionProvider } from '../providers/connection/connection';
+
 
 import { UserProfilePage } from '../pages/user-profile/user-profile';
+import { LoginPage } from '../pages/login/login';
 
 import { StartPage } from '../pages/start/start';
 import { AboutPage } from '../pages/about/about';
+import { GeneralErrorPage } from '../pages/general-error/general-error';
 
 import { HomePage } from '../pages/home/home';
 import { HomeMenu } from '../pages/home/menu';
@@ -59,7 +65,9 @@ export function createTranslateLoader(http: HttpClient) {
     AppComponent,
     StartPage,
     AboutPage,
+    GeneralErrorPage,
     UserProfilePage,
+    LoginPage,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -77,7 +85,6 @@ export function createTranslateLoader(http: HttpClient) {
     BrowserModule,
     BrowserAnimationsModule,
     IonicModule.forRoot(AppComponent),
-    IonicStorageModule.forRoot(),
     HttpClientModule,
     TranslateModule.forRoot({
       loader: {
@@ -91,7 +98,9 @@ export function createTranslateLoader(http: HttpClient) {
   entryComponents: [
     StartPage,
     AboutPage,
+    GeneralErrorPage,
     UserProfilePage,
+    LoginPage,
     HomePage,
     HomeMenu,
     QuizNewPage,
@@ -124,7 +133,11 @@ export function createTranslateLoader(http: HttpClient) {
     QuizsProvider,
     GameProvider,
     GameControllerProvider,
-    Globalization
+    AuthenticationProvider,
+    ConnectionProvider,
+    Globalization,
+    Network,
+    NativeStorage
   ]
 })
 export class AppModule {}

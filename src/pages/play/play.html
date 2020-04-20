@@ -65,9 +65,9 @@
   <!--Extra Zone-->
   <div class="extra" *ngIf="displayExtras"
     [@extraAnimation]="{value: '', params: {time: commonAnimationDuration}}">
-    <canvas *ngIf="currentExtraType === ExtraType.picture" [style.background-image]="currentExtras[0]"></canvas>
+    <img *ngIf="currentExtraType === ExtraType.picture" [src]="currentQuestions[currentQuestion].extrasUrl[0]"/>
     <video #extraVideo *ngIf="currentExtraType === ExtraType.video">
-      <source [src]="currentExtras[0]"/>
+      <source [src]="currentQuestions[currentQuestion].extrasUrl[0]"/>
     </video>
   </div>
 
@@ -87,12 +87,16 @@
   <!--Common answers Zone-->
   <div class="answers">
     <div class="zero" *ngIf="displayAnswers"
+          [ngClass]="{'disabled': screenState === ScreenStateType.displayPlayersAnswer && currentQuestions[currentQuestion].rightAnswer !== 0}"
           [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[0]}}</div>
     <div class="one" *ngIf="displayAnswers"
+          [ngClass]="{'disabled': screenState === ScreenStateType.displayPlayersAnswer && currentQuestions[currentQuestion].rightAnswer !== 1}"
           [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[1]}}</div>
     <div class="two" *ngIf="displayAnswers"
+          [ngClass]="{'disabled': screenState === ScreenStateType.displayPlayersAnswer && currentQuestions[currentQuestion].rightAnswer !== 2}"
           [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[2]}}</div>
     <div class="three" *ngIf="displayAnswers"
+          [ngClass]="{'disabled': screenState === ScreenStateType.displayPlayersAnswer && currentQuestions[currentQuestion].rightAnswer !== 3}"
           [@answerAnimation]="{value: '', params: {time: commonAnimationDuration}}">{{currentQuestions[currentQuestion].answers[3]}}</div>
   </div>
 
@@ -100,7 +104,7 @@
   <div class="picture" *ngIf="displayPictures"
           [@pictureInOutAnimation]="{value: '', params: {time: commonAnimationDuration}}"
           [@pictureTransitionAnimation]="{value: currentPictureCounter, params: {time: commonAnimationDuration}}">
-    <canvas [style.background-image]="currentPictures[this.gameProv.currentPicture]"></canvas>
+    <img [src]="currentQuestions[currentQuestion].answersUrl[this.gameProv.currentPicture]"/>
   </div>
 
   <!-- Manual mode fabs -->

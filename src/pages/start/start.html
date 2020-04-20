@@ -7,60 +7,38 @@
 </ion-header>
 
 <ion-content>
-  <ion-slides>
-    <ion-slide>
-      <h2 class="title">{{ 'WELCOME_START' | translate }}</h2>
-      <img src="assets/svgs/icon.svg" class="slide-image">
-      <p>{{ 'INTRO_START' | translate }}</p>
-      <p>{{ 'SETUP_PROFILE_START' | translate }}</p>
-      <ion-footer>
-        <ion-toolbar color="fulldark">
-          <ion-buttons right>
-            <button ion-button icon-end (click)="gotToCreateProfile()">
-              {{ 'LETS_GO_START' | translate }}
-              <ion-icon name="arrow-forward"></ion-icon>
-            </button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-footer>
-    </ion-slide>
-    <ion-slide>
-      <h2 class="title">{{ 'CREATE_PROFILE' | translate }}</h2>
-      <p>{{ 'CHOSE_NICKNAME' | translate }}</p>
-      <ion-list>
-        <ion-item no-lines>
-          <ion-avatar>
-            <img class="no-img" *ngIf="!profile.avatar" src="assets/svgs/icon.svg">
-            <img *ngIf="profile.avatar" [src]="renderPicture(profile.avatar)">
-          </ion-avatar>
-          <ion-fab class="avatar-fab" (click)="openImagePicker()">
-          <button ion-fab>
-            <ion-icon name="camera"></ion-icon>
+  <ion-grid>
+    <ion-row>
+      <ion-col col-12 col-sm-6 class="hidden-sm-down">
+        <div class="empty-space"></div>
+        <img src="assets/svgs/icon.svg" class="slide-image">
+        <div class="empty-space"></div>
+      </ion-col>
+      <ion-col col-12 col-sm-6>
+        <div class="empty-space"></div>
+        <h2 class="title">{{ 'WELCOME_START' | translate }}</h2>
+        <p>{{ 'INTRO_START' | translate }}</p>
+        <br>
+        <p>
+          <button ion-button color="primary" (click)="openLoginPage()">
+            {{ 'LOG_IN' | translate }}
           </button>
-        </ion-fab>
-        </ion-item>
-        <ion-item class="slide-input">
-          <ion-label stacked>{{ 'NICKNAME' | translate }}</ion-label>
-          <ion-input type="text" minlength="3" [(ngModel)]="profile.nickname"></ion-input>
-        </ion-item>
-      </ion-list>
-      <p>{{ 'NICKNAME_INFO' | translate }}</p>
-      <ion-footer>
-        <ion-toolbar color="fulldark">
-          <ion-buttons left>
-            <button ion-button icon-start (click)="goToStart()">
-              <ion-icon name="arrow-back"></ion-icon>
-              {{ 'BACK' | translate }}
-            </button>
-          </ion-buttons>
-          <ion-buttons right>
-            <button ion-button icon-end (click)="createProfile()" [disabled]="!enableCreateButton()">
-              {{ 'DONE_START' | translate }}
-              <ion-icon></ion-icon>
-            </button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-footer>
-    </ion-slide>
-  </ion-slides>
+        </p>
+        <p>{{ 'DONT_HAVE_ACCOUNT' | translate }}</p>
+        <p>
+          <button ion-button color="light" (click)="openSignUpPage()">
+            {{ 'SIGN_UP' | translate }}
+          </button>
+        </p>
+        <p>{{ 'OR_START' | translate }}</p>
+        <p>
+          <button ion-button clear color="fulllight" (click)="signInAnonymously()">
+            {{ 'SIGN_UP_ANONYMOUSLY' | translate }}
+          </button>
+        </p>
+        <div class="empty-space"></div>
+        <p>{{ 'LOG_IN_INFO' | translate }}</p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

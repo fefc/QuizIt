@@ -2,4 +2,19 @@ page-quiz-questions {
   .category-questions:last-child {
       margin-bottom: 66px;
   }
+
+  .start-infos {
+    height: 100%;
+    width: 100%;
+    padding: 12px;
+
+    display: flex;
+    flex-flow: column;
+    text-align: center;
+
+    .empty-space {
+      height: auto;
+      flex-grow: 1;
+    }
+  }
 }

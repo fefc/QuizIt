@@ -1,0 +1,48 @@
+page-general-error {
+  .infos {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 2.0em;
+    width: 100%;
+    font-weight: bold;
+    color: #fff;
+    padding: 1em;
+  }
+
+  .what-to-do {
+    font-size: 2.0em;
+    width: 100%;
+    color: #fff;
+    padding: 1em;
+  }
+
+  .code {
+    font-size: 1.0em;
+    width: 100%;
+    color: #ccc;
+    padding: 0.2em;
+  }
+
+  .error {
+    font-size: 1.0em;
+    margin: 2em;
+    padding: 2em;
+
+    color: #000;
+    background-color: #ccc;
+  }
+
+  img {
+    flex-grow: 1;
+    display: block;
+    max-height: 40%;
+    max-width: 40%;
+    margin: auto;
+  }
+}

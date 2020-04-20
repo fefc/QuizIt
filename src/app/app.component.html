@@ -1,12 +1,11 @@
 <ion-menu [content]="content" id="menu-one">
-  <ion-header *ngIf="profilesProv.profiles.length > 0">
+  <ion-header>
     <ion-item no-lines class="user-info" tappable (tap)="openUserProfilePage()">
       <ion-icon name="create"></ion-icon>
       <ion-avatar>
-        <img class="no-img" *ngIf="!profilesProv.profiles[0].avatar" src="assets/svgs/icon.svg">
-        <img *ngIf="profilesProv.profiles[0].avatar" [src]="renderPicture(profilesProv.profiles[0].avatar)">
+        <img id="avatar" crossorigin="anonymous" [class.no-img]="!profilesProv.profile.avatarUrl" [src]="profilesProv.profile.avatarUrl || 'assets/svgs/icon.svg'">
       </ion-avatar>
-        <div class="card-title">{{profilesProv.profiles[0].nickname}}</div>
+        <div class="card-title">{{profilesProv.profile.nickname}}</div>
     </ion-item>
   </ion-header>
   <ion-content>
@@ -28,6 +27,10 @@
           <ion-icon name="settings" item-start></ion-icon>
           Settings
         </ion-item>-->
+        <ion-item>
+          <ion-icon name="{{connProv.connected === true ? 'planet' : 'plane' }}" item-start></ion-icon>
+          {{ connProv.connected === true ? ('ONLINE' | translate) : ('OFFLINE' | translate) }}
+        </ion-item>
         <ion-item tappable (tap)="openAboutPage()">
           <ion-icon name="information-circle" item-start></ion-icon>
           {{ 'ABOUT' | translate }}
@@ -37,4 +40,4 @@
   </ion-content>
 </ion-menu>
 
-<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>
+<ion-nav #content swipeBackEnabled="false"></ion-nav>

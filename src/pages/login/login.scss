@@ -1,0 +1,33 @@
+page-login {
+  .scroll-content {
+    //overflow-y: hidden !important;
+    padding-bottom: 0px !important; //important to API 21
+    display: flex;
+    flex-flow: column;
+  }
+
+  ion-list {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+
+    .empty-space {
+      height: auto;
+      flex-grow: 1;
+    }
+
+    .slide-input {
+      max-width: 450px;
+      margin: auto;
+    }
+
+    p {
+        text-align: center;
+        padding: 0 40px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+  }
+}

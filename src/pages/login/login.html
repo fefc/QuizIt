@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      {{ signUpScreen === false ? ('LOG_IN' | translate) : ('SIGN_UP' | translate) }}
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <div class="empty-space"></div>
+    <ion-item class="slide-input">
+      <ion-label stacked>{{ 'EMAIL' | translate }}</ion-label>
+      <ion-input type="email" minlength="3" [(ngModel)]="email"></ion-input>
+    </ion-item>
+    <ion-item class="slide-input">
+      <ion-label stacked>{{ 'PASSWORD' | translate }}</ion-label>
+      <ion-input type="password" minlength="3" [(ngModel)]="password"></ion-input>
+    </ion-item>
+    <p>
+      <button ion-button color="primary" (click)="signUpScreen === false ? login() : signUp()" [disabled]="!enableLoginSignUpButton()">
+        {{ signUpScreen === false ? ('LOG_IN' | translate) : ('SIGN_UP' | translate) }}
+      </button>
+    </p>
+    <p *ngIf="signUpScreen === false">
+      <button ion-button clear color="fulllight" (click)="resetPassword()">
+        {{ 'LOST_PASSWORD' | translate }}
+      </button>
+    </p>
+    <div class="empty-space"></div>
+    <br>
+    <p>{{ 'LOG_IN_INFO' | translate }}</p>
+    <br>
+  </ion-list>
+</ion-content>

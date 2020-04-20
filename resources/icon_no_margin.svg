@@ -1,10 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<g transform="matrix(1.305,0,0,1.305,-63.505,-758.006)">
-  <g transform="matrix(1.5059 0 0 1.5059 -583.83 513.09)">
-   <circle style="stroke-linejoin:round;stroke:#fff;stroke-linecap:round;stroke-width:14;fill:none" cy="182.68" cx="469.68" r="42.684"/>
-   <path style="stroke:#fff;stroke-linecap:round;stroke-width:14;fill:none" d="m503.28 156.02c60.5 88.939 156.33 138.04 156.33 138.04"/>
-   <path style="stroke:#fff;stroke-linecap:round;stroke-width:14;fill:none" d="m568.58 227.17c72.54-111.27 47.66-171.11 47.66-171.11"/>
-   <path style="stroke:#fff;stroke-linecap:round;stroke-width:14;fill:none" d="m602.83 163.23c19.1-39.504 70.488-39.001 70.488-39.001"/>
-    </g>
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" xmlns:osb="http://www.openswatchbook.org/uri/2009/osb" height="72.249mm" width="72.249mm" version="1.1" xmlns:cc="http://creativecommons.org/ns#" viewBox="0 0 256.00021 255.99975" xmlns:dc="http://purl.org/dc/elements/1.1/">
+ <g transform="translate(-425 -61.363)">
+  <g transform="translate(-8.3109 28.086)">
+   <path style="stroke-linejoin:round;stroke:#fff;stroke-linecap:round;stroke-width:14;fill:none" d="m536.16 115.3c-7.9669-9.9564-16.253-23.893-16.253-23.893s-22.766 12.454-36.049 17.682c-13.284 5.2284-43.549 13.182-43.549 13.182s39.278 46.048 56.795 69.664c22.033 29.705 61.79 90.345 61.79 90.345s22.57-14.94 33.24-21.68c11.272-7.1206 35.556-16.031 35.556-16.031s-29.636-36.629-44.614-57.893"/>
+   <path style="stroke-linejoin:round;fill-rule:evenodd;stroke:#fff;stroke-linecap:round;stroke-width:8;fill:#fff" d="m560.63 122.83c14.15-27.919 36.868-49.533 59.55-63.462 30.404-18.671 65.132-22.087 65.132-22.087s-33.775 27.321-46.908 48.224c-13.132 20.902-12.122 24.995-22.275 36.483-10.152 11.488-25.666 13.506-41.834 14.79-16.168 1.2839-22.164 7.756-22.626 12.21-0.44853 4.3281 3.5652 10.604 17.724 10.092 12.348-0.4467 33.318-5.3805 33.318-5.3805s-6.3698 5.8077-14.981 8.8032-19.026 3.532-29.707 2.8462c-10.681-0.68582-15.079 3.5588-17.782 8.9893-2.8785 5.7835-6.9267 16.344-6.9267 16.344s8.0285-29.798 27.316-67.852z"/>
   </g>
+ </g>
 </svg>
