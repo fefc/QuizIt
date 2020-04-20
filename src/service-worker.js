@@ -20,13 +20,14 @@ self.toolbox.precache(
     './build/main.css',
     './build/polyfills.js',
     'index.html',
-    'manifest.json'
+    'manifest.json',
+    './assets/imgs/backgrounds/0.jpg',
+    './assets/imgs/backgrounds/1.jpg',
   ]
 );
 
 // dynamically cache any other local assets
-self.toolbox.router.any('/*', self.toolbox.fastest,
-  { cache: { name: 'ionic-cache-local-files', maxAgeSeconds: 604800 } });
+self.toolbox.router.any('/*', self.toolbox.fastest);
 
 // for any requests from firebasestorage that are actual files (token is given)
 // use cache first
