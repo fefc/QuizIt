@@ -77,7 +77,6 @@ export class ConnectionProvider {
       this.nativeStorage.keys().then((keys) => {
 
         let now: number = new Date().getTime();
-        let promises = [];
 
         keys.forEach((key) => {
           this.nativeStorage.getItem(key).then((object) => {
