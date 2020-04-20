@@ -375,13 +375,15 @@ export class PlayPage {
 
             for (let question of this.quiz.questions) {
               const storageRef: string = 'Q/' + this.quiz.uuid + '/Q/' + question.uuid + '/';
-              for (let i: number = 0; i < question.answers.length; i++) {
-                if (typeof question.answersUrl[i] !== 'string') {
-                  question.answersUrl[i] = undefined;
-                  setTimeout(async () =>  {
-                    question.answersUrl[i] = await this.connProv.getFileUrl(storageRef, question.answers[i]);
-                  }, 0); //Constructor can't get aysnc so let's do it my way.
-                }
+              if (question.type === QuestionType.rightPicture) {
+                for (let i: number = 0; i < question.answers.length; i++) {
+                  if (typeof question.answersUrl[i] !== 'string') {
+                    question.answersUrl[i] = undefined;
+                    setTimeout(async () =>  {
+                      question.answersUrl[i] = await this.connProv.getFileUrl(storageRef, question.answers[i]);
+                    }, 0); //Constructor can't get aysnc so let's do it my way.
+                  }
+                }                
               }
 
               for (let i: number = 0; i < question.extras.length; i++) {
