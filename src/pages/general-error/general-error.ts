@@ -7,12 +7,18 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: 'general-error.html'
 })
 export class GeneralErrorPage {
-  private message: string;
+  private code: string;
+  private error: string;
 
   constructor(
     private translate: TranslateService,
     params: NavParams) {
 
-      this.message = params.data.message;
+      //To avoid warings on ionic build
+      this.code = this.code;
+      this.error = this.error;
+
+      this.code = params.data.code;
+      this.error = JSON.stringify(params.data.error);
   }
 }

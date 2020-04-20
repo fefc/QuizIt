@@ -51,7 +51,7 @@ export class QuizsProvider {
       try {
         //await this.loadFromOnline();
       } catch (error) {
-        reject(error);
+        reject({message: error, code: 'sync/quizs-could-not-get-data'});
       }
 
       this.quizsChangesSubscription = this.quizsChanges().subscribe();

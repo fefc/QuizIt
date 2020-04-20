@@ -1,7 +1,10 @@
 <ion-content>
   <div class="infos">
-    <div class="title">An error occured</div>
-    <div class="description">{{ message }}</div>
+    <div class="title">{{'GENERAL_ERROR' | translate }}</div>
+    <div class="code">{{ code | translate }}</div>
+    <div class="error">{{ error }}</div>
+
     <img src="assets/svgs/icon.svg">
+    <div class="what-to-do">{{ 'TRY_CLOSING_APP_AND_RESTART' | translate }}</div>
   </div>
 </ion-content>

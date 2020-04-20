@@ -115,7 +115,7 @@ export class AppComponent {
       firebase.initializeApp(FIREBASE_CONFIG);
       firebase.storage().setMaxOperationRetryTime(2);
       firebase.storage().setMaxUploadRetryTime(2);
-
+//{ synchronizeTabs: true }
       firebase.firestore().enablePersistence().then(() => {
 
         this.connProv.init().then(() => {
@@ -135,7 +135,7 @@ export class AppComponent {
                     this.openUserProfilePage(true);
                   }
                 }).catch((errors) => {
-                  this.openGeneralErrorPage(errors);
+                  this.openGeneralErrorPage(errors[0].code, errors[0].message);
                   this.hideSplashScreen();
                 });
               }, (error) => {
@@ -152,12 +152,12 @@ export class AppComponent {
               this.hideSplashScreen();
             }
           }, (error) => {
-            this.openGeneralErrorPage(error);
+            this.openGeneralErrorPage('auth/state-unknown', error);
             this.hideSplashScreen();
           });
         });
       }).catch((error) => {
-        this.openGeneralErrorPage(error);
+        this.openGeneralErrorPage(error.code, error.message);
         this.hideSplashScreen();
       });
     });
@@ -231,10 +231,10 @@ export class AppComponent {
     modal.present();
   }
 
-  openGeneralErrorPage(message: string) {
+  openGeneralErrorPage(code: string, error: any) {
     this.menuCtrl.close('menu-one');
     this.menuCtrl.enable(false, 'menu-one');
-    this.nav.setRoot(GeneralErrorPage, {message: message});
+    this.nav.setRoot(GeneralErrorPage, {code: code, error: error});
   }
 
   startScanning() {

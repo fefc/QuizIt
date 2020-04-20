@@ -42,7 +42,7 @@ export class UserProfilesProvider {
           };
 
         } catch (error) {
-          reject(error);
+          reject({message: error, code: 'sync/profiles-could-not-get-data'});
         }
       }
 

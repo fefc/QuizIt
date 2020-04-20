@@ -59,6 +59,7 @@
   "EXTRA_DURATION": "Einführungsdauer",
   "EXTRA_DURATION_PLACEHOLDER": "Anzeigezeit der Einführung in ms",
   "GENERAL_ERROR": "Allgemeiner Fehler",
+  "TRY_CLOSING_APP_AND_RESTART": "Schließen Sie die Anwendung und öffnen Sie sie erneut.",
   "IMPORTING": "Importieren...",
   "IMPORT_QUIZ": "Quiz importieren",
   "INTRO_START": "In wenigen Sekunden können Sie ganz einfach Quiz erstellen, teilen und spielen!",
@@ -161,5 +162,9 @@
   "auth/user-disabled": "Benutzer wurde deaktiviert, kontaktieren Sie uns für weitere Informationen.",
   "auth/user-not-found": "Benutzer nicht gefunden, hast du dich schon angemeldet?",
   "auth/weak-password": "Ihr Passwort ist zu schwach. Bitte wählen Sie ein sichereres Passwort.",
-  "auth/wrong-password": "Falsches Passwort, bitte versuchen Sie es erneut."
+  "auth/wrong-password": "Falsches Passwort, bitte versuchen Sie es erneut.",
+  "auth/state-unknown": "Bei der Authentifizierung ist ein Problem aufgetreten.",
+  "failed-precondition": "Bei der Initialisierung ist ein Problem aufgetreten.",
+  "sync/profiles-could-not-get-data": "Beim Synchronisieren der Profile ist ein Problem aufgetreten.",
+  "sync/quizs-could-not-get-data": "Beim Synchronisieren der Quizs ist ein Problem aufgetreten."
 }

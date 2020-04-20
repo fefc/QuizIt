@@ -59,6 +59,7 @@
   "EXTRA_DURATION": "Durée de l'intro",
   "EXTRA_DURATION_PLACEHOLDER": "Temps d'affichage de l'introduction en ms",
   "GENERAL_ERROR": "Erreur générale",
+  "TRY_CLOSING_APP_AND_RESTART": "Essayez de fermer l'application et de la rouvrir.",
   "IMPORTING": "Importation...",
   "IMPORT_QUIZ": "Importer un quiz",
   "INTRO_START": "Dans quelques secondes, vous pourrez créer, partager et jouer facilement des quizs!",
@@ -161,5 +162,9 @@
   "auth/user-disabled": "L'utilisateur a été désactivé, contactez-nous pour plus d'informations.",
   "auth/user-not-found": "Utilisateur non trouvé, avez-vous déjà créé un compte?",
   "auth/weak-password": "Votre mot de passe est trop faible, veuillez choisir un mot de passe plus sûr.",
-  "auth/wrong-password": "Mauvais mot de passe, veuillez réessayer."
+  "auth/wrong-password": "Mauvais mot de passe, veuillez réessayer.",
+  "auth/state-unknown": "Un problème a eu lieu lors de l'authentification.",
+  "failed-precondition": "Un problème a eu lieu lors de l'initialisation.",
+  "sync/profiles-could-not-get-data": "Un problème a eu lieu lors de la synchronisation des profiles.",
+  "sync/quizs-could-not-get-data": "Un problème a eu lieu lors de la synchronisation des quizs."
 }
