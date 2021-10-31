@@ -363,7 +363,7 @@ export class PlayPage {
 
         this.gameProv.createGame().then(() => {
           BarcodeGenerator.generate(
-            { content: 'https://quizpadapp.com/controller?id=' + this.gameProv.game.uuid,
+            { content: 'https://controller.quizpadapp.com/controller?id=' + this.gameProv.game.uuid,
               height: 256,
               width: 256,
               format: 11,
@@ -383,7 +383,7 @@ export class PlayPage {
                       question.answersUrl[i] = await this.connProv.getFileUrl(storageRef, question.answers[i]);
                     }, 0); //Constructor can't get aysnc so let's do it my way.
                   }
-                }                
+                }
               }
 
               for (let i: number = 0; i < question.extras.length; i++) {
