@@ -240,9 +240,9 @@ export class AppComponent {
   startScanning() {
     this.barcodeScanner.scan(BARECODE_SCANNER_OPTIONS).then((data) => {
      if (data.cancelled === false) {
-       if (data.text.startsWith('https://quizpadapp.com/controller?id=')) {
+       if (data.text.startsWith('https://controller.quizpadapp.com/controller?id=')) {
          this.menuCtrl.close('menu-one');
-         this.joinGame(data.text.replace('https://quizpadapp.com/controller?id=', ''));
+         this.joinGame(data.text.replace('https://controller.quizpadapp.com/controller?id=', ''));
        } else {
          this.menuCtrl.close('menu-one');
          this.showGeneralErrorAlert(this.translate.instant('INVALID_QR_CODE'), this.translate.instant('INVALID_QR_CODE_INFO'));
